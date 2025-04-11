@@ -8,65 +8,65 @@ sidebar_position: 4
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |---------|---------|---------|------|
-| [`accessor-pairs`](https://eslint.org/docs/rules/accessor-pairs) | off | - | 强制 getter/setter 成对出现 |
-| [`array-callback-return`](https://eslint.org/docs/rules/array-callback-return) | error | `{ allowImplicit: true }` | 强制数组方法的回调函数中有 return 语句 |
+| [`accessor-pairs`](https://eslint.org/docs/rules/accessor-pairs) | off | - | 强制 `getter`/`setter` 成对出现 |
+| [`array-callback-return`](https://eslint.org/docs/rules/array-callback-return) | error | `{ allowImplicit: true }` | 强制数组方法的回调函数中有 `return` 语句 |
 | [`block-scoped-var`](https://eslint.org/docs/rules/block-scoped-var) | error | - | 禁止在块作用域外使用变量 |
 | [`complexity`](https://eslint.org/docs/rules/complexity) | off | `20` | 限制代码圈复杂度 |
-| [`class-methods-use-this`](https://eslint.org/docs/rules/class-methods-use-this) | error | `{ exceptMethods: [] }` | 强制类方法使用 this |
+| [`class-methods-use-this`](https://eslint.org/docs/rules/class-methods-use-this) | error | `{ exceptMethods: [] }` | 强制类方法使用 `this` |
 | [`consistent-return`](https://eslint.org/docs/rules/consistent-return) | error | - | 要求函数返回类型一致 |
 | [`curly`](https://eslint.org/docs/rules/curly) | error | `multi-line` | 强制使用大括号控制流语句 |
-| [`default-case`](https://eslint.org/docs/rules/default-case) | error | `{ commentPattern: '^no default$' }` | 要求 switch 语句必须有 default |
-| [`default-case-last`](https://eslint.org/docs/rules/default-case-last) | error | - | 要求 default case 放在最后 |
+| [`default-case`](https://eslint.org/docs/rules/default-case) | error | `{ commentPattern: '^no default$' }` | 要求 `switch` 语句必须有 `default` |
+| [`default-case-last`](https://eslint.org/docs/rules/default-case-last) | error | - | 要求 `default case` 放在最后 |
 | [`default-param-last`](https://eslint.org/docs/rules/default-param-last) | error | - | 要求默认参数放在最后 |
 | [`dot-notation`](https://eslint.org/docs/rules/dot-notation) | error | `{ allowKeywords: true }` | 强制使用点号访问属性 |
 | [`dot-location`](https://eslint.org/docs/rules/dot-location) | error | `property` | 强制点号与属性同一行 |
-| [`eqeqeq`](https://eslint.org/docs/rules/eqeqeq) | error | `always`, `{ null: 'ignore' }` | 强制使用 === 和 !== |
-| [`grouped-accessor-pairs`](https://eslint.org/docs/rules/grouped-accessor-pairs) | error | - | 要求 getter/setter 成组出现 |
-| [`guard-for-in`](https://eslint.org/docs/rules/guard-for-in) | error | - | 要求 for-in 循环包含 if 语句 |
+| [`eqeqeq`](https://eslint.org/docs/rules/eqeqeq) | error | `always`, `{ null: 'ignore' }` | 强制使用 `===` 和 `!==` |
+| [`grouped-accessor-pairs`](https://eslint.org/docs/rules/grouped-accessor-pairs) | error | - | 要求 `getter`/`setter` 成组出现 |
+| [`guard-for-in`](https://eslint.org/docs/rules/guard-for-in) | error | - | 要求 `for-in` 循环包含 `if` 语句 |
 | [`max-classes-per-file`](https://eslint.org/docs/rules/max-classes-per-file) | error | `1` | 限制每个文件的类数量 |
-| [`no-alert`](https://eslint.org/docs/rules/no-alert) | warn | - | 禁止使用 alert |
-| [`no-caller`](https://eslint.org/docs/rules/no-caller) | error | - | 禁止使用 arguments.caller/callee |
-| [`no-case-declarations`](https://eslint.org/docs/rules/no-case-declarations) | error | - | 禁止 case 语句中声明变量 |
+| [`no-alert`](https://eslint.org/docs/rules/no-alert) | warn | - | 禁止使用 `alert` |
+| [`no-caller`](https://eslint.org/docs/rules/no-caller) | error | - | 禁止使用 `arguments.caller`/`callee` |
+| [`no-case-declarations`](https://eslint.org/docs/rules/no-case-declarations) | error | - | 禁止 `case` 语句中声明变量 |
 | [`no-constructor-return`](https://eslint.org/docs/rules/no-constructor-return) | error | - | 禁止构造函数返回值 |
 | [`no-div-regex`](https://eslint.org/docs/rules/no-div-regex) | off | - | 禁止在正则表达式中使用除法符号 |
-| [`no-else-return`](https://eslint.org/docs/rules/no-else-return) | error | `{ allowElseIf: false }` | 禁止在 else 前有 return |
+| [`no-else-return`](https://eslint.org/docs/rules/no-else-return) | error | `{ allowElseIf: false }` | 禁止在 `else` 前有 `return` |
 | [`no-empty-function`](https://eslint.org/docs/rules/no-empty-function) | error | `{ allow: [...] }` | 禁止空函数 |
 | [`no-empty-pattern`](https://eslint.org/docs/rules/no-empty-pattern) | error | - | 禁止空解构模式 |
 | [`no-empty-static-block`](https://eslint.org/docs/rules/no-empty-static-block) | off | - | 禁止空静态块 |
-| [`no-eq-null`](https://eslint.org/docs/rules/no-eq-null) | off | - | 禁止与 null 比较 |
-| [`no-eval`](https://eslint.org/docs/rules/no-eval) | error | - | 禁止使用 eval |
+| [`no-eq-null`](https://eslint.org/docs/rules/no-eq-null) | off | - | 禁止与 `null` 比较 |
+| [`no-eval`](https://eslint.org/docs/rules/no-eval) | error | - | 禁止使用 `eval` |
 | [`no-extend-native`](https://eslint.org/docs/rules/no-extend-native) | error | - | 禁止扩展原生对象 |
-| [`no-extra-bind`](https://eslint.org/docs/rules/no-extra-bind) | error | - | 禁止不必要的 bind |
+| [`no-extra-bind`](https://eslint.org/docs/rules/no-extra-bind) | error | - | 禁止不必要的 `bind` |
 | [`no-extra-label`](https://eslint.org/docs/rules/no-extra-label) | error | - | 禁止不必要的标签 |
-| [`no-fallthrough`](https://eslint.org/docs/rules/no-fallthrough) | error | - | 禁止 case 穿透 |
+| [`no-fallthrough`](https://eslint.org/docs/rules/no-fallthrough) | error | - | 禁止 `case` 穿透 |
 | [`no-floating-decimal`](https://eslint.org/docs/rules/no-floating-decimal) | error | - | 禁止浮点小数 |
 | [`no-global-assign`](https://eslint.org/docs/rules/no-global-assign) | error | `{ exceptions: [] }` | 禁止覆盖原生对象 |
 | [`no-native-reassign`](https://eslint.org/docs/rules/no-native-reassign) | off | - | 禁止覆盖原生对象 (已弃用) |
 | [`no-implicit-coercion`](https://eslint.org/docs/rules/no-implicit-coercion) | off | `{ boolean: false, ... }` | 禁止隐式类型转换 |
 | [`no-implicit-globals`](https://eslint.org/docs/rules/no-implicit-globals) | off | - | 禁止隐式全局变量 |
-| [`no-implied-eval`](https://eslint.org/docs/rules/no-implied-eval) | error | - | 禁止隐式 eval |
-| [`no-invalid-this`](https://eslint.org/docs/rules/no-invalid-this) | off | - | 禁止无效的 this 上下文 |
-| [`no-iterator`](https://eslint.org/docs/rules/no-iterator) | error | - | 禁止使用 __iterator__ |
+| [`no-implied-eval`](https://eslint.org/docs/rules/no-implied-eval) | error | - | 禁止隐式 `eval` |
+| [`no-invalid-this`](https://eslint.org/docs/rules/no-invalid-this) | off | - | 禁止无效的 `this` 上下文 |
+| [`no-iterator`](https://eslint.org/docs/rules/no-iterator) | error | - | 禁止使用 `__iterator__` |
 | [`no-labels`](https://eslint.org/docs/rules/no-labels) | error | `{ allowLoop: false, ... }` | 禁止标签语句 |
 | [`no-lone-blocks`](https://eslint.org/docs/rules/no-lone-blocks) | error | - | 禁止不必要的嵌套块 |
 | [`no-loop-func`](https://eslint.org/docs/rules/no-loop-func) | error | - | 禁止循环中创建函数 |
 | [`no-magic-numbers`](https://eslint.org/docs/rules/no-magic-numbers) | off | `{ ignore: [], ... }` | 禁止魔法数字 |
 | [`no-multi-spaces`](https://eslint.org/docs/rules/no-multi-spaces) | error | `{ ignoreEOLComments: false }` | 禁止多个空格 |
 | [`no-multi-str`](https://eslint.org/docs/rules/no-multi-str) | error | - | 禁止多行字符串 |
-| [`no-new`](https://eslint.org/docs/rules/no-new) | error | - | 禁止 new 操作符副作用 |
-| [`no-new-func`](https://eslint.org/docs/rules/no-new-func) | error | - | 禁止 new Function |
-| [`no-new-wrappers`](https://eslint.org/docs/rules/no-new-wrappers) | error | - | 禁止 new 包装对象 |
+| [`no-new`](https://eslint.org/docs/rules/no-new) | error | - | 禁止 `new` 操作符副作用 |
+| [`no-new-func`](https://eslint.org/docs/rules/no-new-func) | error | - | 禁止 `new Function` |
+| [`no-new-wrappers`](https://eslint.org/docs/rules/no-new-wrappers) | error | - | 禁止 `new` 包装对象 |
 | [`no-nonoctal-decimal-escape`](https://eslint.org/docs/rules/no-nonoctal-decimal-escape) | error | - | 禁止非八进制十进制转义 |
-| [`no-object-constructor`](https://eslint.org/docs/rules/no-object-constructor) | off | - | 禁止 Object 构造函数 |
+| [`no-object-constructor`](https://eslint.org/docs/rules/no-object-constructor) | off | - | 禁止 `Object` 构造函数 |
 | [`no-octal`](https://eslint.org/docs/rules/no-octal) | error | - | 禁止八进制字面量 |
 | [`no-octal-escape`](https://eslint.org/docs/rules/no-octal-escape) | error | - | 禁止八进制转义序列 |
 | [`no-param-reassign`](https://eslint.org/docs/rules/no-param-reassign) | error | `{ props: true, ... }` | 禁止参数重新赋值 |
-| [`no-proto`](https://eslint.org/docs/rules/no-proto) | error | - | 禁止 __proto__ |
+| [`no-proto`](https://eslint.org/docs/rules/no-proto) | error | - | 禁止 `__proto__` |
 | [`no-redeclare`](https://eslint.org/docs/rules/no-redeclare) | error | - | 禁止重复声明变量 |
 | [`no-restricted-properties`](https://eslint.org/docs/rules/no-restricted-properties) | error | 多对象配置 | 限制特定对象属性 |
-| [`no-return-assign`](https://eslint.org/docs/rules/no-return-assign) | error | `always` | 禁止 return 中赋值 |
-| [`no-return-await`](https://eslint.org/docs/rules/no-return-await) | error | - | 禁止不必要的 return await |
-| [`no-script-url`](https://eslint.org/docs/rules/no-script-url) | error | - | 禁止 javascript: URL |
+| [`no-return-assign`](https://eslint.org/docs/rules/no-return-assign) | error | `always` | 禁止 `return` 中赋值 |
+| [`no-return-await`](https://eslint.org/docs/rules/no-return-await) | error | - | 禁止不必要的 `return await` |
+| [`no-script-url`](https://eslint.org/docs/rules/no-script-url) | error | - | 禁止 `javascript: URL` |
 | [`no-self-assign`](https://eslint.org/docs/rules/no-self-assign) | error | `{ props: true }` | 禁止自我赋值 |
 | [`no-self-compare`](https://eslint.org/docs/rules/no-self-compare) | error | - | 禁止自我比较 |
 | [`no-sequences`](https://eslint.org/docs/rules/no-sequences) | error | - | 禁止逗号操作符 |
@@ -74,21 +74,21 @@ sidebar_position: 4
 | [`no-unmodified-loop-condition`](https://eslint.org/docs/rules/no-unmodified-loop-condition) | off | - | 禁止未修改的循环条件 |
 | [`no-unused-expressions`](https://eslint.org/docs/rules/no-unused-expressions) | error | `{ allowShortCircuit: false, ... }` | 禁止未使用的表达式 |
 | [`no-unused-labels`](https://eslint.org/docs/rules/no-unused-labels) | error | - | 禁止未使用的标签 |
-| [`no-useless-call`](https://eslint.org/docs/rules/no-useless-call) | off | - | 禁止不必要的 .call/.apply |
-| [`no-useless-catch`](https://eslint.org/docs/rules/no-useless-catch) | error | - | 禁止不必要的 catch |
+| [`no-useless-call`](https://eslint.org/docs/rules/no-useless-call) | off | - | 禁止不必要的 `.call`/`.apply` |
+| [`no-useless-catch`](https://eslint.org/docs/rules/no-useless-catch) | error | - | 禁止不必要的 `catch` |
 | [`no-useless-concat`](https://eslint.org/docs/rules/no-useless-concat) | error | - | 禁止不必要的字符串连接 |
 | [`no-useless-escape`](https://eslint.org/docs/rules/no-useless-escape) | error | - | 禁止不必要的转义 |
-| [`no-useless-return`](https://eslint.org/docs/rules/no-useless-return) | error | - | 禁止不必要的 return |
-| [`no-void`](https://eslint.org/docs/rules/no-void) | error | - | 禁止 void 操作符 |
+| [`no-useless-return`](https://eslint.org/docs/rules/no-useless-return) | error | - | 禁止不必要的 `return` |
+| [`no-void`](https://eslint.org/docs/rules/no-void) | error | - | 禁止 `void` 操作符 |
 | [`no-warning-comments`](https://eslint.org/docs/rules/no-warning-comments) | off | `{ terms: [...], location: 'start' }` | 禁止警告注释 |
-| [`no-with`](https://eslint.org/docs/rules/no-with) | error | - | 禁止 with 语句 |
+| [`no-with`](https://eslint.org/docs/rules/no-with) | error | - | 禁止 `with` 语句 |
 | [`prefer-promise-reject-errors`](https://eslint.org/docs/rules/prefer-promise-reject-errors) | error | `{ allowEmptyReject: true }` | 要求 Promise reject 错误对象 |
 | [`prefer-named-capture-group`](https://eslint.org/docs/rules/prefer-named-capture-group) | off | - | 建议命名捕获组 |
-| [`prefer-object-has-own`](https://eslint.org/docs/rules/prefer-object-has-own) | off | - | 建议使用 Object.hasOwn() |
+| [`prefer-object-has-own`](https://eslint.org/docs/rules/prefer-object-has-own) | off | - | 建议使用 `Object.hasOwn()` |
 | [`prefer-regex-literals`](https://eslint.org/docs/rules/prefer-regex-literals) | error | `{ disallowRedundantWrapping: true }` | 建议使用正则字面量 |
-| [`radix`](https://eslint.org/docs/rules/radix) | error | - | 要求 parseInt 使用基数 |
-| [`require-await`](https://eslint.org/docs/rules/require-await) | off | - | 要求 async 函数有 await |
-| [`require-unicode-regexp`](https://eslint.org/docs/rules/require-unicode-regexp) | off | - | 要求正则表达式使用 u 标志 |
+| [`radix`](https://eslint.org/docs/rules/radix) | error | - | 要求 `parseInt` 使用基数 |
+| [`require-await`](https://eslint.org/docs/rules/require-await) | off | - | 要求 `async` 函数有 `await` |
+| [`require-unicode-regexp`](https://eslint.org/docs/rules/require-unicode-regexp) | off | - | 要求正则表达式使用 `u` 标志 |
 | [`vars-on-top`](https://eslint.org/docs/rules/vars-on-top) | error | - | 要求变量声明在作用域顶部 |
 | [`wrap-iife`](https://eslint.org/docs/rules/wrap-iife) | error | `outside`, `{ functionPrototypeMethods: false }` | 要求立即执行函数使用括号包裹 |
 | [`yoda`](https://eslint.org/docs/rules/yoda) | error | - | 禁止 Yoda 条件 |
@@ -297,17 +297,17 @@ sidebar_position: 4
 | [`arrow-body-style`](https://eslint.org/docs/rules/arrow-body-style) | error | `"as-needed"`, `{ requireReturnForObjectLiteral: false }` | 要求箭头函数体在可能的情况下省略大括号 |
 | [`arrow-parens`](https://eslint.org/docs/rules/arrow-parens) | error | `"always"` | 要求箭头函数参数始终使用括号 |
 | [`arrow-spacing`](https://eslint.org/docs/rules/arrow-spacing) | error | `{ before: true, after: true }` | 强制箭头函数的箭头前后空格一致性 |
-| [`constructor-super`](https://eslint.org/docs/rules/constructor-super) | error | - | 禁止在构造函数中在调用 super() 之前使用 this/super |
-| [`generator-star-spacing`](https://eslint.org/docs/rules/generator-star-spacing) | error | `{ before: false, after: true }` | 强制 generator 函数中星号周围空格的一致性 |
+| [`constructor-super`](https://eslint.org/docs/rules/constructor-super) | error | - | 禁止在构造函数中在调用 `super()` 之前使用 `this`/`super` |
+| [`generator-star-spacing`](https://eslint.org/docs/rules/generator-star-spacing) | error | `{ before: false, after: true }` | 强制 `generator` 函数中星号周围空格的一致性 |
 | [`no-class-assign`](https://eslint.org/docs/rules/no-class-assign) | error | - | 禁止修改类声明 |
 | [`no-confusing-arrow`](https://eslint.org/docs/rules/no-confusing-arrow) | error | `{ allowParens: true }` | 禁止可能与比较操作符混淆的箭头函数语法 |
-| [`no-const-assign`](https://eslint.org/docs/rules/no-const-assign) | error | - | 禁止修改 const 声明的变量 |
+| [`no-const-assign`](https://eslint.org/docs/rules/no-const-assign) | error | - | 禁止修改 `const` 声明的变量 |
 | [`no-dupe-class-members`](https://eslint.org/docs/rules/no-dupe-class-members) | error | - | 禁止类成员中的重复名称 |
 | [`no-duplicate-imports`](https://eslint.org/docs/rules/no-duplicate-imports) | off | - | 禁止重复模块导入（已禁用） |
-| [`no-new-symbol`](https://eslint.org/docs/rules/no-new-symbol) | error | - | 禁止使用 new 操作符创建 Symbol 实例 |
+| [`no-new-symbol`](https://eslint.org/docs/rules/no-new-symbol) | error | - | 禁止使用 `new` 操作符创建 Symbol 实例 |
 | [`no-restricted-exports`](https://eslint.org/docs/rules/no-restricted-exports) | error | `{ restrictedNamedExports: ["default", "then"] }` | 限制指定的命名导出 |
 | [`no-restricted-imports`](https://eslint.org/docs/rules/no-restricted-imports) | off | `{ paths: [], patterns: [] }` | 限制指定的模块导入（已禁用） |
-| [`no-this-before-super`](https://eslint.org/docs/rules/no-this-before-super) | error | - | 禁止在构造函数中在 super() 调用前使用 this |
+| [`no-this-before-super`](https://eslint.org/docs/rules/no-this-before-super) | error | - | 禁止在构造函数中在 `super()` 调用前使用 `this` |
 | [`no-useless-computed-key`](https://eslint.org/docs/rules/no-useless-computed-key) | error | - | 禁止不必要的计算属性键 |
 | [`no-useless-constructor`](https://eslint.org/docs/rules/no-useless-constructor) | error | - | 禁止不必要的构造函数 |
 | [`no-useless-rename`](https://eslint.org/docs/rules/no-useless-rename) | error | `{ ignoreDestructuring: false, ignoreImport: false, ignoreExport: false }` | 禁止不必要的重命名解构 |
@@ -316,17 +316,17 @@ sidebar_position: 4
 | [`prefer-arrow-callback`](https://eslint.org/docs/rules/prefer-arrow-callback) | error | `{ allowNamedFunctions: false, allowUnboundThis: true }` | 要求回调函数使用箭头函数 |
 | [`prefer-const`](https://eslint.org/docs/rules/prefer-const) | error | `{ destructuring: "any", ignoreReadBeforeAssign: true }` | 要求使用 const 声明不会被重新赋值的变量 |
 | [`prefer-destructuring`](https://eslint.org/docs/rules/prefer-destructuring) | error | `{ VariableDeclarator: { array: false, object: true }, AssignmentExpression: { array: true, object: false } }`, `{ enforceForRenamedProperties: false }` | 强制使用解构赋值 |
-| [`prefer-numeric-literals`](https://eslint.org/docs/rules/prefer-numeric-literals) | error | - | 禁用 parseInt() 而使用二进制、八进制和十六进制字面量 |
+| [`prefer-numeric-literals`](https://eslint.org/docs/rules/prefer-numeric-literals) | error | - | 禁用 `parseInt()` 而使用二进制、八进制和十六进制字面量 |
 | [`prefer-reflect`](https://eslint.org/docs/rules/prefer-reflect) | off | - | 要求使用 Reflect 方法（已禁用） |
-| [`prefer-rest-params`](https://eslint.org/docs/rules/prefer-rest-params) | error | - | 要求使用 rest 参数代替 arguments |
-| [`prefer-spread`](https://eslint.org/docs/rules/prefer-spread) | error | - | 要求使用扩展运算符代替 .apply() |
+| [`prefer-rest-params`](https://eslint.org/docs/rules/prefer-rest-params) | error | - | 要求使用 rest 参数代替 `arguments` |
+| [`prefer-spread`](https://eslint.org/docs/rules/prefer-spread) | error | - | 要求使用扩展运算符代替 `.apply()` |
 | [`prefer-template`](https://eslint.org/docs/rules/prefer-template) | error | - | 要求使用模板字面量代替字符串拼接 |
-| [`require-yield`](https://eslint.org/docs/rules/require-yield) | error | - | 要求 generator 函数内包含 yield 语句 |
+| [`require-yield`](https://eslint.org/docs/rules/require-yield) | error | - | 要求 `generator` 函数内包含 `yield` 语句 |
 | [`rest-spread-spacing`](https://eslint.org/docs/rules/rest-spread-spacing) | error | `"never"` | 强制剩余和扩展运算符周围空格的一致性 |
 | [`sort-imports`](https://eslint.org/docs/rules/sort-imports) | off | `{ ignoreCase: false, ignoreDeclarationSort: false, ignoreMemberSort: false, memberSyntaxSortOrder: ["none", "all", "multiple", "single"] }` | 强制导入声明排序（已禁用） |
 | [`symbol-description`](https://eslint.org/docs/rules/symbol-description) | error | - | 要求 Symbol 描述参数 |
 | [`template-curly-spacing`](https://eslint.org/docs/rules/template-curly-spacing) | error | - | 强制模板字符串中花括号内的空格 |
-| [`yield-star-spacing`](https://eslint.org/docs/rules/yield-star-spacing) | error | `"after"` | 强制 yield* 表达式中星号周围空格 |
+| [`yield-star-spacing`](https://eslint.org/docs/rules/yield-star-spacing) | error | `"after"` | 强制 `yield*` 表达式中星号周围空格 |
 
 ## 模块导入
 
