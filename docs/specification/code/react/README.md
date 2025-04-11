@@ -61,38 +61,38 @@ sidebar_position: 6
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |----------|----------|----------|------|
-| [jsx-a11y/accessible-emoji](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/accessible-emoji.md) | off | - | 已废弃，要求 Emoji 包含无障碍提示（推荐用 `<span role="img">` 替代） |
-| [jsx-a11y/alt-text](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md) | error | `elements: ['img', 'object', 'area', 'input[type="image"]` | 强制图片等媒体元素必须有 `alt` 属性 |
-| [jsx-a11y/anchor-has-content](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/anchor-has-content.md) | error | `components: []` | 强制 `<a>` 标签必须有内容（可配置自定义组件） |
-| [jsx-a11y/anchor-is-valid](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/anchor-is-valid.md) | error | `components: ['Link'], specialLink: ['to'], aspects: [...]` | 强制 `<a>` 标签使用有效 `href` 或路由属性（如 React Router 的 `to`） |
-| [jsx-a11y/aria-activedescendant-has-tabindex](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md) | error | - | 使用 `aria-activedescendant` 时必须定义 `tabIndex` |
-| [jsx-a11y/aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-props.md) | error | - | 强制 ARIA 属性名称合法 |
-| [jsx-a11y/aria-proptypes](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-proptypes.md) | error | - | 强制 ARIA 属性值类型合法 |
-| [jsx-a11y/aria-role](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-role.md) | error | `ignoreNonDOM: false` | 强制 ARIA `role` 值合法（默认检查非 DOM 元素） |
-| [jsx-a11y/aria-unsupported-elements](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-unsupported-elements.md) | error | - | 禁止在非交互元素上使用 ARIA 角色/属性 |
-| [jsx-a11y/autocomplete-valid](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/autocomplete-valid.md) | off | `inputComponents: []` | 强制 `autocomplete` 属性合法（已关闭） |
-| [jsx-a11y/click-events-have-key-events](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/click-events-have-key-events.md) | error | - | 强制点击事件（如 `onClick`）绑定键盘事件（如 `onKeyUp`） |
-| [jsx-a11y/control-has-associated-label](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/control-has-associated-label.md) | error | `ignoreElements: [...], ignoreRoles: [...], depth: 5` | 强制交互控件（如按钮）关联标签 |
-| [jsx-a11y/heading-has-content](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/heading-has-content.md) | error | `components: ['']` | 强制标题标签（如 `<h1>`）包含内容 |
-| [jsx-a11y/html-has-lang](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/html-has-lang.md) | error | - | 强制 `<html>` 标签定义 `lang` 属性 |
-| [jsx-a11y/iframe-has-title](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/iframe-has-title.md) | error | - | 强制 `<iframe>` 包含 `title` 属性 |
-| [jsx-a11y/img-redundant-alt](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/img-redundant-alt.md) | error | - | 禁止冗余的 `alt` 文本（如 "image of..."） |
-| [jsx-a11y/interactive-supports-focus](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/interactive-supports-focus.md) | error | - | 强制交互元素（如按钮）支持聚焦 |
-| [jsx-a11y/label-has-associated-control](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/label-has-associated-control.md) | error | `assert: 'both', depth: 25` | 强制 `<label>` 关联表单控件（如 `input`） |
-| [jsx-a11y/lang](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/lang.md) | error | - | 强制 `lang` 属性值符合语言代码规范 |
-| [jsx-a11y/media-has-caption](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md) | error | `audio: [], video: [], track: []` | 强制 `<audio>`/`<video>` 包含字幕 |
-| [jsx-a11y/mouse-events-have-key-events](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/mouse-events-have-key-events.md) | error | - | 强制鼠标事件（如 `onMouseOver`）绑定键盘事件 |
-| [jsx-a11y/no-access-key](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-access-key.md) | error | - | 禁止使用 `accessKey`（易与辅助技术快捷键冲突） |
-| [jsx-a11y/no-autofocus](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-autofocus.md) | error | `ignoreNonDOM: true` | 禁止使用 `autoFocus`（允许非原生 DOM 元素） |
-| [jsx-a11y/no-distracting-elements](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-distracting-elements.md) | error | `elements: ['marquee', 'blink']` | 禁止干扰性元素（如 `<marquee>`） |
-| [jsx-a11y/no-noninteractive-element-interactions](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-element-interactions.md) | error | `handlers: [...]` | 禁止非交互元素（如 `<div>`）绑定交互事件 |
-| [jsx-a11y/no-noninteractive-tabindex](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-tabindex.md) | error | `roles: ['tabpanel']` | 禁止非交互元素使用 `tabIndex`（允许 `tabpanel` 角色） |
-| [jsx-a11y/no-onchange](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-onchange.md) | off | - | 已关闭，推荐用 `onBlur` 替代 `onChange` |
-| [jsx-a11y/no-redundant-roles](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md) | error | - | 禁止冗余 ARIA 角色（如 `<button role="button">`） |
-| [jsx-a11y/no-static-element-interactions](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-static-element-interactions.md) | error | `handlers: [...]` | 禁止静态元素（如 `<div>`）绑定交互事件 |
-| [jsx-a11y/role-has-required-aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-has-required-aria-props.md) | error | - | 强制 ARIA 角色具备必要属性（如 `checkbox` 需 `aria-checked`） |
-| [jsx-a11y/role-supports-aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-supports-aria-props.md) | error | - | 强制 ARIA 属性与角色兼容（如 `aria-hidden` 不能用于 `role="alert"`） |
-| [jsx-a11y/scope](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/scope.md) | error | - | 强制 `<th>` 使用 `scope` 属性（如 `scope="col"`） |
-| [jsx-a11y/tabindex-no-positive](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md) | error | - | 禁止 `tabIndex > 0`（破坏自然键盘导航顺序） |
-| [jsx-a11y/label-has-for](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/label-has-for.md) | off | `components: [], required: { every: [...] }` | 已废弃，强制 `<label>` 关联控件（改用 `label-has-associated-control`） |
+| [`jsx-a11y/accessible-emoji`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/accessible-emoji.md) | off | - | 已废弃，要求 Emoji 包含无障碍提示（推荐用 `<span role="img">` 替代） |
+| [`jsx-a11y/alt-text`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md) | error | `elements: ['img', 'object', 'area', 'input[type="image"]` | 强制图片等媒体元素必须有 `alt` 属性 |
+| [`jsx-a11y/anchor-has-content`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/anchor-has-content.md) | error | `components: []` | 强制 `<a>` 标签必须有内容（可配置自定义组件） |
+| [`jsx-a11y/anchor-is-valid`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/anchor-is-valid.md) | error | `components: ['Link'], specialLink: ['to'], aspects: [...]` | 强制 `<a>` 标签使用有效 `href` 或路由属性（如 React Router 的 `to`） |
+| [`jsx-a11y/aria-activedescendant-has-tabindex`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md) | error | - | 使用 `aria-activedescendant` 时必须定义 `tabIndex` |
+| [`jsx-a11y/aria-props`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-props.md) | error | - | 强制 ARIA 属性名称合法 |
+| [`jsx-a11y/aria-proptypes`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-proptypes.md) | error | - | 强制 ARIA 属性值类型合法 |
+| [`jsx-a11y/aria-role`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-role.md) | error | `ignoreNonDOM: false` | 强制 ARIA `role` 值合法（默认检查非 DOM 元素） |
+| [`jsx-a11y/aria-unsupported-elements`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-unsupported-elements.md) | error | - | 禁止在非交互元素上使用 ARIA 角色/属性 |
+| [`jsx-a11y/autocomplete-valid`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/autocomplete-valid.md) | off | `inputComponents: []` | 强制 `autocomplete` 属性合法（已关闭） |
+| [`jsx-a11y/click-events-have-key-events`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/click-events-have-key-events.md) | error | - | 强制点击事件（如 `onClick`）绑定键盘事件（如 `onKeyUp`） |
+| [`jsx-a11y/control-has-associated-label`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/control-has-associated-label.md) | error | `ignoreElements: [...], ignoreRoles: [...], depth: 5` | 强制交互控件（如按钮）关联标签 |
+| [`jsx-a11y/heading-has-content`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/heading-has-content.md) | error | `components: ['']` | 强制标题标签（如 `<h1>`）包含内容 |
+| [`jsx-a11y/html-has-lang`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/html-has-lang.md) | error | - | 强制 `<html>` 标签定义 `lang` 属性 |
+| [`jsx-a11y/iframe-has-title`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/iframe-has-title.md) | error | - | 强制 `<iframe>` 包含 `title` 属性 |
+| [`jsx-a11y/img-redundant-alt`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/img-redundant-alt.md) | error | - | 禁止冗余的 `alt` 文本（如 "image of..."） |
+| [`jsx-a11y/interactive-supports-focus`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/interactive-supports-focus.md) | error | - | 强制交互元素（如按钮）支持聚焦 |
+| [`jsx-a11y/label-has-associated-control`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/label-has-associated-control.md) | error | `assert: 'both', depth: 25` | 强制 `<label>` 关联表单控件（如 `input`） |
+| [`jsx-a11y/lang`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/lang.md) | error | - | 强制 `lang` 属性值符合语言代码规范 |
+| [`jsx-a11y/media-has-caption`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md) | error | `audio: [], video: [], track: []` | 强制 `<audio>`/`<video>` 包含字幕 |
+| [`jsx-a11y/mouse-events-have-key-events`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/mouse-events-have-key-events.md) | error | - | 强制鼠标事件（如 `onMouseOver`）绑定键盘事件 |
+| [`jsx-a11y/no-access-key`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-access-key.md) | error | - | 禁止使用 `accessKey`（易与辅助技术快捷键冲突） |
+| [`jsx-a11y/no-autofocus`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-autofocus.md) | error | `ignoreNonDOM: true` | 禁止使用 `autoFocus`（允许非原生 DOM 元素） |
+| [`jsx-a11y/no-distracting-elements`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-distracting-elements.md) | error | `elements: ['marquee', 'blink']` | 禁止干扰性元素（如 `<marquee>`） |
+| [`jsx-a11y/no-noninteractive-element-interactions`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-element-interactions.md) | error | `handlers: [...]` | 禁止非交互元素（如 `<div>`）绑定交互事件 |
+| [`jsx-a11y/no-noninteractive-tabindex`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-tabindex.md) | error | `roles: ['tabpanel']` | 禁止非交互元素使用 `tabIndex`（允许 `tabpanel` 角色） |
+| [`jsx-a11y/no-onchange`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-onchange.md) | off | - | 已关闭，推荐用 `onBlur` 替代 `onChange` |
+| [`jsx-a11y/no-redundant-roles`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md) | error | - | 禁止冗余 ARIA 角色（如 `<button role="button">`） |
+| [`jsx-a11y/no-static-element-interactions`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-static-element-interactions.md) | error | `handlers: [...]` | 禁止静态元素（如 `<div>`）绑定交互事件 |
+| [`jsx-a11y/role-has-required-aria-props`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-has-required-aria-props.md) | error | - | 强制 ARIA 角色具备必要属性（如 `checkbox` 需 `aria-checked`） |
+| [`jsx-a11y/role-supports-aria-props`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-supports-aria-props.md) | error | - | 强制 ARIA 属性与角色兼容（如 `aria-hidden` 不能用于 `role="alert"`） |
+| [`jsx-a11y/scope`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/scope.md) | error | - | 强制 `<th>` 使用 `scope` 属性（如 `scope="col"`） |
+| [`jsx-a11y/tabindex-no-positive`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md) | error | - | 禁止 `tabIndex > 0`（破坏自然键盘导航顺序） |
+| [`jsx-a11y/label-has-for`](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/label-has-for.md) | off | `components: [], required: { every: [...] }` | 已废弃，强制 `<label>` 关联控件（改用 `label-has-associated-control`） |
 
