@@ -29,6 +29,8 @@ description: 架构指南和总览
 | SSR           | ✔️                | ✔️                | ❌                      | ❌                       |
 | Electron      | ❌                 | ❌                 | ❌                      | ✔️                      |
 | Capacitor     | ❌                 | ❌                 | ✔️                     | ❌                       |
+| 单元测试          | Jest              | Jest              | Vitest                 | Jest                    |
+| E2E测试         | Playwright        | Playwright        | Playwright             | Playwright              |
 
 
 - 严格的代码检查工具，提升代码维护性：包括 ESLint、stylelint 和 HTML Validate
