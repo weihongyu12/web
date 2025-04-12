@@ -10,40 +10,37 @@ description: 架构指南和总览
 
 ## 总览
 
-| 特性/平台         | C端 - PC端         | B端 - PC端         | C端 - 移动端         |
-|---------------|------------------|------------------|------------------|
-| 框架            | Nuxt             | Vue              | Vue              |
-| 脚手架           | Nuxi             | Vue CLI          | Vue CLI          |
-| Webpack       | ✔️               | ✔️               | ✔️               |
-| UI 组件/框架      | Tailwind CSS     | Vuetify          | Tailwind CSS     |
-| 路由            | -                | Vue Router       | Vue Router       |
-| 路由模式          | history          | hash             | hash             |
-| 状态管理          | -                | Pinia            | Pinia            |
-| TypeScript    | ✔️               | ✔️               | ✔️               |
-| ESLint        | airbnb           | airbnb           | airbnb           |
-|               | vue3/recommended | vue3/recommended | vue3/recommended |
-|               | nuxt/recommended |                  |                  |
-| Sass          | ✔️               | ✔️               | ✔️               |
-| stylelint     | Bootstrap        | Bootstrap        | Bootstrap        |
-| HTML Validate | ✔️               | ✔️               | ✔️               |
-| PWA           | ✔️               | ✔️               | ✔️               |
-| SSR           | ✔️               | ❌                | ❌                |
-| Electron      | ❌                | 🚧工作进行中          | ❌                |
-| Capacitor     | ❌                | ❌                | 🚧工作进行中          |
-| IE 兼容         | ☑️有限兼容           | ❌                | ❌                |
+| 特性/平台         | C端 - PC端          | C端 - 移动端（React）   | C端 - 移动端（Vue）          | B端 - PC端                |
+|---------------|-------------------|-------------------|------------------------|-------------------------|
+| 框架            | Next.js           | Next.js           | Vue                    | React（基于Ant Design Pro） |
+| 打包工具          | RSpack            | RSpack            | Vite                   | Umi Max                 |
+| UI 组件/框架      | Tailwind CSS      | Tailwind CSS      | Tailwind CSS           | Ant Design Pro          |
+| 路由            | -                 | -                 | Vue Router             | Umi Router              |
+| 路由模式          | history           | history           | hash                   | hash                    |
+| 状态管理          | -                 | -                 | Pinia                  | Zustand                 |
+| TypeScript    | ✔️                | ✔️                | ✔️                     | ✔️                      |
+| ESLint        | airbnb            | airbnb            | @vue/airbnb-typescript | airbnb                  |
+|               | airbnb-typescript | airbnb-typescript | vue3/recommended       | airbnb-typescript       |
+|               | next/recommended  | next/recommended  |                        |                         |
+| Sass          | ✔️                | ✔️                | ✔️                     | ✔️                      |
+| stylelint     | Bootstrap         | Bootstrap         | Bootstrap              | Bootstrap               |
+| HTML Validate | ✔️                | ✔️                | ✔️                     | ❌                       |
+| PWA           | ✔️                | ✔️                | ✔️                     | ✔️                      |
+| SSR           | ✔️                | ✔️                | ❌                      | ❌                       |
+| Electron      | ❌                 | ❌                 | ❌                      | ✔️                      |
+| Capacitor     | ❌                 | ❌                 | ✔️                     | ❌                       |
 
-- 使用 Vue 3，支持 Vue 的完整生态（Vue Router、Pinia、Nuxt 等），提供完善的功能和开发体验
-- 支持使用 Composition API 特性提升代码的复用率
+
 - 严格的代码检查工具，提升代码维护性：包括 ESLint、stylelint 和 HTML Validate
 - 使用 PWA 为用户提供更好的用户体验
-- 使用 Webpack 5 为项目提供最佳构建支持
+- 使用前端工具链为项目提供最佳构建支持
 
 ## 技术运用
 
 ### 环境
 
 - **Node.js**：一个 JS 的运行环境，可以让 JS 在非浏览器的环境下执行
-- **npm**：项目相关依赖包，同时提供命令行进行关联
+- **pnpm**：项目相关依赖包，同时提供命令行进行关联
 
 ### 基础技术
 
@@ -52,10 +49,16 @@ description: 架构指南和总览
 
 ### 工具
 
-- **Webpack**：模块打包工具，用于将所有资源（JS、CSS、图片等）构建成一个项目
-- **Babel**：转化 JS 语法，将 ES6 转为 ES5，或者转化 JSX，将语法转化至浏览器可运行版本
 - **ESLint**：JS 语法检查工具，避免一些编程时的错误，同时能让团队编程风格统一
 - **Sass**：CSS 预处理器，为 CSS 提供编程能力
+
+### React 框架
+
+| 特性   | 框架                                              | 说明                         |
+|------|-------------------------------------------------|----------------------------|
+| 框架   | [React](https://cn.vuejs.org/)                    |                            |
+| 路由   | [React Router](https://next.router.vuejs.org/zh/) |              |
+| 状态管理 | [Zustand](https://pinia.vuejs.org/)               |           |
 
 ### Vue 框架
 
@@ -64,13 +67,6 @@ description: 架构指南和总览
 | 框架   | [Vue](https://cn.vuejs.org/)                    |                            |
 | 路由   | [Vue Router](https://next.router.vuejs.org/zh/) | 为 Vue 提供页面切换功能             |
 | 状态管理 | [Pinia](https://pinia.vuejs.org/)               | 为多个 Vue 组件提供共享的状态          |
-| 脚手架  | [Vue CLI](https://next.cli.vuejs.org/zh/)       | 生成一个 Vue 项目，项目开发可能需要参考配置文档 |
-
-### Nuxt 框架
-
-| 特性  | 框架                             | 说明  |
-|-----|--------------------------------|-----|
-| 框架  | [Nuxt](https://v3.nuxtjs.org/) |     |
 
 ### JS 库
 
