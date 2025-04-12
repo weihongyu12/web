@@ -155,6 +155,10 @@ const config: Config = {
       additionalLanguages: ['docker', 'nginx'],
     },
   } satisfies Preset.ThemeConfig,
+
+  future: {
+    experimental_faster: true,
+  },
 };
 
 export default config;
