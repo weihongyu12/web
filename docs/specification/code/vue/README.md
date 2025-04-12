@@ -213,35 +213,33 @@ sidebar_position: 7
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |---------|---------|---------|-----|
-| [`attribute-hyphenation`](https://eslint.vuejs.org/rules/attribute-hyphenation.html) | warn | - | 强制组件属性名使用连字符格式（kebab-case） |
-| [`component-definition-name-casing`](https://eslint.vuejs.org/rules/component-definition-name-casing.html) | warn | - | 强制组件定义名称的大小写（默认 PascalCase） |
-| [`first-attribute-linebreak`](https://eslint.vuejs.org/rules/first-attribute-linebreak.html) | warn | - | 控制第一个属性的换行位置 |
-| [`html-closing-bracket-newline`](https://eslint.vuejs.org/rules/html-closing-bracket-newline.html) | warn | - | 强制闭合标签的括号换行格式 |
-| [`html-closing-bracket-spacing`](https://eslint.vuejs.org/rules/html-closing-bracket-spacing.html) | warn | - | 强制闭合标签括号内外的空格规则 |
-| [`html-end-tags`](https://eslint.vuejs.org/rules/html-end-tags.html) | warn | - | 要求 HTML 标签必须有闭合标签 |
-| [`html-indent`](https://eslint.vuejs.org/rules/html-indent.html) | warn | - | 统一 HTML 元素的缩进规则 |
-| [`html-quotes`](https://eslint.vuejs.org/rules/html-quotes.html) | warn | - | 强制 HTML 属性值使用双引号 |
-| [`html-self-closing`](https://eslint.vuejs.org/rules/html-self-closing.html) | warn | - | 强制自闭合标签的格式（无内容时自动闭合） |
-| [`max-attributes-per-line`](https://eslint.vuejs.org/rules/max-attributes-per-line.html) | warn | - | 限制每行允许的最大属性数量 |
-| [`multiline-html-element-content-newline`](https://eslint.vuejs.org/rules/multiline-html-element-content-newline.html) | warn | - | 多行 HTML 元素内容前后需要换行 |
-| [`mustache-interpolation-spacing`](https://eslint.vuejs.org/rules/mustache-interpolation-spacing.html) | warn | - | 强制 Mustache 插值内的空格规则 |
-| [`no-multi-spaces`](https://eslint.vuejs.org/rules/no-multi-spaces.html) | warn | - | 禁止模板中出现连续多个空格 |
-| [`no-spaces-around-equal-signs-in-attribute`](https://eslint.vuejs.org/rules/no-spaces-around-equal-signs-in-attribute.html) | warn | - | 属性等号周围禁止空格 |
-| [`no-template-shadow`](https://eslint.vuejs.org/rules/no-template-shadow.html) | warn | - | 禁止模板内变量与父作用域变量同名（避免遮蔽） |
-| [`one-component-per-file`](https://eslint.vuejs.org/rules/one-component-per-file.html) | warn | - | 每个文件只能包含一个组件 |
-| [`prop-name-casing`](https://eslint.vuejs.org/rules/prop-name-casing.html) | warn | - | 强制 Prop 名称的格式（默认 camelCase） |
-| [`require-default-prop`](https://eslint.vuejs.org/rules/require-default-prop.html) | warn | - | 要求 Prop 必须有默认值 |
-| [`require-explicit-emits`](https://eslint.vuejs.org/rules/require-explicit-emits.html) | warn | - | 要求 `emits` 选项中明确声明触发的事件 |
-| [`require-prop-types`](https://eslint.vuejs.org/rules/require-prop-types.html) | warn | - | 要求 Prop 必须定义类型 |
-| [`singleline-html-element-content-newline`](https://eslint.vuejs.org/rules/singleline-html-element-content-newline.html) | warn | - | 单行 HTML 元素内容前后禁止换行 |
-| [`v-bind-style`](https://eslint.vuejs.org/rules/v-bind-style.html) | warn | - | 强制 `v-bind` 指令的简写或完整格式 |
-| [`v-on-event-hyphenation`](https://eslint.vuejs.org/rules/v-on-event-hyphenation.html) | warn | `"always", { autofix: true }` | 强制事件名使用连字符格式（kebab-case） |
-| [`v-on-style`](https://eslint.vuejs.org/rules/v-on-style.html) | warn | - | 强制 `v-on` 指令的简写或完整格式 |
-| [`v-slot-style`](https://eslint.vuejs.org/rules/v-slot-style.html) | warn | - | 强制 `v-slot` 指令的格式（默认缩写为 `#`） |
+| [`vue/attribute-hyphenation`](https://eslint.vuejs.org/rules/attribute-hyphenation.html) | warn | - | 强制组件属性名使用连字符格式（kebab-case） |
+| [`vue/component-definition-name-casing`](https://eslint.vuejs.org/rules/component-definition-name-casing.html) | warn | - | 强制组件定义名称的大小写（默认 PascalCase） |
+| [`vue/first-attribute-linebreak`](https://eslint.vuejs.org/rules/first-attribute-linebreak.html) | warn | - | 控制第一个属性的换行位置 |
+| [`vue/html-closing-bracket-newline`](https://eslint.vuejs.org/rules/html-closing-bracket-newline.html) | warn | - | 强制闭合标签的括号换行格式 |
+| [`vue/html-closing-bracket-spacing`](https://eslint.vuejs.org/rules/html-closing-bracket-spacing.html) | warn | - | 强制闭合标签括号内外的空格规则 |
+| [`vue/html-end-tags`](https://eslint.vuejs.org/rules/html-end-tags.html) | warn | - | 要求 HTML 标签必须有闭合标签 |
+| [`vue/html-indent`](https://eslint.vuejs.org/rules/html-indent.html) | warn | - | 统一 HTML 元素的缩进规则 |
+| [`vue/html-quotes`](https://eslint.vuejs.org/rules/html-quotes.html) | warn | - | 强制 HTML 属性值使用双引号 |
+| [`vue/html-self-closing`](https://eslint.vuejs.org/rules/html-self-closing.html) | warn | - | 强制自闭合标签的格式（无内容时自动闭合） |
+| [`vue/max-attributes-per-line`](https://eslint.vuejs.org/rules/max-attributes-per-line.html) | warn | - | 限制每行允许的最大属性数量 |
+| [`vue/multiline-html-element-content-newline`](https://eslint.vuejs.org/rules/multiline-html-element-content-newline.html) | warn | - | 多行 HTML 元素内容前后需要换行 |
+| [`vue/mustache-interpolation-spacing`](https://eslint.vuejs.org/rules/mustache-interpolation-spacing.html) | warn | - | 强制 Mustache 插值内的空格规则 |
+| [`vue/no-multi-spaces`](https://eslint.vuejs.org/rules/no-multi-spaces.html) | warn | - | 禁止模板中出现连续多个空格 |
+| [`vue/no-spaces-around-equal-signs-in-attribute`](https://eslint.vuejs.org/rules/no-spaces-around-equal-signs-in-attribute.html) | warn | - | 属性等号周围禁止空格 |
+| [`vue/no-template-shadow`](https://eslint.vuejs.org/rules/no-template-shadow.html) | warn | - | 禁止模板内变量与父作用域变量同名（避免遮蔽） |
+| [`vue/one-component-per-file`](https://eslint.vuejs.org/rules/one-component-per-file.html) | warn | - | 每个文件只能包含一个组件 |
+| [`vue/prop-name-casing`](https://eslint.vuejs.org/rules/prop-name-casing.html) | warn | - | 强制 Prop 名称的格式（默认 camelCase） |
+| [`vue/require-default-prop`](https://eslint.vuejs.org/rules/require-default-prop.html) | warn | - | 要求 Prop 必须有默认值 |
+| [`vue/require-explicit-emits`](https://eslint.vuejs.org/rules/require-explicit-emits.html) | warn | - | 要求 `emits` 选项中明确声明触发的事件 |
+| [`vue/require-prop-types`](https://eslint.vuejs.org/rules/require-prop-types.html) | warn | - | 要求 Prop 必须定义类型 |
+| [`vue/singleline-html-element-content-newline`](https://eslint.vuejs.org/rules/singleline-html-element-content-newline.html) | warn | - | 单行 HTML 元素内容前后禁止换行 |
+| [`vue/v-bind-style`](https://eslint.vuejs.org/rules/v-bind-style.html) | warn | - | 强制 `v-bind` 指令的简写或完整格式 |
+| [`vue/v-on-event-hyphenation`](https://eslint.vuejs.org/rules/v-on-event-hyphenation.html) | warn | `"always", { autofix: true }` | 强制事件名使用连字符格式（kebab-case） |
+| [`vue/v-on-style`](https://eslint.vuejs.org/rules/v-on-style.html) | warn | - | 强制 `v-on` 指令的简写或完整格式 |
+| [`vue/v-slot-style`](https://eslint.vuejs.org/rules/v-slot-style.html) | warn | - | 强制 `v-slot` 指令的格式（默认缩写为 `#`） |
 
 ## 优先级 C：推荐
-
-以下是整理后的ESLint规则表格：
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |---------|---------|---------|-----|
