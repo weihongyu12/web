@@ -4,9 +4,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 5
 ---
 
-# 参考配置
-
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import TOCInline from '@theme/TOCInline';
+
+# 参考配置
 
 <TOCInline toc={toc} />
 
@@ -927,18 +929,57 @@ limit_req_log_level warn;
 [https://eslint.org/docs/user-guide/configuring](https://eslint.org/docs/user-guide/configuring)
 :::
 
+<Tabs>
+  <TabItem value="react" label="React" default>
+```js
+// .eslintrc.js
+
+module.exports = {
+  extends: [
+    'airbnb',
+    'airbnb/hooks',
+    'airbnb-typescript',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    'plugin:no-unsanitized/recommended-legacy',
+  ],
+};
+```
+  </TabItem>
+  <TabItem value="next" label="Next.js">
+```js
+// .eslintrc.js
+
+module.exports = {
+  extends: [
+    'airbnb',
+    'airbnb/hooks',
+    'airbnb-typescript',
+    'plugin:@next/next/recommended',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    'plugin:no-unsanitized/recommended-legacy',
+  ],
+};
+```
+  </TabItem>
+  <TabItem value="vue" label="Vue">
 ```js
 // .eslintrc.js
 
 module.exports = {
   extends: [
     '@vue/airbnb',
-    'plugin:vue/vue3-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:no-unsanitized/DOM',
+    '@vue/eslint-config-airbnb-with-typescript',
+    // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
+    'plugin:no-unsanitized/recommended-legacy',
   ],
 };
 ```
+  </TabItem>
+</Tabs>
+
+
 
 ## stylelint
 
@@ -1043,12 +1084,6 @@ module.exports = {
   extends: ['@commitlint/config-angular'],
 };
 ```
-
-## Vue Styleguidist
-
-:::warning
-截止本文撰写时，Vue Styleguidist 仍不支持 Vue 3
-:::
 
 ## Docker
 
