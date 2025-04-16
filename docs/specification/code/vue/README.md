@@ -4,6 +4,24 @@ sidebar_position: 7
 
 # Vue 规范
 
+```js
+// .eslintrc.js
+require("@rushstack/eslint-patch/modern-module-resolution");
+
+module.exports = {
+  extends: [
+    'plugin:vue/vue3-recommended',
+    '@vue/eslint-config-airbnb-with-typescript', 
+    // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
+  ],
+};
+```
+
+:::warning
+- 由于上游依赖关系，`@vue/eslint-config-airbnb-with-typescript` 仍不支持 ESLint 9.x 版本，使用时请注意。使用时请使用 ESLint 8.x 版本，后续请及时关注版本变化。
+- 根据项目实际情况，决定是否开启 tsx 支持。
+:::
+
 ## 基础规则 JavaScript
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |

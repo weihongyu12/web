@@ -4,6 +4,28 @@ sidebar_position: 5
 
 # TypeScript 规范
 
+```js
+// .eslintrc.js
+
+module.exports = {
+  extends: [
+    // ...
+    'airbnb-typescript',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/stylistic-type-checked',
+  ],
+};
+```
+
+:::warning
+- 截止至目前，`eslint-config-airbnb-typescript` 仍不支持 ESLint 9.x 版本，使用时请注意。使用时请使用 ESLint 8.x 版本，耐心等待 `eslint-config-airbnb-typescript` 升级。
+- 由于 `eslint-config-airbnb-typescript` 需要搭配 `eslint-config-airbnb` 或 `eslint-config-airbnb-base` 使用。
+- 由于 `eslint-config-airbnb-typescript` 需要搭配 `@typescript-eslint/parser` 和 `@typescript-eslint/eslint-plugin` 使用，截止目前仅支持 7.x 版本。
+- 由于 `eslint-config-airbnb-typescript` 目前是只读状态，后续需要持续关注项目情况，或寻求其他替代项目。
+:::
+
+## 基础规则
+
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |----------|----------|----------|------|
 | [`@typescript-eslint/brace-style`](https://typescript-eslint.io/rules/brace-style) | error | `["1tbs", { allowSingleLine: true }]` | 强制大括号样式使用1tbs风格，允许单行形式 |
