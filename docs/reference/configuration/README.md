@@ -665,6 +665,9 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
+    
+    http2 on;
+    http2_push_preload on;
 
     ssl_certificate     /path/to/signed_cert_plus_intermediates;
     ssl_certificate_key /path/to/private_key;
