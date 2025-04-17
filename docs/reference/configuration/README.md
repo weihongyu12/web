@@ -903,9 +903,9 @@ http {
 server {
   listen 443;
   server_name example.com www.example.com;
-  set $porxy_port 8021;
+  set $proxy_port 8021;
 
-  location ~ /porxy-path/ {
+  location ^~ /proxy-path/ {
     proxy_http_version 1.1;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -913,7 +913,7 @@ server {
     proxy_set_header X-NginX-Proxy true;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
-    proxy_pass http://127.0.0.1:$porxy_port$request_uri;
+    proxy_pass http://127.0.0.1:$proxy_port$request_uri;
     proxy_redirect off;
   }
 }
