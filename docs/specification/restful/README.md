@@ -9,9 +9,11 @@ toc_max_heading_level: 5
 :::note
 服务端 API 推荐使用以下语言和框架实现：
 
-- OpenJDK 17 + [Spring Boot](https://spring.io/projects/spring-boot)
-- Python + [Django](https://www.djangoproject.com/)
+- Java + [Spring Boot](https://spring.io/projects/spring-boot)
 - PHP + [Laravel](https://laravel.com/)
+- Python + [Django](https://www.djangoproject.com/)
+- C# + [ASP.NET Core](https://dotnet.microsoft.com/zh-cn/apps/aspnet)
+- Ruby + [Ruby on Rails](https://rubyonrails.org/)
 :::
 
 import TOCInline from '@theme/TOCInline';
@@ -240,7 +242,16 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 
 #### 敏感字段
 
-永远加密敏感字段，其中密码推荐使用 PBKDF2 算法加密，其他敏感字段使用 AES 加密。
+敏感字段使用 AES 加密传输，前端/后端均需要做加密/解密处理。
+
+敏感字段包括但不限于：
+
+- 身份证号码
+- 银行卡号
+- 密码
+- 手机号码
+- 家庭住址
+- 健康数据
 
 :::warning 注意
 密码仅限在请求时作为参数使用，响应参数不应该包含密码相关字段。在数据库，密码字段推荐使用 Bcrypt 算法 或者 PBKDF2 算法进行存储。
