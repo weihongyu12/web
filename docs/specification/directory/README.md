@@ -2,6 +2,9 @@
 sidebar_position: 3
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # 目录规范
 
 ## 项目根目录
@@ -24,7 +27,6 @@ project/
 ├── .gitignore
 ├── .gitlab-ci.yml
 ├── .lighthouserc.js
-├── babel.config.js
 ├── commitlint.config.js
 ├── jest.config.js
 ├── package.json
@@ -34,7 +36,7 @@ project/
 ```
 
 - `dist/`：项目构建结果
-- `public/`：静态文件，不受 webpack 影响
+- `public/`：静态文件，不受构建工具影响
 - `src/`：项目源代码，见 [`src` 目录](#src-目录)
 - `tests/`：测试源代码
   - `e2e/`：E2E 测试代码
@@ -47,18 +49,53 @@ project/
 - `.gitignore`：忽略不需要 Git 提交的目录或文件
 - `.gitlab-ci.yml`：Gitlab CI 配置
 - `.lighthouserc.js`：lighthouse 检查配置，在 CI 环境下运行
-- `babel.config.js`：Babel 配置
 - `commitlint.config.js`：commitlint 配置
 - `lint-staged.config.js`：lint-staged 配置
 - `jest.config.js`：Jest 配置
 - `package.json`
-- `package-lock.json`
+- `pnpm-lock.yaml`
 - `stylelint.config.js`：stylelint 配置
 - `tsconfig.json`：TypeScript 配置
-- `vue.config.json`：Vue CLI 配置
 
 ## `src` 目录
 
+<Tabs>
+  <TabItem value="react" label="React" default>
+```:no-line-numbers
+project/
+└── src/
+    ├── assets/
+    ├── components/
+    ├── hooks/
+    ├── layouts/
+    ├── service/
+    ├── store/
+    ├── utils/
+    ├── pages/
+    ├── App.tsx
+    ├── main.tsx
+    └── react-env.d.ts
+```
+<>
+- `assets/`：静态文件目录
+- `components/`：项目公共组件
+- `hooks/`：Hooks
+- `layouts/`：页面布局组件
+- `services/`：HTTP 请求封装方法
+- `store/`：Zustand 相关代码
+- `utils/`：工具 JS 函数
+- `pages/`：页面组件
+- `App.tsx`：根组件
+- `main.tsx`：页面入口文件
+- `react-env.d.ts`：React Types 类型文件
+</>
+  </TabItem>
+  <TabItem value="next" label="Next.js">
+:::warning
+TODO
+:::
+  </TabItem>
+  <TabItem value="vue" label="Vue">
 ```:no-line-numbers
 project/
 └── src/
@@ -71,16 +108,14 @@ project/
     ├── router/
     ├── service/
     ├── store/
-    ├── types/
     ├── utils/
     ├── views/
     ├── App.vue
     ├── main.ts
-    ├── registerServiceWorker.ts
-    └── shims-vue.d.ts
+    └── vite-env.d.ts
 ```
-
-- `assets/`：静态文件目录（例如图片）
+<>
+- `assets/`：静态文件目录
 - `components/`：项目公共组件
 - `composables/`：项目 Composition API
 - `directives/`：项目公共指令
@@ -88,28 +123,56 @@ project/
 - `plugins/`：Vue 全局插件
 - `router/`：路由配置
 - `services/`：HTTP 请求封装方法
-- `store/`：Vuex 相关代码
-- `types/`：公用 Types
+- `store/`：Pinia 相关代码
 - `utils/`：工具 JS 函数
 - `views/`：页面组件
 - `App.vue`：根组件
-- `main.js`：页面入口文件
-- `registerServiceWorker.ts`：PWA 相关代码
-- `shims-vue.d.ts`：Vue Types
-
-:::warning
-在 Nuxt 项目中，配置 [`srcDir`](https://nuxtjs.org/docs/configuration-glossary/configuration-srcdir) 才可以把项目源代码放进 `src/` 目录
-
-```js
-// nuxt.config.js
-export default {
-  srcDir: 'src/'
-}
-```
-:::
+- `main.ts`：页面入口文件
+- `vite-env.d.ts`：Vue Types类型文件
+</>
+  </TabItem>
+</Tabs>
 
 ## 模块的导出
 
+<Tabs>
+  <TabItem value="react" label="React" default>
+模块应该使用统一入口进行导出，以 `components/` 为例
+
+目录结构，注意这里 `HelloWorld/` 下的 `assets/` 为组件私有资源，`components/` 为私有组件。我们会把 `components/index.ts` 作为统一的组件入口。
+
+```:no-line-numbers
+components/
+├── HelloWorld/
+|   ├── assets/
+|   ├── components/
+|   └── index.tsx
+└── index.ts
+```
+
+在把模块导出成统一入口：
+
+```js
+// components/index.ts
+export { default as HelloWorld } from './HelloWorld';
+```
+
+在页面组件中使用：
+
+```tsx
+import React from 'react';
+import { HelloWorld } from '@/components';
+
+const Page: React.FC = function Page() {
+  return (
+    <HelloWorld />
+  );
+};
+
+export default Page;
+```
+  </TabItem>
+  <TabItem value="vue" label="Vue">
 模块应该使用统一入口进行导出，以 `components/` 为例
 
 目录结构，注意这里 `HelloWorld/` 下的 `assets/` 为组件私有资源，`components/` 为私有组件。我们会把 `components/index.ts` 作为统一的组件入口。
@@ -154,4 +217,6 @@ export default {
 </script>
 ```
 
-这样做的好处是可以方便的管理和引用组件，无需再组件的使用过程中频繁的寻找组件的代码路径。由于 Webpack 已经支持 TreeShaking，这里无需过多的考虑性能优化的问题。
+这样做的好处是可以方便的管理和引用组件，无需再组件的使用过程中频繁的寻找组件的代码路径。由于构建工具已经支持 TreeShaking，这里无需过多的考虑性能优化的问题。
+  </TabItem>
+</Tabs>
