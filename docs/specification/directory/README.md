@@ -79,7 +79,7 @@ project/
 <>
 - `assets/`：静态文件目录
 - `components/`：项目公共组件
-- `hooks/`：Hooks
+- `hooks/`：自定义 React Hooks
 - `layouts/`：页面布局组件
 - `services/`：HTTP 请求封装方法
 - `store/`：Zustand 相关代码
@@ -91,9 +91,36 @@ project/
 </>
   </TabItem>
   <TabItem value="next" label="Next.js">
-:::warning
-TODO
-:::
+```:no-line-numbers
+project/
+└── src/
+    ├── app/
+    │   ├── page.tsx 
+    │   ├── layout.tsx
+    │   ├── loading.tsx
+    │   ├── error.tsx
+    │   ├── error.tsx
+    │   └── .../
+    ├── assets/
+    ├── components/
+    ├── hooks/
+    ├── service/
+    └── utils/
+```
+
+<>
+- `app/`：App Router 的根目录
+  - `page.tsx` - 定义路由的 UI，比如 `/app/dashboard/page.tsx` 对应 `/dashboard` 路由
+  - `layout.tsx` - 定义共享布局，嵌套在各级路由中
+  - `loading.tsx` - 路由加载状态
+  - `error.tsx` - 错误处理组件
+  - `not-found.tsx` - 404 页面
+- `assets/`：静态文件目录
+- `components/`：项目公共组件
+- `hooks/`：自定义 React Hooks
+- `services/`：HTTP 请求封装方法
+- `utils/`：工具 JS 函数
+</>
   </TabItem>
   <TabItem value="vue" label="Vue">
 ```:no-line-numbers
