@@ -11,7 +11,7 @@ title: 部署
 
 ## 项目构建和环境部署
 
-使用 **Docker** 进行项目构建和环境部署，所有的构建和部署操作，均在 **Jenkins** 执行操作。
+使用 **Docker** 进行项目构建和环境部署，所有的构建和部署操作，均在 **Gitlab CI** 执行操作。
 
 主要依赖于下面两个镜像：
 
@@ -30,13 +30,13 @@ title: 部署
   - 配置 HTTP 安全 Header
   - 配置 HTTPS
   - 配置 [ModSecurity](https://github.com/SpiderLabs/ModSecurity) 防火墙（可选）
-  - 配置反向代理（Nuxt.js 项目专属）
+  - 配置反向代理（Next.js 项目专属）
 
 :::tip
 参见 [nginx 配置](/docs/reference/configuration/#nginx)
 :::
 
-### Vue
+### React/Vue
 
 - Node.js
   - 执行 `npm install` 安装依赖
@@ -50,11 +50,7 @@ title: 部署
   - 复制 `nginx.conf` 文件替换镜像的 nginx 配置文件
   - 执行 `nginx -s reload` 重新加载 nginx 配置
 
-:::tip
-参见 [Docker#Vue](/docs/reference/configuration/#vue)
-:::
-
-### Nuxt.js
+### Next.js
 
 - Node.js
   - 执行 `npm install` 安装依赖
@@ -66,10 +62,6 @@ title: 部署
   - 将编译完成后模块复制到 nginx 的模块目录
   - 复制 `nginx.conf` 文件替换镜像的 nginx 配置文件
   - 执行 `nginx -s reload` 重新加载 nginx 配置
-
-:::tip
-参见 [Docker#Nuxt.js](/docs/reference/configuration/#nuxt-js)
-:::
 
 ## 服务器架构推荐
 
