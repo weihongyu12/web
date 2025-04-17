@@ -994,8 +994,6 @@ module.exports = {
   </TabItem>
 </Tabs>
 
-
-
 ## stylelint
 
 :::tip
@@ -1102,23 +1100,20 @@ module.exports = {
 
 ## Docker
 
-### Vue
-
+<Tabs>
+  <TabItem value="react" label="React/Vue" default>
 ```dockerfile
 # Dockerfile
 
-# 安装依赖和构建
-FROM node:lts AS build
-WORKDIR /app
-COPY configuration /app
-RUN npm install
-RUN npm ci
-
 # 运行 nginx
 FROM nginx:stable AS deploy
-COPY --from=build /app/dist/ /usr/share/nginx/html/
-COPY --from=build /app/nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
+
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]
 ```
 
 :::note 最完整配置（包括 Brotli 和 ModSecurity）
@@ -1127,20 +1122,13 @@ EXPOSE 80
 # Dockerfile
 
 # nginx 使用最新的 stable 版本
-ARG NGINX_VERSION="1.20.2"
-
-# 安装依赖和构建
-FROM node:lts AS build
-WORKDIR /app
-COPY .. /app
-RUN yarn install --frozen-lock
-RUN yarn build
+ARG NGINX_VERSION="1.26.3"
 
 # 编译 nginx 模块，运行 nginx
 FROM nginx:stable-alpine AS deploy
 ARG SSDEEP_VERSION="2.14.1"
 ## OWASP® ModSecurity Core Rule Set(CRS) 使用最新的 release 版本
-ARG OWASP_CRS_VERSION="3.3.2"
+ARG OWASP_CRS_VERSION="4.13.0"
 ## 安装依赖
 RUN apk add \
      autoconf \
@@ -1255,29 +1243,74 @@ RUN wget --quiet https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
 RUN cp /nginx-${NGINX_VERSION}/objs/ngx_http_brotli_filter_module.so /usr/lib/nginx/modules/ \
     && cp /nginx-${NGINX_VERSION}/objs/ngx_http_brotli_static_module.so /usr/lib/nginx/modules/  \
     && cp /nginx-${NGINX_VERSION}/objs/ngx_http_modsecurity_module.so /usr/lib/nginx/modules/
+
 ## 部署代码
-COPY --from=build /app/docs/.vuepress/dist /usr/share/nginx/html/
-COPY --from=build /app/nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 443
 ```
 :::
-
-### Nuxt.js
-
+  </TabItem>
+  <TabItem value="next" label="Next.js">
 ```dockerfile
-# Dockerfile
+FROM node:lts-alpine AS base
 
-# 安装依赖和启动
-FROM node:lts AS build
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY . /app
-RUN npm install
-RUN npm install pm2 -g
-RUN pm2 start
-EXPOSE 8000
 
-# 运行 nginx
-FROM nginx:stable AS deploy
-COPY --from=build /app/nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
+
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+# ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN corepack enable pnpm && pnpm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+# ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
 ```
+  </TabItem>
+</Tabs>
+
+
+
