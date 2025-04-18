@@ -177,6 +177,9 @@ export default defineConfig({
 //
 // WebP格式转化（推荐）：
 // pnpm install imagemin-webp --save-dev
+//
+// AVIF格式转化（推荐，基于sharp）：
+// pnpm install sharp --save-dev
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 
 module.exports = {
