@@ -43,7 +43,7 @@ import TOCInline from '@theme/TOCInline';
 }
 ```
 
-## Webpack
+## Webpack/Vite
 
 :::tip
 - [https://webpack.js.org/configuration/](https://webpack.js.org/configuration/)
@@ -54,7 +54,7 @@ import TOCInline from '@theme/TOCInline';
 ```js
 // webpack.config.js
 
-// $ npm install @vue/preload-webpack-plugin --save-dev
+// $ pnpm install @vue/preload-webpack-plugin --save-dev
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 
 module.exports = {
@@ -82,7 +82,7 @@ module.exports = {
 ```js
 // webpack.config.js
 
-// $ npm install compression-webpack-plugin --save-dev
+// $ pnpm install compression-webpack-plugin --save-dev
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
@@ -111,10 +111,12 @@ module.exports = {
 
 ### Crossorigin & SRI 配置
 
+<Tabs>
+  <TabItem value="webpack" label="Webpack" default>
 ```js
 // webpack.config.js
 
-// $ npm install webpack-subresource-integrity --save-dev
+// $ pnpm install webpack-subresource-integrity --save-dev
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 
 module.exports = {
@@ -125,22 +127,56 @@ module.exports = {
   ],
 };
 ```
+  </TabItem>
+  <TabItem value="vite" label="Vite">
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
 
-### Imagemin 图片压缩配置
+// $ pnpm install vite-plugin-compression --save-dev
+import compression from 'vite-plugin-compression';
 
+export default defineConfig({
+  plugins: [
+    // brotli 预压缩
+    compression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
+    // gzip 预压缩
+    compression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'gzip',
+      ext: '.gz',
+    }),
+  ],
+});
+```
+  </TabItem>
+</Tabs>
+
+### Imagemin 图片压缩配置 & 图片格式转换配置
+
+<Tabs>
+  <TabItem value="webpack" label="Webpack" default>
 ```js
 // webpack.config.js
 
-// npm install image-minimizer-webpack-plugin imagemin sharp --save-dev
+// pnpm install image-minimizer-webpack-plugin imagemin sharp --save-dev
 //
 // 无损压缩（推荐）：
-// npm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --save-dev
+// pnpm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --save-dev
 //
 // 有损压缩：
-// npm install imagemin-gifsicle imagemin-mozjpeg imagemin-pngquant imagemin-svgo --save-dev
+// pnpm install imagemin-gifsicle imagemin-mozjpeg imagemin-pngquant imagemin-svgo --save-dev
 //
 // WebP格式转化（推荐）：
-// npm install imagemin-webp --save-dev
+// pnpm install imagemin-webp --save-dev
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 
 module.exports = {
@@ -206,22 +242,69 @@ module.exports = {
   },
 };
 ```
+  </TabItem>
+  <TabItem value="vite" label="Vite">
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
 
-## Babel
+// $ pnpm install vite-plugin-image-optimizer vite-imagetools svgo --save-dev
+import { ViteImageOptimizer as imageOptimizer } from 'vite-plugin-image-optimizer';
+import { imagetools } from 'vite-imagetools';
+import type { PluginConfig } from 'svgo';
 
-:::tip
-- [https://babeljs.io/docs/en/config-files](https://babeljs.io/docs/en/config-files)
-:::
+const svgoPlugins: PluginConfig[] = [
+  {
+    name: 'preset-default',
+    params: {
+      overrides: {
+        removeViewBox: false,
+      },
+    },
+  },
+  'sortAttrs',
+  {
+    name: 'addAttributesToSVGElement',
+    params: {
+      attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+    },
+  },
+];
 
-```js
-// vue.config.js
-
-const { defineConfig } = require('@vue/cli-service');
-
-module.exports = defineConfig({
-  transpileDependencies: true,
+export default defineConfig({
+  plugins: [
+    imagetools(),
+    imageOptimizer({
+      svg: {
+        multipass: true,
+        plugins: [...svgoPlugins],
+      },
+      avif: {
+        quality: 100,
+        lossless: true,
+      },
+      webp: {
+        quality: 100,
+        lossless: true,
+      },
+      png: {
+        quality: 100,
+        progressive: true,
+      },
+      jpeg: {
+        quality: 100,
+        progressive: true,
+      },
+      jpg: {
+        quality: 100,
+        progressive: true,
+      },
+    }),
+  ],
 });
 ```
+  </TabItem>
+</Tabs>
 
 ## Nginx
 
@@ -1023,7 +1106,7 @@ module.exports = {
 // vue.config.js
 
 const { defineConfig } = require('@vue/cli-service');
-// $ npm install stylelint-webpack-plugin --save-dev
+// $ pnpm install stylelint-webpack-plugin --save-dev
 const StylelintPlugin = require('stylelint-webpack-plugin');
 
 module.exports = defineConfig({
@@ -1072,7 +1155,7 @@ last 1 safari version
 ```
 
 :::tip
-支持的浏览器列表可通过运行 `npx browserslist` 查看
+支持的浏览器列表可通过访问 [https://browsersl.ist/](https://browsersl.ist/) 查看
 :::
 
 ## Jest
@@ -1092,9 +1175,9 @@ Jest 可使用 CRA 提供的默认配置，如需修改配置可修改 `jest.con
 ```js
 // commitlint.config.js
 
-// $ npm install @commitlint/cli @commitlint/config-angular --save-dev
+// $ pnpm install @commitlint/cli @commitlint/config-conventional --save-dev
 module.exports = {
-  extends: ['@commitlint/config-angular'],
+  extends: ['@commitlint/config-conventional'],
 };
 ```
 
@@ -1108,8 +1191,10 @@ module.exports = {
 # 运行 nginx
 FROM nginx:stable AS deploy
 
-COPY dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
+
+COPY dist /app/usr/share/nginx/html
+COPY nginx.conf /app/etc/nginx/nginx.conf
 
 EXPOSE 443
 
