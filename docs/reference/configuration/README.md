@@ -145,6 +145,8 @@ export default defineConfig({
 
 ### Crossorigin & SRI 配置
 
+<Tabs>
+  <TabItem value="webpack" label="Webpack" default>
 ```js
 // webpack.config.js
 
@@ -159,6 +161,27 @@ module.exports = {
   ],
 };
 ```
+  </TabItem>
+  <TabItem value="vite" label="Vite">
+```ts
+import { defineConfig } from 'vite';
+
+// $ pnpm install vite-plugin-sri --save-dev
+import sri from 'vite-plugin-sri';
+
+export default defineConfig({
+  plugins: [
+    sri({
+      algorithms: ['sha384'],
+      crossorigin: 'anonymous',
+      modulePreload: true,
+      assets: true,
+    }),
+  ],
+});
+```
+  </TabItem>
+</Tabs>
 
 ### Imagemin 图片压缩配置 & 图片格式转换配置
 
@@ -1399,6 +1422,3 @@ CMD ["node", "server.js"]
 ```
   </TabItem>
 </Tabs>
-
-
-
