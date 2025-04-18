@@ -79,6 +79,8 @@ module.exports = {
 
 ### Brotli & Gzip 预压缩配置
 
+<Tabs>
+  <TabItem value="webpack" label="Webpack" default>
 ```js
 // webpack.config.js
 
@@ -104,25 +106,6 @@ module.exports = {
       compressionOptions: { level: 9 },
       threshold: 10240,
       minRatio: 0.8,
-    }),
-  ],
-};
-```
-
-### Crossorigin & SRI 配置
-
-<Tabs>
-  <TabItem value="webpack" label="Webpack" default>
-```js
-// webpack.config.js
-
-// $ pnpm install webpack-subresource-integrity --save-dev
-const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
-
-module.exports = {
-  plugins: [
-    new SubresourceIntegrityPlugin({
-      hashFuncNames: ['sha384'],
     }),
   ],
 };
@@ -159,6 +142,23 @@ export default defineConfig({
 ```
   </TabItem>
 </Tabs>
+
+### Crossorigin & SRI 配置
+
+```js
+// webpack.config.js
+
+// $ pnpm install webpack-subresource-integrity --save-dev
+const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
+
+module.exports = {
+  plugins: [
+    new SubresourceIntegrityPlugin({
+      hashFuncNames: ['sha384'],
+    }),
+  ],
+};
+```
 
 ### Imagemin 图片压缩配置 & 图片格式转换配置
 
