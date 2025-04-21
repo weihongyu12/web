@@ -10,27 +10,28 @@ description: 架构指南和总览
 
 ## 总览
 
-| 特性/平台         | C端 - PC端          | C端 - 移动端（React）   | C端 - 移动端（Vue）          | B端 - PC端                |
-|---------------|-------------------|-------------------|------------------------|-------------------------|
-| 框架            | Next.js           | Next.js           | Vue                    | React（基于Ant Design Pro） |
-| 打包工具          | RSpack            | RSpack            | Vite                   | Umi Max                 |
-| UI 组件/框架      | Tailwind CSS      | Tailwind CSS      | Tailwind CSS           | Ant Design Pro          |
-| 路由            | -                 | -                 | Vue Router             | Umi Router              |
-| 路由模式          | history           | history           | hash                   | hash                    |
-| 状态管理          | -                 | -                 | Pinia                  | Zustand                 |
-| TypeScript    | ✔️                | ✔️                | ✔️                     | ✔️                      |
-| ESLint        | airbnb            | airbnb            | @vue/airbnb-typescript | airbnb                  |
-|               | airbnb-typescript | airbnb-typescript | vue3/recommended       | airbnb-typescript       |
-|               | next/recommended  | next/recommended  |                        |                         |
-| Sass          | ✔️                | ✔️                | ✔️                     | ✔️                      |
-| stylelint     | Bootstrap         | Bootstrap         | Bootstrap              | Bootstrap               |
-| HTML Validate | ✔️                | ✔️                | ✔️                     | ❌                       |
-| PWA           | ✔️                | ✔️                | ✔️                     | ✔️                      |
-| SSR           | ✔️                | ✔️                | ❌                      | ❌                       |
-| Electron      | ❌                 | ❌                 | ❌                      | ✔️                      |
-| Capacitor     | ❌                 | ❌                 | ✔️                     | ❌                       |
-| 单元测试          | Jest              | Jest              | Vitest                 | Jest                    |
-| E2E测试         | Playwright        | Playwright        | Playwright             | Playwright              |
+| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端                |
+|---------------|-----------------------|-----------------------|------------------------|-------------------------|
+| 框架            | Next.js               | Next.js               | Vue                    | React（基于Ant Design Pro） |
+| 打包工具          | RSpack                | RSpack                | Vite                   | Umi Max                 |
+| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro          |
+| 路由            | -                     | -                     | Vue Router             | Umi Router              |
+| 路由模式          | history               | history               | hash                   | hash                    |
+| 状态管理          | -                     | -                     | Pinia                  | Zustand                 |
+| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
+| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                  |
+|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript       |
+|               | next/recommended      | next/recommended      |                        |                         |
+| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
+| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap               |
+| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                       |
+| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
+| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                       |
+| Electron      | ❌                     | ❌                     | ❌                      | ✔️                      |
+| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                       |
+| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                    |
+| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library   |
+| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright              |
 
 
 - 严格的代码检查工具，提升代码维护性：包括 ESLint、stylelint 和 HTML Validate
@@ -72,20 +73,22 @@ description: 架构指南和总览
 
 ### JS 库
 
-| 包名                                                        | 作用                                                                                 |
-|-----------------------------------------------------------|------------------------------------------------------------------------------------|
-| [async-es](https://caolan.github.io/async/v3/)            | 异步函数功能函数，提供类似 map、reduce、filter 等功能，同时提供 parallel、series、waterfall、queue 等常见的异步控制流 |
-| [axios](https://axios-http.com/)                          | HTTP 客户端，XmlHttpRequest API 的封装                                                    |
-| [crypto-js](http://github.com/brix/crypto-js)             | 实现 MD5、SHA1、RSA 等常用加密算法                                                            |
-| [date-fns](https://date-fns.org/)                         | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
-| [js-cookie](https://github.com/js-cookie/js-cookie)       | 浏览器cookie操作                                                                        |
-| [localforage](https://localforage.github.io/localForage/) | 浏览器本地存储（IndexedDB、Storage、~~WebSQL~~），常用于IndexedDB的操作                              |
-| [lodash](https://lodash.com/)                             | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
-| [mathjs](https://mathjs.org/)                             | JS 数学计算函数，能有效避免 JS 数学计算中可能出现的数值精度问题                                                |
-| [nzh](http://cnwhy.github.io/nzh)                         | 实现数值转中文大写字符功能                                                                      |
-| [print-js](http://printjs.crabbly.com/)                   | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
-| [qs](https://github.com/ljharb/qs)                        | 序列化和反序列化 querystring                                                               |
-| [zod](https://zod.dev/)                       | 数据验证库，用于验证、转换数据结构                                                               |
+| 包名                                                                               | 作用                                                                                 |
+|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [@braintree/sanitize-url](https://www.npmjs.com/package/@braintree/sanitize-url) | 适用于 Url 的 XSS 清理器，用于防御针对 Url 的 XSS 攻击                                              |
+| [async-es](https://caolan.github.io/async/v3/)                                   | 异步函数功能函数，提供类似 map、reduce、filter 等功能，同时提供 parallel、series、waterfall、queue 等常见的异步控制流 |
+| [axios](https://axios-http.com/)                                                 | HTTP 客户端，XmlHttpRequest API 的封装                                                    |
+| [crypto-js](http://github.com/brix/crypto-js)                                    | 实现 MD5、SHA1、RSA 等常用加密算法                                                            |
+| [date-fns](https://date-fns.org/)                                                | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
+| [dompurify](https://www.npmjs.com/package/dompurify)                             | 适用于 DOM 的 XSS 清理器，用于防御针对 HTML 的 XSS 攻击                                             |
+| [js-cookie](https://github.com/js-cookie/js-cookie)                              | 浏览器cookie操作                                                                        |
+| [localforage](https://localforage.github.io/localForage/)                        | 浏览器本地存储（IndexedDB、Storage、~~WebSQL~~），常用于IndexedDB的操作                              |
+| [lodash](https://lodash.com/)                                                    | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
+| [mathjs](https://mathjs.org/)                                                    | JS 数学计算函数，能有效避免 JS 数学计算中可能出现的数值精度问题                                                |
+| [nzh](http://cnwhy.github.io/nzh)                                                | 实现数值转中文大写字符功能                                                                      |
+| [print-js](http://printjs.crabbly.com/)                                          | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
+| [qs](https://github.com/ljharb/qs)                                               | 序列化和反序列化 querystring                                                               |
+| [zod](https://zod.dev/)                                                          | 数据验证库，用于验证、转换数据结构                                                                  |
 
 ## 关注点
 
