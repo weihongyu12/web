@@ -19,19 +19,14 @@ flowchart TD
     A[开始请求] --> B{匹配 Service Worker Cache?}
     
     B -- 是 --> C[从 Service Worker Cache 获取]
-    C --> Z[结束]
+    C --> Z[浏览器渲染]
     
     B -- 否 --> D{匹配 HTTP/2 Push Cache?}
     D -- 是 --> E[从 Push Cache 获取]
     E --> Z
     
     D -- 否 --> F[进入 HTTP Cache 流程]
-    F --> G{缓存是否有效?}
-    G -- 是 --> H[从 HTTP Cache 获取]
-    G -- 否 --> I[执行缓存验证或发送网络请求]
-    
-    H --> Z
-    I --> Z
+    F --> Z
 ```
 
 通过网络获取内容既速度缓慢又开销巨大。较大的响应需要在客户端与服务器之间进行多次往返通信，这会延迟浏览器获得和处理内容的时间，还会增加访问者的流量费用。因此，HTTP 缓存并重复利用之前获取的资源的能力成为性能优化的一个关键方面。
@@ -47,7 +42,7 @@ HTTP 缓存的优先级如下：
 Service Worker Cache 实际上是 [Service Worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API) 和 [CacheStorage API](https://developer.mozilla.org/zh-CN/docs/Web/API/CacheStorage) 两项技术。Service Worker 允许用户拦截网络请求，并通过 CacheStorage API 有条件的将项目存储在一个特殊的缓存中。此缓存与浏览器的本地缓存分开，使用它即可在用户出于弱网络（甚至离线）时，从 CacheStorage 缓存向用户提供内容。还可以使用这个特殊时期的缓存提高渲染性能。
 
 :::tip
-Service Worker Cache 实际上是 PWA 的一个功能，有一个库 [Workbox](https://developers.google.com/web/tools/workbox) 可以实现此功能。在 Vue 项目中可以使用 [PWA 插件](https://cli.vuejs.org/zh/config/#pwa) 来开启 Workbox。
+Service Worker Cache 实际上是 PWA 的一个功能，有一个库 [Workbox](https://developers.google.com/web/tools/workbox) 可以实现此功能。
 :::
 
 #### HTTP/2 Push Cache
