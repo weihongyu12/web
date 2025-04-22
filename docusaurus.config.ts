@@ -156,6 +156,11 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
 
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
+
   future: {
     experimental_faster: true,
   },
