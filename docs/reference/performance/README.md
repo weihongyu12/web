@@ -14,27 +14,71 @@ import TOCInline from '@theme/TOCInline';
 
 ### HTTP 缓存
 
+```mermaid
+flowchart TD
+    A[开始请求] --> B{匹配 Service Worker Cache?}
+    
+    B -- 是 --> C[从 Service Worker Cache 获取]
+    C --> Z[结束]
+    
+    B -- 否 --> D{匹配 HTTP/2 Push Cache?}
+    D -- 是 --> E[从 Push Cache 获取]
+    E --> Z
+    
+    D -- 否 --> F[进入 HTTP Cache 流程]
+    F --> G{缓存是否有效?}
+    G -- 是 --> H[从 HTTP Cache 获取]
+    G -- 否 --> I[执行缓存验证或发送网络请求]
+    
+    H --> Z
+    I --> Z
+```
+
 通过网络获取内容既速度缓慢又开销巨大。较大的响应需要在客户端与服务器之间进行多次往返通信，这会延迟浏览器获得和处理内容的时间，还会增加访问者的流量费用。因此，HTTP 缓存并重复利用之前获取的资源的能力成为性能优化的一个关键方面。
 
 HTTP 缓存的优先级如下：
 
 - Service Worker Cache
+- HTTP/2 Push Cache
 - HTTP Cache
-- Push Cache
 
 #### Service Worker Cache
 
 Service Worker Cache 实际上是 [Service Worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API) 和 [CacheStorage API](https://developer.mozilla.org/zh-CN/docs/Web/API/CacheStorage) 两项技术。Service Worker 允许用户拦截网络请求，并通过 CacheStorage API 有条件的将项目存储在一个特殊的缓存中。此缓存与浏览器的本地缓存分开，使用它即可在用户出于弱网络（甚至离线）时，从 CacheStorage 缓存向用户提供内容。还可以使用这个特殊时期的缓存提高渲染性能。
 
-![Service Worker Cache](assets/service-worker-cache.svg)
-
 :::tip
 Service Worker Cache 实际上是 PWA 的一个功能，有一个库 [Workbox](https://developers.google.com/web/tools/workbox) 可以实现此功能。在 Vue 项目中可以使用 [PWA 插件](https://cli.vuejs.org/zh/config/#pwa) 来开启 Workbox。
 :::
 
+#### HTTP/2 Push Cache
+
+次高优先级，仅在HTTP/2连接中可用。存在于会话期间，会话结束后被清除，存储由服务器推送但尚未被请求的资源，生命周期短暂，仅在页面会话期间有效，不会被写入磁盘，只存在于内存中。
+
 #### HTTP Cache
 
-![HTTP Cache](assets/http-cache.svg)
+```mermaid
+flowchart TD
+    A[开始请求] --> F{Cache-Control/Expires是否过期?}
+    F -- 否 --> G[从浏览器缓存读取 From Cache]
+    G --> Z[浏览器渲染]
+    
+    F -- 是 --> H{是否有ETag?}
+    H -- 是 --> I[带If-None-Match 向服务器请求]
+    I --> N{服务器决策}
+    
+    H -- 否 --> J{是否有Last-Modified?}
+    J -- 是 --> K[带If-Modified-Since 向服务器请求]
+    K --> N
+    
+    J -- 否 --> L[向服务器请求]
+    L --> N
+    
+    N -- 304无更新 --> O[从缓存读取]
+    N -- 200有更新 --> P[更新缓存并返回新响应]
+    
+    O --> Z
+    P --> Z
+```
 
 ##### Cache-Control
 
@@ -55,10 +99,6 @@ Service Worker Cache 实际上是 PWA 的一个功能，有一个库 [Workbox](h
 [Last-Modified](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Last-Modified) 响应头可以作为一种弱校验器。说它弱是因为它只能精确到一秒。如果响应头里含有这个信息，客户端可以在后续的请求中带上 [If-Modified-Since](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/If-Modified-Since) 来验证缓存。
 
 当向服务端发起缓存校验的请求时（缓存协商），服务端会返回 200 ok表示返回正常的结果或者 304 Not Modified(不返回body)表示浏览器可以使用本地缓存文件。304的响应头也可以同时更新缓存文档的过期时间。
-
-#### Push Cache
-
-Push Cache 是指 HTTP2 在 server push 阶段存在的缓存。
 
 ### HTTP 压缩
 
