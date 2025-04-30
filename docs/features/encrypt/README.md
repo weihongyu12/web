@@ -1,5 +1,11 @@
 # 敏感数据加密
 
+对敏感数据采用AES加密传输，避免数据泄露
+
+:::warning
+采用AES加密传输属于**纵深防御**，在传输数据时，应该确保**优先使用HTTPS**
+:::
+
 ```mermaid
 sequenceDiagram
     participant 前端
