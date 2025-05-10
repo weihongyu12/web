@@ -90,24 +90,24 @@ const config: Config = {
           position: 'left',
           label: '参考',
         },
+        // {
+        //   type: 'docSidebar',
+        //   sidebarId: 'deploySidebar',
+        //   position: 'left',
+        //   label: '部署',
+        // },
         {
           type: 'docSidebar',
-          sidebarId: 'deploySidebar',
+          sidebarId: 'pipelineSidebar',
           position: 'left',
-          label: '部署',
+          label: '流水线',
         },
-        // {
-        //   type: 'docSidebar',
-        //   sidebarId: 'pipelineSidebar',
-        //   position: 'left',
-        //   label: '流水线',
-        // },
-        // {
-        //   type: 'docSidebar',
-        //   sidebarId: 'featuresSidebar',
-        //   position: 'left',
-        //   label: '功能设计',
-        // },
+        {
+          type: 'docSidebar',
+          sidebarId: 'featuresSidebar',
+          position: 'left',
+          label: '功能设计',
+        },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/facebook/docusaurus',
