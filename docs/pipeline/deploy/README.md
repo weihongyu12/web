@@ -38,6 +38,12 @@ title: 部署
 |         | 执行 `nginx -s reload` 重新加载 nginx 配置                                         | ✔️        | ✔️      |
 |         | 启动 nginx                                                                   | ✔️        | ✔️      |
 
+:::warning
+- 安装依赖和构建项目的步骤，均在 Gitlab CI 中执行，不需要配置在 Dockerfile 中
+- Dockerfile 仅需要配置 nginx 的相关步骤
+  - 如果需要使用 Node.js 启动服务，则需要在 Dockerfile 中配置 Node.js 的相关步骤，并运行 Node.js 服务。此时，需要使用 `docker-compose` 来启动服务，并配置 nginx 的反向代理
+    :::
+
 ### 前端构建优化
 
 构建过程中应注意以下前端优化点：
@@ -56,14 +62,8 @@ title: 部署
 
 3. **框架特定优化**
    - **React**: 启用懒加载组件、使用 `React.memo()` 减少重渲染
-   - **Vue**: 启用异步组件、适当使用 keep-alive
+   - **Vue**: 启用异步组件、适当使用 `keep-alive`
    - **Next.js**: 优化图片处理、配置合适的渲染策略（SSG/ISR/SSR）
-
-:::warning
-- 安装依赖和构建项目的步骤，均在 Gitlab CI 中执行，不需要配置在 Dockerfile 中
-- Dockerfile 仅需要配置 nginx 的相关步骤
-  - 如果需要使用 Node.js 启动服务，则需要在 Dockerfile 中配置 Node.js 的相关步骤，并运行 Node.js 服务。此时，需要使用 `docker-compose` 来启动服务，并配置 nginx 的反向代理
-:::
 
 ## 部署验证与回滚
 
