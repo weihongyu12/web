@@ -72,7 +72,7 @@ git push origin pre-production --tags
 # GitLab Runner 检测到 pre-production 分支更新，执行部署脚本
 ```
 
-#### 合并到预生产环境（production）
+#### 合并到生产环境（production）
 
 预发布环境测试通过后，合并到生产环境（production）
 
@@ -97,9 +97,9 @@ git checkout production
 git checkout -b hotfix/v1.2.1
 
 # 修复问题并提交
-echo "Emergency fix" >> hotfix.txt
+echo "紧急修复" >> hotfix.txt
 git add hotfix.txt
-git commit -m "Fix critical bug in production"
+git commit -m "fix: 修复生产环境中的关键登录错误"
 
 # 合并到 production 和 main
 git checkout production
@@ -109,7 +109,7 @@ git checkout main
 git merge hotfix/v1.2.1 --no-ff
 
 # 打新版本标签（例如 v1.2.1）
-git tag -a v1.2.1 -m "Hotfix release v1.2.1"
+git tag -a v1.2.1 -m "热修复版本 v1.2.1"
 git push origin production --tags
 git push origin main
 ```
@@ -166,8 +166,8 @@ git push origin v1.2  # 推送版本分支到远程仓库
 ```bash
 git checkout v1.2
 # 进行版本特定的修复和调整
-git commit -m "调整配置为生产环境"
-git commit -m "版本文档更新"
+git commit -m "chore: 调整配置为生产环境参数"
+git commit -m "docs: 更新版本说明文档"
 git push origin v1.2
 ```
 
@@ -177,7 +177,7 @@ git push origin v1.2
 
 ```bash
 git checkout v1.2
-git tag -a v1.2.0 -m "Release version 1.2.0"
+git tag -a v1.2.0 -m "发布版本 1.2.0"
 git push origin v1.2.0  # 推送标签到远程仓库
 
 # CI/CD 可以配置为检测到标签后自动构建和发布
@@ -193,15 +193,15 @@ git checkout v1.2
 git checkout -b bugfix/v1.2-login-issue
 
 # 修复问题并提交
-git commit -m "Fix login issue in v1.2"
+git commit -m "fix: 修复v1.2中的用户登录问题"
 git push origin bugfix/v1.2-login-issue
 
-# 创建���并请求到v1.2分支
+# 创建合并请求到v1.2分支
 # 审核通过后合并到v1.2分支
 
 # 合并修复后，更新版本号并打标签
 git checkout v1.2
-git tag -a v1.2.1 -m "Release version 1.2.1 with login fix"
+git tag -a v1.2.1 -m "发布版本 1.2.1，修复登录问题"
 git push origin v1.2.1
 ```
 
@@ -220,16 +220,16 @@ gitGraph
     checkout v1.1
     commit id: "v1.1.0发布"
     checkout main
-    commit id: "新功能开发"
+    commit id: "feat: 添加新功能"
     branch v1.2
     checkout v1.2
     commit id: "v1.2.0发布"
     checkout main
-    commit id: "修复安全漏洞" type: HIGHLIGHT
+    commit id: "fix: 修复安全漏洞" type: HIGHLIGHT
     checkout v1.2
-    commit id: "cherry-pick安全修复" type: REVERSE
+    commit id: "fix: cherry-pick安全修复" type: REVERSE
     checkout v1.1
-    commit id: "cherry-pick安全修复" type: REVERSE
+    commit id: "fix: cherry-pick安全修复" type: REVERSE
 ```
 
 执行cherry-pick的操作流程：
@@ -245,14 +245,14 @@ git cherry-pick abc1234
 # 解决可能出现的冲突
 git add .
 git cherry-pick --continue
-git tag -a v1.2.1 -m "Release v1.2.1 with security fix"
+git tag -a v1.2.1 -m "发布版本 v1.2.1，包含安全修复"
 git push origin v1.2 --tags
 
 # 对旧版本也执行相同操作
 git checkout v1.1
 git cherry-pick abc1234
 # 解决可能的冲突
-git tag -a v1.1.2 -m "Release v1.1.2 with security fix" 
+git tag -a v1.1.2 -m "发布版本 v1.1.2，包含安全修复" 
 git push origin v1.1 --tags
 ```
 
@@ -278,7 +278,7 @@ git push origin main
 当开发下一个版本时：
 
 ```bash
-git checkout main  # 从主分支创建��版本分支
+git checkout main  # 从主分支创建新版本分支
 git pull origin main
 git checkout -b v1.3
 git push origin v1.3
@@ -310,7 +310,7 @@ Commit 提交规范使用[约定式提交](https://www.conventionalcommits.org/z
 - `BREAKING CHANGE:` 在脚注中包含 `BREAKING CHANGE:` 或 `<类型>(范围)` 后面有一个 `!` 的提交，表示引入了破坏性 API 变更。 破坏性变更可以是任意 类型 提交的一部分。
 - 除 `fix:` 和 `feat:` 之外，也可以使用其它提交 类型 ，例如 @commitlint/config-conventional（基于 Angular 约定）中推荐的 `build:`、`chore:`、 `ci:`、`docs:`、`style:`、`refactor:`、`perf:`、`test:`，等等。
   - `build:` 用于修改项目构建系统，例如修改依赖库、外部接口或者升级 Node 版本等；
-  - `chore:` 用于对非业务性代码进行修改，例如修改构建��程或者工具配置等；
+  - `chore:` 用于对非业务性代码进行修改，例如修改构建过程或者工具配置等；
   - `ci:` 用于修改持续集成流程，例如修改 Travis、Jenkins 等工作流配置；
   - `docs:` 用于修改文档，例如修改 README 文件、API 文档等；
   - `style:` 用于修改代码的样式，例如调整缩进、空格、空行等；
