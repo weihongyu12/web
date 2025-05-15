@@ -14,4 +14,4 @@ Work In Progress
 - [x] 测试：单元测试、E2E、集成测试等
 - [ ] 部署：CI/CD、多环境部署、回滚策略
 - [x] 监控：监控工具、日志、报警机制
-- [ ] 文档：JSDoc、Swagger API 文档、组件库文档
+- [x] 文档：JSDoc、Open API 文档、组件库文档
