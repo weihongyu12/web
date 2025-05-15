@@ -6,10 +6,6 @@ title: 部署
 
 # 部署
 
-:::warning
-本章内容没有真正的实践过，仅提供理论支持，在实践过程中请注意是否能正确部署
-:::
-
 ## 项目构建和环境部署
 
 使用 **Docker** 进行项目构建和环境部署，所有的构建和部署操作，均在 **Gitlab CI** 执行操作。
@@ -19,50 +15,34 @@ title: 部署
 - [Node.js](https://nodejs.org/)：用于安装依赖、构建和启动
 - [nginx](https://nginx.org/)：作为 HTTP 服务器，或者充当的反向代理
 
-构建和部署时，注意检查下列配置：
+| 镜像      | 步骤                                                                         | React/Vue | Next.js |
+|---------|----------------------------------------------------------------------------|-----------|---------|
+| Node.js | 执行 `pnpm i --frozen-lockfile` 安装依赖                                         | ✔️        | ✔️      |
+|         | 执行 `npm run build` 构建项目                                                    | ✔️        | ✔️      |
+|         | 构建完成后生成 `/dist` 目录                                                         | ✔️        |         |
+|         | 将静态资源文件上传至 CDN/OSS 存储                                                      | ✔️        | ✔️      |
+|         | 执行 `npm run start` 启动 Node.js 服务                                           |           | ✔️      |
+| nginx   | 编译 [Brotli nginx 模块](https://github.com/google/ngx_brotli)                 | ✔️        | ✔️      |
+|         | 编译 [ModSecurity nginx 模块](https://github.com/SpiderLabs/ModSecurity-nginx) | ✔️        | ✔️      |
+|         | 将编译完成后模块复制到 nginx 的模块目录                                                    | ✔️        | ✔️      |
+|         | 复制 `/dist` 目录到 nginx 的服务器目录                                                | ✔️        |         |
+|         | 复制 `nginx.conf` 文件替换镜像的 nginx 配置文件                                         | ✔️        | ✔️      |
+|         | 更新 nginx 配置以使用 CDN/OSS 域名作为静态资源引用                                          | ✔️        | ✔️      |
+|         | 执行 `nginx -s reload` 重新加载 nginx 配置                                         | ✔️        | ✔️      |
+|         | 启动 nginx                                                                   | ✔️        | ✔️      |
 
-- Node.js：推荐使用 LTS 版本
-  - 优先使用现代模式构建依赖
-- nginx：推荐使用 stable 版本
-  - 配置路由伪静态（History 路由模式专属）
-  - 配置 HTTP 缓存
-  - 配置 Gzip 压缩
-  - 配置 Brotli 压缩
-  - 配置 HTTP 安全 Header
-  - 配置 HTTPS
-  - 配置 [ModSecurity](https://github.com/SpiderLabs/ModSecurity) 防火墙（可选）
-  - 配置反向代理（Next.js 项目专属）
-
-:::tip
-参见 [nginx 配置](/docs/reference/configuration/#nginx)
+:::warning
+- 安装依赖和构建项目的步骤，均在 Gitlab CI 中执行，不需要配置在 Dockerfile 中
+- Dockerfile 仅需要配置 nginx 的相关步骤
+  - 如果需要使用 Node.js 启动服务，则需要在 Dockerfile 中配置 Node.js 的相关步骤，并运行 Node.js 服务。此时，需要使用 `docker-compose` 来启动服务，并配置 nginx 的反向代理
 :::
 
-### React/Vue
+:::tip
+- [nginx 配置](/docs/reference/configuration/#nginx)
+- [Docker 配置](/docs/reference/configuration/#docker)
+:::
 
-- Node.js
-  - 执行 `npm install` 安装依赖
-  - 执行 `npm run build` 构建项目
-  - 构建完成后生成 `/dist` 目录
-- nginx
-  - 编译 [Brotli nginx 模块](https://github.com/google/ngx_brotli)
-  - 编译 [ModSecurity nginx 模块](https://github.com/SpiderLabs/ModSecurity-nginx)（可选）
-  - 将编译完成后模块复制到 nginx 的模块目录
-  - 复制 `/dist` 目录到 nginx 的服务器目录
-  - 复制 `nginx.conf` 文件替换镜像的 nginx 配置文件
-  - 执行 `nginx -s reload` 重新加载 nginx 配置
 
-### Next.js
-
-- Node.js
-  - 执行 `npm install` 安装依赖
-  - 执行 `npm install -g pm2` 安装 [PM2](https://pm2.keymetrics.io/)
-  - 执行 `pm2 start` 启动项目
-- nginx
-  - 编译 [Brotli nginx 模块](https://github.com/google/ngx_brotli)
-  - 编译 [ModSecurity nginx 模块](https://github.com/SpiderLabs/ModSecurity-nginx)（可选）
-  - 将编译完成后模块复制到 nginx 的模块目录
-  - 复制 `nginx.conf` 文件替换镜像的 nginx 配置文件
-  - 执行 `nginx -s reload` 重新加载 nginx 配置
 
 ## 服务器架构推荐
 
@@ -93,3 +73,4 @@ title: 部署
 ### 数据层
 
 （数据层不是前端关注的重点，这里不做说明）
+
