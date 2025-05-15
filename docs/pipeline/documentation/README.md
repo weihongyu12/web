@@ -159,5 +159,3 @@ RESTful API 文档推荐使用 [Open API](https://www.openapis.org/)，Open API�
 - ...
 
 这些文档可以使用 Markdown 格式编写，并使用 [GitLab Wiki](https://docs.gitlab.com/ee/user/project/wiki/)，方便团队成员查阅和维护。
-
-`
