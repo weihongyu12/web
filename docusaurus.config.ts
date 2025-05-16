@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: '老魏的工作笔记',
-  tagline: 'Dinosaurs are cool',
+  tagline: '前端架构与开发最佳实践',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -90,12 +90,6 @@ const config: Config = {
           position: 'left',
           label: '参考',
         },
-        // {
-        //   type: 'docSidebar',
-        //   sidebarId: 'deploySidebar',
-        //   position: 'left',
-        //   label: '部署',
-        // },
         {
           type: 'docSidebar',
           sidebarId: 'pipelineSidebar',
