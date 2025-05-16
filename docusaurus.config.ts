@@ -102,6 +102,11 @@ const config: Config = {
           position: 'left',
           label: '功能设计',
         },
+        {
+          to: '/docs/support',
+          position: 'left',
+          label: '支持',
+        },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/facebook/docusaurus',
