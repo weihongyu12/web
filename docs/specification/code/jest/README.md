@@ -4,6 +4,10 @@ sidebar_position: 9
 
 # Jest 规范
 
+:::warning
+在编写 Jest 代码时，可以适当关闭一些规则，避免过于严格的检查影响开发效率。但是，仍然鼓励遵循这些规范，以提高代码质量和可维护性。
+:::
+
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |---------|---------|---------|-----|
 | [`jest/expect-expect`](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/expect-expect.md) | warn | - | 强制在测试中至少有一个 `expect` 断言 |

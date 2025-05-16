@@ -4,382 +4,186 @@ sidebar_position: 1
 
 # 代码规范
 
-## HTML
+本文档集合定义了项目中所有编程语言和框架的代码规范，旨在保证代码质量、提高团队协作效率、降低维护成本。每个开发者都应当熟悉并遵循这些规范。
 
-:::warning
-HTML 目前可以暂时参照 [此规范](https://codeguide.bootcss.com/#html)，后续会根据实际需要进行调整。
-:::
+## 通用原则
 
-### 注重标签语义化
+无论使用何种语言或框架，以下原则适用于所有代码：
 
-:::tip
-HTML代码会使用 [`html-validate:recommended`](https://html-validate.org/) 进行检验，特别是 SSR 的场景下
-:::
+1. **一致性** - 遵循团队已有的代码风格和约定
+2. **可读性** - 编写易于理解和维护的代码
+3. **简洁性** - 避免冗余和重复代码
+4. **可测试性** - 编写便于测试的代码结构
+5. **可扩展性** - 设计灵活、可扩展的代码架构
 
-HTML 标签语义化是 Web 标准化的重要一环。也是标准定制时重要的设计原则。页面标签语义化的优点很明显，标签语义化是的诸如搜索引擎以及第三方内容抓取工具等更容易读懂页面代码。机器不会关注页面实际的渲染外观，只会关注页面内容本身，页面渲染的美观与否对机器识别毫无帮助。标签语义化也提高了页面代码的可读性，有利于代码阅读者理解代码对应的模块。
+## 规范执行工具
 
-### 减少 DOM 结构
+项目使用多种工具自动执行规范检查：
 
-页面的 HTML 代码越多，整个页面维护起来就越难。同时还影响 DOM 的渲染。减少 DOM 结构，精简 HTML 代码以为了减少网络的传输，加快页面的渲染速度。通常可以通过以下方式达到精简 DOM 结构的目的：
+- **[ESLint](https://eslint.org/)** - JavaScript/TypeScript 代码检查
+- **[Stylelint](https://stylelint.io/)** - CSS/Sass 代码检查
+- **[html-validate](https://html-validate.org/)** - HTML 代码检查
+- **[Prettier](https://prettier.io/)** - 代码格式化
+- **[husky](https://typicode.github.io/husky/)/[lint-staged](https://github.com/lint-staged/lint-staged)** - 提交前代码检查
 
-- 删除多余的容器
-- 使用 CSS 样式替代
+每个规范文档中都详细说明了相关工具配置和使用方法。
 
-### HTML Validate 规则参考
+## 规范概览
 
-在项目中会使用 `html-validate:recommended` 作为 HTML 代码检查，点击这里可以查看详细的 [HTML 规则](/docs/specification/code/html)
+以下是各类技术栈的规范文档：
 
-## CSS
+### HTML
 
-:::warning
-CSS 和 Sass 将会使用 stylelint 进行代码检查，配置为 `stylelint-config-twbs-bootstrap`，由于 Bootstrap 没有提供文档参考，所以暂时使用 Airbnb CSS 文档，因此可能存在文档与实际校验规则不一致的情况，本段落可能根据配置进行更新。
+HTML 规范专注于标签语义化和优化 DOM 结构，确保页面代码的可读性和可访问性：
 
-CSS 目前可以暂时参照 [此规范](https://codeguide.bootcss.com/#css)，后续会根据实际需要进行调整。
-:::
+- 强调语义化标签使用（如 `<article>`, `<section>`, `<nav>` 等）
+- 减少不必要的 DOM 层级，优化页面性能
+- 遵循 `html-validate:recommended` 标准进行验证
+- 确保正确的元素嵌套关系和属性使用
+- 标签闭合和属性格式的一致性
 
-### 格式
+[查看 HTML 规范详情](./html/)
 
-- 使用 2 空格进行缩进
-- 使用中划线命名(kebab-case)
-  - 如果使用 BEM，下划线(snake_case)和大写开头(PascalCase)没问题
-- 不要使用ID选择器
-- 在规则声明中使用多个选择器时，为每个选择器指定一行
-- 在规则声明之间放置空行
-- `{` 在规则声明中的左大括号之前放置一个空格
-- 在属性中，在 `:` 字符之后放置一个空格
-- 将 `}` 规则声明的右大括号放在新行上
+### CSS
 
-:::danger 反面例子 👎
-```css
-.avatar{
-  border-radius:50%;
-  border:2px solid white; }
-.no, .nope, .not_good {
-    /* ... */
-}
-#lol-no {
-  /* ... */
-}
-```
-:::
+CSS 规范基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织和性能优化：
 
-:::tip 正面例子 👍
-```css
-.avatar {
-  border-radius: 50%;
-  border: 2px solid white;
-}
+- 使用 CSS 命名规范（如 BEM 或 OOCSS）
+- 避免过度特定的选择器，减少选择器嵌套
+- 优先使用类选择器而非标签或属性选择器
+- 避免使用 `!important`
+- 采用简写属性提高代码简洁性
+- 遵循移动优先的响应式设计原则
 
-.one,
-.selector,
-.per-line {
-  /* ... */
-}
-```
-:::
-
-### 注释
-
-- 使用行注释而不是块注释。
-- 在的行前进行注释。
-- 避免行尾注释。
-- 为特定用途的代码编写详细的注释：
-  - z-index 的用途
-  - 兼容性或特定于浏览器的 Hack 代码
-
-:::danger 反面例子 👎
-```css
-/*
- * 块注释
- */
-.avatar {
-  border-radius: 50%; /* 行尾注释 */
-  border: 2px solid white;
-}
-```
-:::
-
-:::tip 正面例子 👍
-```css
-/* 选择器行注释 */
-.avatar {
-  /* 属性行注释 */
-  border-radius: 50%;
-  border: 2px solid white;
-}
-
-```
-:::
-
-### OOCSS 和 BEM
-
-出于以下原因，推荐鼓励 OOCSS 和 BEM：
-
-- 有助于在 CSS 和 HTML 之间创建清晰、严格的关系
-- 帮助我们创建可重用、可组合的组件
-- 允许更少的嵌套和更低的特异性
-- 有助于构建可扩展的样式表
-
-**OOCSS**（Object Oriented CSS，面向对象 CSS），是一种编写 CSS 的方法，鼓励将样式表视为”对象“的集合：可在整个网站中独立使用的可重用、可重复的片段。
-
-**BEM**（Block-Element-Modifier，块元素修饰符）是HTML 和 CSS 中类的命名约定。考虑到大型代码库和可扩展性，可以作为一套实现 OOCSS 的可靠指南。
-
-:::tip 例子
-```html
-<article class="ListingCard ListingCard--featured">
-  <h1 class="ListingCard__title">Adorable 2BR in the sunny Mission</h1>
-  <div class="ListingCard__content">
-    <p>Vestibulum id ligula porta felis euismod semper.</p>
-  </div>
-</article>
-```
-
-```css
-.ListingCard { }
-.ListingCard--featured { }
-.ListingCard__title { }
-.ListingCard__content { }
-```
-
-- `.ListingCard` 是“块（Block）”，代表更高级别的组件
-- `.ListingCard__title` 是一个“元素（Element）”，代表 `.ListingCard` 的后代，有助于将块组合成一个整体
-- `.ListingCard--featured` 是一个“修饰符（Modifier）”，代表 `.ListingCard` 块上的不同状态或变化
-:::
+[查看 CSS 规范详情](./css/)
 
 :::tip
-参见 [CSS-Tricks BEM 101](https://css-tricks.com/bem-101/)
+参见 [Airbnb CSS/Sass 风格指南](https://github.com/airbnb/css) 和 [Airbnb CSS-in-JS 风格指南](https://airbnb.io/javascript/css-in-javascript/)
 :::
 
-### stylelint 规则参考
+### Sass
 
-在项目中会使用 `stylelint-config-twbs-bootstrap` 作为 CSS 代码检查，点击这里可以查看详细的 [CSS 规则](/docs/specification/code/css)
+Sass 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践：
 
-## Sass
+- 合理组织变量、Mixin 和函数
+- 避免深层次的选择器嵌套（不超过 3 层）
+- 按功能拆分文件，使用部分文件（_partial）
+- 使用 `@import` 和 `@use` 合理组织模块
+- 采用一致的变量命名方式（kebab-case）
+- 避免在 Mixin 中生成大量重复代码
 
-### 语法
+[查看 Sass 规范详情](./sass/)
 
-**使用 `.scss` 的语法，不使用 `.sass` 原本的语法**
+### JavaScript
+
+JavaScript 规范采用 `eslint-config-airbnb-base` 作为基础配置，强调现代 JS 特性和最佳实践：
+
+- 优先使用 ES6+ 语法特性（箭头函数、解构、模板字符串等）
+- 避免副作用，倾向于函数式编程理念
+- 变量使用 `const` 和 `let`，避免 `var`
+- 严格的错误处理和异步编程规范
+- 一致的代码格式化（缩进、空格、分号等）
+- 模块化设计，明确的导入/导出规则
+
+[查看 JavaScript 规范详情](./javascript/)
 
 :::tip
-所有 Sass 代码也受到 `stylelint-config-twbs-bootstrap` 检查
+参见 [Airbnb JavaScript 风格指南](https://airbnb.io/javascript/)
 :::
 
-### 变量
+### TypeScript
 
-变量名应使用破折号（例如 `$my-variable`）代替 camelCased 和 snake_cased 风格。对于仅用在当前文件的变量，可以在变量名之前添加下划线前缀（例如 `$_my-variable`）。
+TypeScript 规范基于 `eslint-config-airbnb-typescript`，聚焦于类型安全和 TS 特性正确使用：
 
-### 扩展指令
+- 严格的类型检查（启用 `strict` 模式）
+- 合理使用接口（Interface）和类型别名（Type）
+- 避免过度使用 `any` 类型
+- 利用泛型增强代码复用性和类型安全
+- 类型和值的清晰分离
+- 正确处理 null 和 undefined 值
+- 适当使用高级类型（联合类型、交叉类型、映射类型等）
 
-**应避免使用 `@extend` 指令**，因为它并不直观，而且具有潜在风险，特别是用在嵌套选择器的时候。即便是在顶层占位符选择器使用扩展，如果选择器的顺序最终会改变，也可能会导致问题。（比如，如果它们存在于其他文件，而加载顺序发生了变化）。其实，使用 @extend 所获得的大部分优化效果，gzip 压缩已经帮助你做到了，因此你只需要通过 mixin 让样式表更符合 DRY 原则就足够了。
+[查看 TypeScript 规范详情](./typescript/)
 
-### 嵌套选择器
+### React
 
-**请不要让嵌套选择器的深度超过 3 层！**
+React 规范基于 `eslint-config-airbnb` 和 React 团队推荐实践，关注组件设计和性能：
 
-:::danger 反面例子 👎
-```scss
-.page-container {
-  .content {
-    .profile {
-      // STOP!
-    }
-  }
-}
-```
-
-当遇到以上情况的时候，CSS 大概是这样的：
-
-- 与 HTML 强耦合的
-- 过于具体
-- 无法重用
-:::
-
-**永远不要嵌套 ID 选择器❗❗❗❗**
-
-### stylelint 规则参考
-
-在项目中会使用 `stylelint-config-twbs-bootstrap` 作为 Sass 代码检查，点击这里可以查看详细的 [Sass 规则](/docs/specification/code/sass)
-
-## JavaScript
-
-### Airbnb JavaScript 风格指南
-
-**JS 代码规范采用 [Airbnb JavaScript 风格指南](https://airbnb.io/javascript/)**，请务必熟读
+- 函数组件和 Hooks 优先
+- 组件职责单一，提倡组合而非继承
+- Props 和 State 的合理使用和验证
+- 性能优化策略（React.memo、useMemo、useCallback）
+- JSX 格式规范和最佳实践
+- 可访问性（a11y）规则的严格遵守
+- 合理的文件和目录结构组织
+- 测试友好的组件设计
 
 :::tip
-所有 JS 代码都会使用 `eslint-config-airbnb-base` 进行强制检查
+参见 [Airbnb React 风格指南](https://airbnb.io/javascript/react/)
 :::
 
-- 参见：[Airbnb JavaScript 风格指南](https://airbnb.io/javascript/)
+[查看 React 规范详情](./react/)
 
-#### 核心思想
+### Vue
 
-- 优先使用 ES6+ 语法
-- 强类型编程
-- 保持语法整洁和维护性
+Vue 规范采用 Vue 官方推荐的最佳实践，适配 Vue 3 的新特性：
 
-## TypeScript
+- 组合式 API 与选项式 API 的使用场景区分
+- 单文件组件（SFC）的格式规范
+- 组件通信最佳实践（props、emit、provide/inject）
+- 响应式系统的正确使用（ref/reactive）
+- 生命周期钩子的合理应用
+- 性能优化指南（如异步组件、keep-alive）
+- Vue Router 和 Pinia/Vuex 的集成规范
+- 可测试性设计考量
 
-TypeScript 目前并非强制要求，但是鼓励在项目中进行尝试。特别是对于公共函数、类这样的公共模块。
-
-## Vue
-
-### Vue 风格指南
-
-**Vue 代码规范采用 [Vue 风格指南](https://v3.cn.vuejs.org/style-guide/)，级别是优先级C-推荐**，请务必熟读
+[查看 Vue 规范详情](./vue/)
 
 :::tip
-所有 Vue 文件都会使用 [`eslint-plugin-vue`](https://eslint.vuejs.org/) 进行强制检查，检查配置为 `plugin:vue/vue3-recommended`
+参见 [Vue 风格指南](https://vuejs.org/style-guide/)
 :::
 
-- 参见：[Vue 风格指南](https://v3.cn.vuejs.org/style-guide/)
+### Next.js
 
-#### 补充规则
+Next.js 规范聚焦于服务端渲染和性能优化的最佳实践：
 
-##### 组件文件命名
+- 页面路由和布局组织方式
+- 数据获取策略（SSR、SSG、ISR、CSR）
+- 图像和字体等资源的优化处理
+- 服务端与客户端代码分离管理
+- API 路由的设计和安全考量
+- 环境变量和配置管理
+- 合理使用 Next.js 特有组件（如 Image, Link, Script）
+- SEO 和性能优化策略
 
-单文件组件的文件名应该始终是单词大写开头 (PascalCase)
+[查看 Next.js 规范详情](./nextjs/)
 
-:::: details 例子
-:::danger 反面例子 👎
-```
-components/
-|- mycomponent.vue
-```
+### Jest
 
-```
-components/
-|- myComponent.vue
-```
+Jest 测试规范定义了单元测试和集成测试的编写准则：
 
-```
-components/
-|- my-component.vue
-```
-:::
+- 测试文件组织和命名约定
+- 测试套件和用例的结构设计
+- Mock 和 Stub 的合理使用
+- 异步测试的正确写法
+- 快照测试的适用场景
+- 测试覆盖率要求和报告方式
+- 持续集成中的测试策略
+- 测试驱动开发（TDD）的实践指南
 
+[查看 Jest 规范详情](./jest/)
 
-:::tip 正面例子 👍
-```
-components/
-|- MyComponent.vue
-```
+### Playwright
 
-```
-components/
-|- MyComponent
-   |- MyComponent.vue
-   |- index.{js,ts}
-```
-:::
-::::
+Playwright 端到端测试规范定义了 E2E 测试的编写和组织方式：
 
-##### 模板中的组件名大小写
+- 页面对象模式的实现
+- 测试环境和浏览器配置
+- 稳定性策略（等待、重试、超时）
+- 数据管理和测试隔离
+- 视觉测试和截图比对
+- 性能测试指标采集
+- 并行测试执行策略
+- 测试报告和失败分析方法
 
-模板中的组件名应该始终是单词是横线连接 (kebab-case)
-
-:::: details 例子
-:::danger 反面例子 👎
-```vue
-<!-- 不区分大小写 -->
-<mycomponent />
-```
-
-```vue
-<!-- camelCase -->
-<myComponent />
-```
-
-```vue
-<!-- PascalCase -->
-<MyComponent />
-```
-:::
-
-
-:::tip 正面例子 👍
-```vue
-<!-- kebab-case -->
-<my-component />
-```
-:::
-::::
-
-##### 为组件样式设置 CSS Module
-
-在项目组件内，应该使用 `module` 属性为 CSS 设置 CSS 作用域
-
-> Why? `scoped` 属性最终生成的结果，是通过属性选择器的方式来避免 CSS 样式名的冲突，属性选择器的效率不如 class 选择器的效率高（特别是有大量节点的时候）。CSS Module 同样可以做到避免样式名冲突，它会生成一个全局唯一的样式名。同时，CSS Module 是可以在 Vue 组件的 JS 代码里被访问的。
-
-:::: details 例子
-:::danger 反面例子 👎
-```vue
-<template>
-  <button class="btn btn-close">X</button>
-</template>
-
-<!-- 不使用 `scoped` 属性 和 CSS Module -->
-<style>
-.btn-close {
-  background-color: red;
-}
-</style>
-```
-
-```vue
-<template>
-  <button class="button button-close">X</button>
-</template>
-
-<!-- 使用 `scoped` 属性 -->
-<style scoped>
-.button {
-  border: none;
-  border-radius: 2px;
-}
-
-.button-close {
-  background-color: red;
-}
-</style>
-```
-:::
-
-:::tip 正面例子 👍
-```vue
-<template>
-  <button :class="[$style.button, $style.buttonClose]">X</button>
-</template>
-
-<!-- 使用 CSS Modules -->
-<style module>
-.button {
-  border: none;
-  border-radius: 2px;
-}
-
-.buttonClose {
-  background-color: red;
-}
-</style>
-```
-
-```vue
-<template>
-  <button :class="[$style['c-Button'], $style['c-Button--close']]">X</button>
-</template>
-
-<!-- 使用 BEM 约定 -->
-<style module>
-.c-Button {
-  border: none;
-  border-radius: 2px;
-}
-
-.c-Button--close {
-  background-color: red;
-}
-</style>
-```
-:::
-::::
+[查看 Playwright 规范详情](./playwright/)
