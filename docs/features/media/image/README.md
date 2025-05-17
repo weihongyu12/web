@@ -61,11 +61,6 @@
 
 ```css
 .hero-section {
-  background-image: image-set(
-    url("hero.avif") type("image/avif"), /* 现代格式优先 */
-    url("hero.webp") type("image/webp"), /* 其次现代格式 */
-    url("hero.jpg") type("image/jpeg")   /* 传统格式兜底 */
-  );
   /* 为高分屏提供更高分辨率的图片 */
   background-image: image-set(
     url("hero@2x.avif") 2x type("image/avif"),
@@ -160,7 +155,7 @@ iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
    - 正被更高效的格式(如 AVIF 和 WebP 动画)取代
 
 :::warning
-虽然保留了 GIF 选项，但对于动画内容，建议使用视频格式替代以提升性能。
+虽然保留了 GIF 选项，但对于动画内容，建议使用视频格式替代以提升性能。查看 **[用视频替换 GIF 动画](/docs/reference/performance/#用视频替换-gif-动画以加快页面加载速度)**
 :::
 
 ### 图片格式兼容性表格
@@ -237,6 +232,12 @@ assets/
 
 响应式图片技术允许浏览器根据设备特性（如屏幕尺寸、分辨率）加载和显示最合适的图片版本，从而优化性能和用户体验。主要通过 `srcset`/`sizes` 属性和 `<picture>` 元素实现。
 
+:::tip
+页面开头的示例代码就是 **响应式图片** 示例。
+
+查看 **[提供响应图像](/docs/reference/performance/#提供响应图像)** 了解更多性能优化信息
+:::
+
 ### Next.js Image 组件
 
 Next.js 提供了优化的 `Image` 组件，它是 HTML `<img>` 标签的扩展，具有多种强大的内置功能：
@@ -279,6 +280,10 @@ function HomePage() {
 
 :::tip
 使用 Next.js Image 组件可以大幅简化图像优化流程，自动为您处理现代格式转换、按需加载和适合设备的尺寸调整。
+:::
+
+:::warning
+Next.js Image SSR 模式下，会增加服务器负担，可能导致页面加载速度变慢。请根据服务器性能和流量需求谨慎使用。
 :::
 
 ### 图像 CDN 和自动优化
