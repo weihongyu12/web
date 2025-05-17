@@ -21,21 +21,63 @@
 <img src="icon.svg" alt="图标描述" width="32" height="32">
 ```
 
+:::tip
+**内联 SVG 和外部 SVG 的对比：**
+
+| 特性 | 内联 SVG | 外部 SVG |
+|------|----------|----------|
+| **文件请求** | 无需额外请求 | 需要额外的 HTTP 请求 |
+| **缓存** | 不可缓存 | 可被浏览器缓存 |
+| **DOM 访问** | 可直接操作 SVG 元素 | 需通过 `<object>` 或 JS 才能操作 |
+| **CSS 控制** | 可直接用 CSS 选择器控制 | 外部样式表影响有限，除非使用 `<object>` |
+| **JavaScript** | 可直接添加事件处理 | 需要额外技术访问 SVG DOM |
+| **适用场景** | 交互式图标、需动态修改的图形 | 重复使用的图标、静态图表、大型图形 |
+| **文件大小影响** | 增加 HTML 大小 | HTML 体积较小，但增加网络请求 |
+| **SEO** | 对搜索引擎友好 | 使用恰当的 alt 属性同样友好 |
+
+选择内联还是外部 SVG 应根据实际需求权衡：
+- 对于需频繁交互的小图标，内联 SVG 更有优势
+- 对于大型复杂的 SVG 或多处重用的图标，外部文件更合适
+:::
+
 对于位图，使用 HTML5 `<picture>` 元素和 `<source>` 标签提供多格式图片源，按优先级排列：
 
 ```html
 <picture>
   <!-- 现代高效格式（优先） -->
-  <source srcset="image.avif" type="image/avif">
-  <source srcset="image.webp" type="image/webp">
+  <source srcset="image.avif 1x, image@2x.avif 2x, image@3x.avif 3x" type="image/avif">
+  <source srcset="image.webp 1x, image@2x.webp 2x, image@3x.webp 3x" type="image/webp">
   
   <!-- 响应式图片设置 -->
-  <source media="(min-width: 1200px)" srcset="image-large.jpg" type="image/jpeg">
-  <source media="(min-width: 768px)" srcset="image-medium.jpg" type="image/jpeg">
+  <source media="(min-width: 1200px)" srcset="image-large.jpg 1x, image-large@2x.jpg 2x, image-large@3x.jpg 3x" type="image/jpeg">
+  <source media="(min-width: 768px)" srcset="image-medium.jpg 1x, image-medium@2x.jpg 2x, image-medium@3x.jpg 3x" type="image/jpeg">
   
   <!-- 传统格式（兜底） -->
-  <img src="image.jpg" alt="详细的图片描述" width="800" height="600" loading="lazy">
+  <img src="image.jpg" srcset="image.jpg 1x, image@2x.jpg 2x, image@3x.jpg 3x" alt="详细的图片描述" width="800" height="600" loading="lazy">
 </picture>
+```
+
+也可以在 CSS 中使用位图，例如作为背景图片。推荐使用 `image-set()` 函数来提供多种格式和分辨率的图片源：
+
+```css
+.hero-section {
+  background-image: image-set(
+    url("hero.avif") type("image/avif"), /* 现代格式优先 */
+    url("hero.webp") type("image/webp"), /* 其次现代格式 */
+    url("hero.jpg") type("image/jpeg")   /* 传统格式兜底 */
+  );
+  /* 为高分屏提供更高分辨率的图片 */
+  background-image: image-set(
+    url("hero@2x.avif") 2x type("image/avif"),
+    url("hero@2x.webp") 2x type("image/webp"),
+    url("hero@2x.jpg") 2x type("image/jpeg"),
+    url("hero.avif") 1x type("image/avif"),
+    url("hero.webp") 1x type("image/webp"),
+    url("hero.jpg") 1x type("image/jpeg")
+  );
+  background-size: cover;
+  background-position: center;
+}
 ```
 
 :::tip
@@ -78,6 +120,7 @@ flowchart TD
    - 可无限缩放而不失真
    - 文件大小小，适合图标、图表和简单插图
    - 可通过 CSS 和 JavaScript 交互和动画
+   - 支持 HTTP 压缩（如 Gzip 或 Brotli），可进一步减小传输大小
    - 所有现代浏览器都支持
 
 :::tip
@@ -117,7 +160,7 @@ iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
    - 正被更高效的格式(如 AVIF 和 WebP 动画)取代
 
 :::warning
-虽然保留了GIF选项，但对于动画内容，建议使用视频格式替代以提升性能。
+虽然保留了 GIF 选项，但对于动画内容，建议使用视频格式替代以提升性能。
 :::
 
 ### 图片格式兼容性表格
@@ -155,15 +198,15 @@ iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
 | **PNG** | 大(照片)/中(图形) | 无损 | 快 | 快 | 8-16 位 | 索引色模式 |
 | **GIF** | 大(动画) | 低 | 快 | 极快 | 8 位(256色) | 简单动画循环 |
 
-*复杂SVG可能渲染较慢
+*复杂 SVG 可能渲染较慢
 
 ### 图片格式转换
 
-使用image-minimizer-webpack-plugin进行图片格式转换和优化：
+使用 `image-minimizer-webpack-plugin` 进行图片格式转换和优化：
 
 ```html
 <picture>
-  <!-- 自动生成的现代格式 (使用as=avif和as=webp参数生成) -->
+  <!-- 自动生成的现代格式 (使用 as=avif 和 as=webp 参数生成) -->
   <source srcset="assets/images/photo.jpg?as=avif" type="image/avif">
   <source srcset="assets/images/photo.jpg?as=webp" type="image/webp">
   <img src="assets/images/photo.jpg" alt="优化后的图片" width="600" height="400">
@@ -174,7 +217,7 @@ iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
 
 ```html
 <picture>
-  <!-- 自动生成的现代格式 (使用as=avif和as=webp参数生成) -->
+  <!-- 自动生成的现代格式 (使用 as=avif 和 as=webp 参数生成) -->
   <source srcset="assets/images/photo.avif" type="image/avif">
   <source srcset="assets/images/photo.webp" type="image/webp">
   <img src="assets/images/photo.jpg" alt="优化后的图片" width="600" height="400">
@@ -186,46 +229,101 @@ iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
 assets/
 └── images/
     ├── photo.jpg     // 原始图片(可能经过压缩)
-    ├── photo.webp    // 由image-minimizer-webpack-plugin生成的WebP版本
-    └── photo.avif    // 由image-minimizer-webpack-plugin生成的AVIF版本
+    ├── photo.webp    // 由 image-minimizer-webpack-plugin 生成的 WebP 版本
+    └── photo.avif    // 由 image-minimizer-webpack-plugin 生成的 AVIF 版本
 ```
 
 ## 响应式图片技术
 
-### 使用 srcset 和 sizes 属性
+响应式图片技术允许浏览器根据设备特性（如屏幕尺寸、分辨率）加载和显示最合适的图片版本，从而优化性能和用户体验。主要通过 `srcset`/`sizes` 属性和 `<picture>` 元素实现。
 
-```html
-<img src="image-400.jpg"
-     srcset="image-400.jpg 400w,
-             image-800.jpg 800w,
-             image-1200.jpg 1200w"
-     sizes="(max-width: 600px) 100vw,
-            (max-width: 1200px) 50vw,
-            33vw"
-     alt="响应式图片示例"
-     width="400" height="300" loading="lazy">
+### Next.js Image 组件
+
+Next.js 提供了优化的 `Image` 组件，它是 HTML `<img>` 标签的扩展，具有多种强大的内置功能：
+
+- **自动图像优化**：自动按需将图像转换为 WebP 和 AVIF 等现代格式，同时根据设备需求调整图像大小，减少不必要的带宽占用
+- **立即尺寸确定**：通过强制设置宽高比例，消除加载过程中的布局偏移 (CLS)，提升页面稳定性
+- **智能懒加载**：使用 IntersectionObserver 自动实现视口内加载，仅当图片即将进入可视区域时才加载
+- **预加载优先级**：可设置高优先级图像提前加载，显著改善 LCP (最大内容绘制) 性能指标
+- **模糊占位符**：支持加载期间显示低质量图像占位符 (LQIP)，提升用户感知体验
+- **自适应尺寸**：通过 sizes 属性自动为不同视口宽度提供最佳的图像尺寸
+
+这种一体化图像解决方案极大简化了 Web 开发中的图像优化工作，同时保证了高性能和良好的用户体验。
+
+```jsx
+import Image from 'next/image';
+
+function HomePage() {
+  return (
+    <div>
+      {/* 本地图像 */}
+      <Image
+        src="/images/hero.jpg"
+        alt="Hero Image"
+        width={800}
+        height={600}
+      />
+
+      {/* 远程图像（需要在配置中允许对应域名） */}
+      <Image
+        src="https://example.com/profile.jpg"
+        alt="Profile Picture"
+        width={500}
+        height={500}
+        loading="lazy"
+      />
+    </div>
+  );
+}
 ```
 
-### 使用 picture 元素用于艺术指导
+:::tip
+使用 Next.js Image 组件可以大幅简化图像优化流程，自动为您处理现代格式转换、按需加载和适合设备的尺寸调整。
+:::
+
+### 图像 CDN 和自动优化
+
+结合使用阿里云 CDN 和对象存储 OSS（及其图片处理服务）可以自动生成、优化并快速分发响应式图像和最佳格式。阿里云 CDN 负责加速 OSS 中图片资源的访问，而 OSS 图片处理服务则允许通过 URL 参数动态处理图片。
 
 ```html
-<picture>
-  <!-- 竖屏移动设备使用剪裁版本 -->
-  <source media="(max-width: 600px) and (orientation: portrait)"
-          srcset="image-mobile-portrait.jpg">
-  
-  <!-- 横屏设备使用宽视图版本 -->
-  <source media="(max-width: 900px) and (orientation: landscape)"
-          srcset="image-mobile-landscape.jpg">
-  
-  <!-- 桌面版本 -->
-  <source media="(min-width: 901px)"
-          srcset="image-desktop.jpg">
-  
-  <!-- 回退图像 -->
-  <img src="image-fallback.jpg" alt="响应式艺术指导示例" width="800" height="600">
-</picture>
+<!-- 阿里云 OSS 图片处理服务，并通过 CDN 分发 -->
+<img src="https://your-cdn-domain.com/product-photo.jpg?x-oss-process=image/resize,m_lfit,w_400,h_300/format,webp/quality,q_80"
+       alt="通过阿里云 CDN 和 OSS URL 参数优化的图像">
 ```
+
+在这个例子中：
+
+- `resize,m_lfit,w_400,h_300`: 将图片等比例缩放，限制在宽度 400px 和高度 300px 的矩形框内。
+- `format,webp`: 将图片转换为 WebP 格式。
+- `quality,q_80`: 设置 WebP 格式的质量为 80。
+
+OSS 会按需处理原图并返回结果，同时 CDN 会缓存处理后的图片。
+
+## SVGR
+
+在 React 应用中，SVGR（SVG to React）是一个强大的工具，可将 SVG 文件转换为 React 组件。这种方式让你能够像处理普通 React 组件一样处理 SVG 图形，实现更灵活的操作和动态交互。
+
+```jsx
+// 使用 SVGR 导入 SVG 文件作为 React 组件
+import { ReactComponent as Logo } from './logo.svg';
+
+function Header() {
+  return (
+    <header>
+      {/* SVG 组件接受常规 props 如 className, style 等 */}
+      <Logo className="site-logo" width={80} height={40} aria-label="公司标志" />
+    </header>
+  );
+}
+```
+
+SVGR 相比于传统的 SVG 使用方法有以下优势：
+
+- 可以使用 React 组件的所有功能，包括传递 props 和处理事件
+- 可以轻松地将 SVG 图标集成到组件库中
+- 使用 React 的状态管理来动态改变 SVG 属性（如颜色、尺寸）
+- 可以结合 CSS-in-JS 解决方案使用
+- 在构建时优化 SVG 代码，减小包体积
 
 ## 最佳实践
 
@@ -234,8 +332,6 @@ assets/
 - **选择正确的格式**: 根据内容类型和视觉需求选择最佳格式
   - 照片和复杂图像：AVIF > WebP > JPEG
   - 需要透明度的图像：AVIF > WebP > PNG
-  - 图标和简单图形：SVG
-  - 屏幕截图：PNG 或有损 WebP
 
 - **预加载关键图像**:
   ```html
@@ -264,7 +360,6 @@ assets/
 
 - **图像优化工具工作流**:
   - 使用构建工具自动生成不同格式和尺寸
-  - 考虑 [Squoosh](https://squoosh.app/)、[ImageOptim](https://imageoptim.com/) 等工具
   - 集成到 CI/CD 流程中
 
 ### 用户体验
@@ -282,7 +377,7 @@ assets/
   }
   ```
 
-- **避免突然的布局变化**: 通过固定宽高比容器防止累积布局偏移(CLS)
+- **避免突然的布局变化**: 通过固定宽高比容器防止累积布局偏移 (CLS)
   ```css
   .aspect-ratio-box {
     position: relative;
@@ -312,7 +407,7 @@ assets/
 
 - **提供描述性替代文本**:
   ```html
-  <img src="chart.png" alt="2023年第一季度销售增长图表，显示同比增长15%">
+  <img src="chart.png" alt="2023 年第一季度销售增长图表，显示同比增长 15%">
   ```
 
 - **隐藏装饰性图片**:
@@ -323,9 +418,9 @@ assets/
 - **复杂图像的扩展描述**:
   ```html
   <figure>
-    <img src="data-visualization.png" alt="2023年销售数据可视化" aria-describedby="viz-desc">
+    <img src="data-visualization.png" alt="2023 年销售数据可视化" aria-describedby="viz-desc">
     <figcaption id="viz-desc">
-      此图表展示了2023年各季度销售趋势，突出显示Q3销售额创历史新高，达到100万元。
+      此图表展示了 2023 年各季度销售趋势，突出显示 Q3 销售额创历史新高，达到 100 万元。
     </figcaption>
   </figure>
   ```
@@ -333,10 +428,12 @@ assets/
 #### 颜色和对比度考虑
 
 - 不要仅依赖颜色传达信息
-- 确保图像中的文本有足够对比度(至少4.5:1)
+- 确保图像中的文本有足够对比度 (至少 4.5:1)
 - 考虑提供高对比度版本的信息图表
 
 #### 减少动画图片的干扰
+
+动画图片虽然能吸引用户注意力，但对于有认知障碍、前庭功能障碍或光敏性癫痫的用户可能造成困扰或健康风险。尊重用户的系统设置，当用户在系统中设置了减少动画的偏好时，应相应调整网页中的动画效果：
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -348,7 +445,10 @@ assets/
 
 ### 色彩管理
 
-- **色彩配置文件**: 为专业图像使用嵌入的颜色配置文件
+色彩管理是确保图像在不同设备上保持一致视觉效果的关键，尤其对于对色彩敏感的行业（如时尚、艺术、电子商务等）至关重要：
+
+- **色彩配置文件**: 在专业图像中嵌入 ICC 配置文件，确保跨设备的色彩准确性。Adobe RGB 或 DCI-P3 适用于宽色域内容，而 sRGB 最适合 Web 应用。
+
 - **色彩空间考虑**: 为支持的浏览器使用广色域图像
   ```html
   <picture>
@@ -356,57 +456,4 @@ assets/
     <source srcset="image-srgb.avif" type="image/avif">
     <img src="image-srgb.jpg" alt="广色域图像示例">
   </picture>
-  ```
-
-### 图像CDN和自动优化
-
-- 使用图像CDN服务自动生成响应式图像和最佳格式
-  ```html
-  <!-- 示例：使用Cloudinary或类似服务 -->
-  <img src="https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,w_auto/product.jpg"
-       alt="自动优化的产品图像">
-  ```
-
-- 使用URL参数控制图像质量、格式和尺寸
-  ```html
-  <img src="https://images.example.com/id/123?width=400&format=webp&quality=80"
-       alt="通过URL参数优化的图像">
-  ```
-
-### 图片内容注意事项
-
-- **图片压缩级别**: 根据内容类型选择适当的压缩级别
-  - 照片：JPEG/WebP/AVIF质量75-85%
-  - 插图和图像：质量85-90%
-  - 屏幕截图：质量80-90%或无损PNG
-
-- **尺寸策略**:
-  - 移动优先：400px-800px
-  - 平板电脑：800px-1200px
-  - 桌面：1200px-1800px
-  - 视网膜/高DPI：原尺寸的1.5x-2x
-
-- **图像布局和图库**:
-  ```html
-  <div class="image-gallery" role="region" aria-label="产品图片库">
-    <figure>
-      <img src="product-1.webp" alt="产品正面视图" loading="lazy">
-      <figcaption>产品正面</figcaption>
-    </figure>
-    <!-- 更多图片... -->
-  </div>
-  ```
-
-- **背景图片**:
-  ```css
-  .hero {
-    background-image: image-set(
-      url("hero.avif") type("image/avif"),
-      url("hero.webp") type("image/webp"),
-      url("hero.jpg") type("image/jpeg")
-    );
-    background-size: cover;
-    background-position: center;
-    height: 60vh;
-  }
   ```
