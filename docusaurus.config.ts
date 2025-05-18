@@ -167,10 +167,14 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
 
+  plugins: [
+    '@docusaurus/plugin-pwa',
+  ],
+
+  themes: ['@docusaurus/theme-mermaid'],
   markdown: {
     mermaid: true,
   },
-  themes: ['@docusaurus/theme-mermaid'],
 
   future: {
     experimental_faster: true,
