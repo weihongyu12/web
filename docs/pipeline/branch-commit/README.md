@@ -41,7 +41,7 @@ gitGraph
     merge hotfix id: "紧急修复同步到main"
 ```
 
-### 持续发布模式分支说明
+#### 持续发布模式分支说明
 
 在 GitLab Flow 中，我们使用以下几种核心分支类型：
 
@@ -102,7 +102,7 @@ git tag -a v1.2.0 -m "Production release v1.2.0"
 git push origin production --tags
 
 # 触发生产环境部署
-# CI/CD 检测到 production 分支更新，自动执行部署
+# CI/CD 检测到 production 分支更新，手动执行部署
 ```
 
 #### 热修复流程（生产环境紧急修复）
