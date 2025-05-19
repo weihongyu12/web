@@ -41,7 +41,7 @@ gitGraph
     merge hotfix id: "紧急修复同步到main"
 ```
 
-### 分支类型说明
+### 持续发布模式分支说明
 
 在 GitLab Flow 中，我们使用以下几种核心分支类型：
 
