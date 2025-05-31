@@ -1,9 +1,9 @@
 # 敏感数据加密
 
-对敏感数据采用AES加密传输，支持前端到后端和后端到前端的双向加密通信，避免数据泄露
+对敏感数据采用 AES 加密传输，支持前端到后端和后端到前端的双向加密通信，避免数据泄露
 
 :::warning
-采用AES加密传输属于**纵深防御**，在传输数据时，应该确保**优先使用HTTPS**
+采用 AES 加密传输属于**纵深防御**，在传输数据时，应该确保**优先使用 HTTPS**
 :::
 
 ## 敏感数据说明
@@ -66,7 +66,7 @@ const authInfo = {
 
 - **全面覆盖**：避免遗漏任何可能包含敏感信息的字段
 - **降低风险**：及时发现潜在的数据泄露风险点
-- **合规要求**：满足GDPR、CCPA等法规对数据分类的要求
+- **合规要求**：满足 GDPR、CCPA 等法规对数据分类的要求
 - **开发效率**：减少人工审查工作量，提高开发效率
 
 #### 常用识别规则
@@ -348,119 +348,29 @@ const maskedData = BatchDataMasking.maskObject(originalData);
 console.log('批量脱敏结果:', maskedData);
 ```
 
-#### 脱敏策略选择
+## 数据加密
 
-不同的业务场景需要选择合适的脱敏策略：
+为了保护敏感数据在传输过程中的安全，我们采用了基于 RSA 和 AES 的混合加密方案，既保证了数据传输的安全性，又兼顾了系统性能。加密传输分为前端到后端和后端到前端两个方向，通过非对称密钥交换和对称加密相结合的方式，实现了端到端的数据保护。
 
-```typescript
-// 脱敏策略枚举
-enum MaskingStrategy {
-  PARTIAL = 'partial',     // 部分遮盖（如手机号138****8000）
-  FULL = 'full',          // 完全遮盖（如密码******）
-  HASH = 'hash',          // 哈希替换（保持唯一性但不可逆）
-  RANDOM = 'random',      // 随机替换（生成同类型的假数据）
-  FORMAT = 'format'       // 格式保留（保持数据格式但内容虚假）
-}
+### 前端到后端加密
 
-// 根据场景选择脱敏策略
-function getMaskingStrategy(dataType: string, useCase: string): MaskingStrategy {
-  const strategies = {
-    'development': {
-      'PII': MaskingStrategy.RANDOM,        // 开发环境用随机数据
-      'FINANCIAL': MaskingStrategy.FORMAT,   // 保持格式便于测试
-      'AUTH': MaskingStrategy.FULL          // 认证信息完全遮盖
-    },
-    'logging': {
-      'PII': MaskingStrategy.PARTIAL,       // 日志中部分遮盖
-      'FINANCIAL': MaskingStrategy.HASH,    // 金融信息哈希处理
-      'AUTH': MaskingStrategy.FULL          // 认证信息完全遮盖
-    },
-    'analytics': {
-      'PII': MaskingStrategy.HASH,          // 分析时保持唯一性
-      'FINANCIAL': MaskingStrategy.PARTIAL, // 部分信息用于统计
-      'AUTH': MaskingStrategy.FULL          // 认证信息不参与分析
-    }
-  };
-  
-  return strategies[useCase]?.[dataType] || MaskingStrategy.FULL;
-}
-```
-
-#### 脱敏质量检查
-
-```typescript
-// 脱敏质量检查工具
-class MaskingQualityChecker {
-  /**
-   * 检查脱敏是否成功
-   * @param original 原始数据
-   * @param masked 脱敏后数据
-   */
-  static validateMasking(original: string, masked: string): boolean {
-    // 基本检查：脱敏后的数据不应与原始数据完全相同（除非数据本身就应该被完全遮盖）
-    if (original === masked) {
-      return false;
-    }
-    
-    // 检查是否包含明显的敏感信息泄露
-    const sensitivePatterns = [
-      /\d{15,19}/,  // 可能的身份证或银行卡号
-      /1[3-9]\d{9}/, // 手机号
-      /.+@.+\..+/   // 邮箱
-    ];
-    
-    return !sensitivePatterns.some(pattern => pattern.test(masked));
-  }
-  
-  /**
-   * 批量检查脱敏质量
-   */
-  static batchValidate(originalData: any, maskedData: any): { passed: boolean; issues: string[] } {
-    const issues: string[] = [];
-    
-    function checkObject(orig: any, mask: any, path = '') {
-      Object.keys(orig).forEach(key => {
-        const currentPath = path ? `${path}.${key}` : key;
-        const origValue = orig[key];
-        const maskValue = mask[key];
-        
-        if (typeof origValue === 'string' && typeof maskValue === 'string') {
-          if (!this.validateMasking(origValue, maskValue)) {
-            issues.push(`字段 ${currentPath} 脱敏不充分`);
-          }
-        } else if (typeof origValue === 'object' && typeof maskValue === 'object') {
-          checkObject(origValue, maskValue, currentPath);
-        }
-      });
-    }
-    
-    checkObject(originalData, maskedData);
-    
-    return {
-      passed: issues.length === 0,
-      issues
-    };
-  }
-}
-```
-
-## 前端到后端加密
+前端生成随机 AES 密钥加密敏感数据，然后使用服务端公钥加密 AES 密钥，服务端接收后用私钥解密得到 AES 密钥，再用此密钥解密业务数据。
 
 ```mermaid
 sequenceDiagram
     participant 前端
     participant 后端
 
-    前端->>后端: 请求RSA公钥
-    后端-->>前端: 返回RSA公钥（SERVER_PUBLIC_KEY）
-    前端->>前端: 生成随机AES密钥（CLIENT_AES_KEY）
-    前端->>前端: 使用CLIENT_AES_KEY加密敏感数据
-    前端->>后端: 发送RSA加密的CLIENT_AES_KEY + AES加密的敏感数据
-    后端->>后端: 用RSA私钥解密获取CLIENT_AES_KEY
-    后端->>后端: 用CLIENT_AES_KEY解密业务数据
+    前端->>后端: 请求 RSA 公钥
+    后端-->>前端: 返回 RSA 公钥（SERVER_PUBLIC_KEY）
+    前端->>前端: 生成随机 AES 密钥（CLIENT_AES_KEY）
+    前端->>前端: 使用 CLIENT_AES_KEY 加密敏感数据
+    前端->>后端: 发送 RSA 加密的 CLIENT_AES_KEY + AES 加密的敏感数据
+    后端->>后端: 用 RSA 私钥解密获取 CLIENT_AES_KEY
+    后端->>后端: 用 CLIENT_AES_KEY 解密业务数据
 ```
 
-### 前端实现
+#### 前端实现
 
 ```typescript
 interface ClientToServerRequest {
@@ -550,15 +460,15 @@ class ClientEncryption {
 }
 ```
 
-### 后端实现（接收加密数据）
+#### 后端实现
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 <Tabs>
 <TabItem value="nestjs" label="NestJS" default>
-
-**Controller**
+<Tabs>
+<TabItem value="controller" label="Controller">
 
 ```typescript
 // filepath: src/encryption/encryption.controller.ts
@@ -610,7 +520,8 @@ export class EncryptionController {
 }
 ```
 
-**Service**
+</TabItem>
+<TabItem value="service" label="Service">
 
 ```typescript
 // filepath: src/encryption/encryption.service.ts
@@ -692,7 +603,8 @@ export class EncryptionService {
 }
 ```
 
-**Module**
+</TabItem>
+<TabItem value="module" label="Module">
 
 ```typescript
 // filepath: src/encryption/encryption.module.ts
@@ -709,9 +621,12 @@ export class EncryptionModule {}
 ```
 
 </TabItem>
-<TabItem value="springboot" label="Spring Boot">
+</Tabs>
+</TabItem>
 
-**Controller**
+<TabItem value="springboot" label="Spring Boot">
+<Tabs>
+<TabItem value="controller" label="Controller">
 
 ```java
 // filepath: src/main/java/com/example/encryption/controller/EncryptionController.java
@@ -783,7 +698,8 @@ public class EncryptionController {
 }
 ```
 
-**Service**
+</TabItem>
+<TabItem value="service" label="Service">
 
 ```java
 // filepath: src/main/java/com/example/encryption/service/EncryptionService.java
@@ -888,9 +804,31 @@ public class EncryptionService {
 ```
 
 </TabItem>
-<TabItem value="django" label="Django">
+<TabItem value="module" label="Module">
 
-**Views**
+```java
+// filepath: src/main/java/com/example/encryption/EncryptionApplication.java
+package com.example.encryption;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class EncryptionApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(EncryptionApplication.class, args);
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+</TabItem>
+
+<TabItem value="django" label="Django">
+<Tabs>
+<TabItem value="views" label="Views">
 
 ```python
 # filepath: encryption/views.py
@@ -977,7 +915,8 @@ def send_encrypted_data(request):
         return JsonResponse({'error': '服务器加密失败'}, status=500)
 ```
 
-**Services**
+</TabItem>
+<TabItem value="services" label="Services">
 
 ```python
 # filepath: encryption/services.py
@@ -1069,22 +1008,25 @@ class EncryptionService:
                 modes.GCM(iv),
                 backend=default_backend()
             )
-            encryptor = cipher.encryptor();
-            encrypted_data = encryptor.update(json_data.encode('utf-8')) + encryptor.finalize();
+            encryptor = cipher.encryptor()
+            encrypted_data = encryptor.update(json_data.encode('utf-8')) + encryptor.finalize()
 
             return {
                 'encryptedAesKey': base64.b64encode(encrypted_aes_key).decode('utf-8'),
                 'encryptedData': base64.b64encode(encrypted_data).decode('utf-8'),
                 'iv': base64.b64encode(iv).decode('utf-8')
-            };
+            }
         except Exception as e:
             raise Exception(f"数据加密失败: {str(e)}")
 ```
 
 </TabItem>
-<TabItem value="laravel" label="Laravel">
+</Tabs>
+</TabItem>
 
-**Controller**
+<TabItem value="laravel" label="Laravel">
+<Tabs>
+<TabItem value="controller" label="Controller">
 
 ```php
 <?php
@@ -1179,7 +1121,8 @@ class EncryptionController extends Controller
 }
 ```
 
-**Service**
+</TabItem>
+<TabItem value="service" label="Service">
 
 ```php
 <?php
@@ -1291,7 +1234,8 @@ class EncryptionService
 }
 ```
 
-**Routes**
+</TabItem>
+<TabItem value="routes" label="Routes">
 
 ```php
 <?php
@@ -1304,9 +1248,12 @@ Route::post('/encrypted-response', [EncryptionController::class, 'sendEncryptedD
 ```
 
 </TabItem>
-<TabItem value="aspnet" label="ASP.NET Core">
+</Tabs>
+</TabItem>
 
-**Service**
+<TabItem value="aspnet" label="ASP.NET Core">
+<Tabs>
+<TabItem value="service" label="Service">
 
 ```csharp
 // filepath: Services/EncryptionService.cs
@@ -1420,7 +1367,8 @@ namespace EncryptionApi.Services
 }
 ```
 
-**Controller**
+</TabItem>
+<TabItem value="controller" label="Controller">
 
 ```csharp
 // filepath: Controllers/EncryptionController.cs
@@ -1531,7 +1479,8 @@ namespace EncryptionApi.Controllers
 }
 ```
 
-**Program**
+</TabItem>
+<TabItem value="program" label="Program">
 
 ```csharp
 // filepath: Program.cs
@@ -1561,23 +1510,27 @@ app.Run();
 
 </TabItem>
 </Tabs>
+</TabItem>
+</Tabs>
 
-## 后端到前端加密
+### 后端到前端加密
+
+后端生成随机 AES 密钥加密响应数据，然后使用前端公钥加密 AES 密钥，前端接收后用私钥解密得到 AES 密钥，再用此密钥解密业务数据。
 
 ```mermaid
 sequenceDiagram
     participant 前端
     participant 后端
 
-    后端->>后端: 生成随机AES密钥（SERVER_AES_KEY）
-    后端->>后端: 使用SERVER_AES_KEY加密响应数据
-    前端->>后端: 发送前端RSA公钥（可选，或使用预共享）
-    后端-->>前端: 返回RSA加密的SERVER_AES_KEY + AES加密的响应数据
-    前端->>前端: 用RSA私钥解密获取SERVER_AES_KEY
-    前端->>前端: 用SERVER_AES_KEY解密响应数据
+    后端->>后端: 生成随机 AES 密钥（SERVER_AES_KEY）
+    后端->>后端: 使用 SERVER_AES_KEY 加密响应数据
+    前端->>后端: 发送前端 RSA 公钥（可选，或使用预共享）
+    后端-->>前端: 返回 RSA 加密的 SERVER_AES_KEY + AES 加密的响应数据
+    前端->>前端: 用 RSA 私钥解密获取 SERVER_AES_KEY
+    前端->>前端: 用 SERVER_AES_KEY 解密响应数据
 ```
 
-### 前端实现（接收加密数据）
+#### 前端实现
 
 ```typescript
 interface ServerToClientResponse {
@@ -1652,8 +1605,8 @@ class ClientDecryption {
     return JSON.parse(jsonString);
   }
 
-  async requestEncryptedData(endpoint: string, clientPublicKey?: string): Promise<any> {
-    const publicKey = clientPublicKey || await this.getClientPublicKey();
+  async requestEncryptedData(endpoint: string): Promise<any> {
+    const publicKey = await this.getClientPublicKey();
     
     const response = await fetch(endpoint, {
       method: "POST",
@@ -1689,22 +1642,22 @@ class ClientDecryption {
 ## 性能优化
 
 ### 密钥复用策略
-- 在同一会话中复用AES密钥减少RSA操作
+- 在同一会话中复用 AES 密钥减少 RSA 操作
 - 实现密钥缓存机制，避免重复生成
 - 批量数据加密时共享密钥
 
 ### 异步处理
-- 使用Web Workers进行大数据量加密
+- 使用 Web Workers 进行大数据量加密
 - 流式加密处理大文件
 - 非阻塞式密钥交换
 
 ## 安全注意事项
 
-- **密钥管理**：RSA私钥必须安全存储，建议使用HSM或密钥管理服务
-- **密钥轮换**：定期更新RSA密钥对
-- **AES密钥随机性**：每次传输都应生成新的随机AES密钥
-- **IV唯一性**：每次AES加密都应使用唯一的初始化向量
-- **HTTPS优先**：加密传输仍需配合HTTPS使用
-- **身份验证**：结合JWT或其他认证机制验证通信双方身份
-- **重放攻击防护**：可添加时间戳和nonce防止重放攻击
+- **密钥管理**：RSA 私钥必须安全存储，建议使用 HSM 或密钥管理服务
+- **密钥轮换**：定期更新 RSA 密钥对
+- **AES 密钥随机性**：每次传输都应生成新的随机 AES 密钥
+- **IV 唯一性**：每次 AES 加密都应使用唯一的初始化向量
+- **HTTPS 优先**：加密传输仍需配合 HTTPS 使用
+- **身份验证**：结合 JWT 或其他认证机制验证通信双方身份
+- **重放攻击防护**：可添加时间戳和 nonce 防止重放攻击
 - **错误处理**：避免在错误信息中泄露密钥信息
