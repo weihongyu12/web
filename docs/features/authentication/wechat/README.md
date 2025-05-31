@@ -7,6 +7,7 @@
 - 网页扫码登录（适用于 PC 端）
 - 微信内应用直接授权登录
 - 小程序关联登录
+- **自动注册账户** - 首次微信登录用户自动创建账户
 - 账号绑定与用户信息同步
 - 登录状态管理与刷新机制
 
@@ -35,11 +36,32 @@ interface WechatLoginState {
   sceneId?: string;
 }
 
+// 添加用户注册相关类型
+interface WechatUserProfile {
+  openid: string;
+  nickname: string;
+  headimgurl: string;
+  sex: number;
+  city: string;
+  province: string;
+  country: string;
+  unionid?: string;
+}
+
+interface RegistrationResult {
+  isNewUser: boolean;
+  userId: string;
+  profile: WechatUserProfile;
+  token: string;
+  needsBinding: boolean; // 是否需要绑定手机号
+}
+
 const WechatLogin: React.FC = () => {
   const [loginState, setLoginState] = useState<WechatLoginState>({
     status: 'initial',
     qrUrl: '',
   });
+  const [registrationResult, setRegistrationResult] = useState<RegistrationResult | null>(null);
   
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const isWeChatBrowser = useRef<boolean>(false);
@@ -170,32 +192,53 @@ const WechatLogin: React.FC = () => {
       const response = await fetch('/api/auth/wechat/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ 
+          code,
+          autoRegister: true, // 启用自动注册
+          scope: 'snsapi_userinfo' // 请求用户信息权限
+        })
       });
       
       if (!response.ok) throw new Error('验证失败');
       
-      const data = await response.json();
+      const data: RegistrationResult = await response.json();
       
-      if (data.success) {
+      if (data.userId) {
         setLoginState({
           status: 'success',
           qrUrl: '',
           authToken: data.token
         });
         
+        // 保存注册结果
+        setRegistrationResult(data);
+        
+        // 如果是新用户，显示欢迎信息
+        if (data.isNewUser) {
+          console.log('新用户通过微信自动注册成功');
+        }
+        
         // 存储认证信息
         localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_info', JSON.stringify({
+          openid: data.profile.openid,
+          unionid: data.profile.unionid,
+          nickname: data.profile.nickname,
+          avatar: data.profile.headimgurl,
+          userId: data.userId,
+          isNewUser: data.isNewUser,
+          loginMethod: 'wechat'
+        }));
         
         // 保存凭据用于自动登录 - 使用FederatedCredential，适合OpenID认证
         if ('credentials' in navigator && 'FederatedCredential' in window) {
           try {
             // 使用FederatedCredential存储微信OpenID凭据
             const cred = new FederatedCredential({
-              id: data.openid, // 微信用户的唯一标识
+              id: data.profile.openid, // 微信用户的唯一标识
               provider: 'https://open.weixin.qq.com', // 微信作为身份提供者
-              name: data.nickname || '微信用户', // 用户昵称
-              iconURL: data.headimgurl // 头像URL
+              name: data.profile.nickname || '微信用户', // 用户昵称
+              iconURL: data.profile.headimgurl // 头像URL
             });
             
             // 存储凭据
@@ -206,10 +249,24 @@ const WechatLogin: React.FC = () => {
           }
         }
         
-        // 跳转到成功页面或首页
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1000);
+        // 根据用户状态决定跳转
+        if (data.isNewUser && data.needsBinding) {
+          // 新用户需要绑定手机号
+          setTimeout(() => {
+            window.location.href = '/profile/bind-phone?source=wechat&welcome=true';
+          }, 3000);
+        } else if (data.isNewUser) {
+          // 新用户但不需要绑定手机号
+          setTimeout(() => {
+            window.location.href = '/profile/setup?source=wechat&welcome=true';
+          }, 2500);
+        } else {
+          // 老用户直接跳转
+          setTimeout(() => {
+            const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+            window.location.href = redirectUrl;
+          }, 1500);
+        }
       } else {
         throw new Error(data.message || '登录失败');
       }
@@ -241,7 +298,11 @@ const WechatLogin: React.FC = () => {
         const response = await fetch('/api/auth/wechat/check-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sceneId })
+          body: JSON.stringify({ 
+            sceneId,
+            autoRegister: true, // 启用自动注册
+            requestUserInfo: true // 请求用户信息
+          })
         });
         
         if (!response.ok) throw new Error('检查状态失败');
@@ -263,16 +324,48 @@ const WechatLogin: React.FC = () => {
               authToken: data.token
             });
             
+            // 处理注册结果
+            if (data.registrationResult) {
+              setRegistrationResult(data.registrationResult);
+              
+              if (data.registrationResult.isNewUser) {
+                setShowWelcome(true);
+                console.log('新用户通过扫码微信登录自动注册成功');
+              }
+            }
+            
             // 存储认证信息
             localStorage.setItem('auth_token', data.token);
+            if (data.registrationResult) {
+              localStorage.setItem('user_info', JSON.stringify({
+                openid: data.registrationResult.profile.openid,
+                unionid: data.registrationResult.profile.unionid,
+                nickname: data.registrationResult.profile.nickname,
+                avatar: data.registrationResult.profile.headimgurl,
+                userId: data.registrationResult.userId,
+                isNewUser: data.registrationResult.isNewUser,
+                loginMethod: 'wechat'
+              }));
+            }
             
             // 清除轮询
             if (pollingRef.current) clearInterval(pollingRef.current);
             
-            // 跳转到成功页面或首页
-            setTimeout(() => {
-              window.location.href = '/dashboard';
-            }, 1000);
+            // 根据用户状态决定跳转
+            if (data.registrationResult?.isNewUser && data.registrationResult.needsBinding) {
+              setTimeout(() => {
+                window.location.href = '/profile/bind-phone?source=wechat&welcome=true';
+              }, 3000);
+            } else if (data.registrationResult?.isNewUser) {
+              setTimeout(() => {
+                window.location.href = '/profile/setup?source=wechat&welcome=true';
+              }, 2500);
+            } else {
+              setTimeout(() => {
+                const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+                window.location.href = redirectUrl;
+              }, 1500);
+            }
             break;
           case 'EXPIRED':
             setLoginState(prev => ({ ...prev, status: 'expired' }));
@@ -349,6 +442,21 @@ const WechatLogin: React.FC = () => {
         )}
       </div>
       
+      {/* 自动注册说明 */}
+      <div className="auto-register-notice">
+        <p className="notice-text">
+          🔐 首次使用微信登录将自动为您创建账户
+        </p>
+        <p className="feature-text">
+          📋 我们将获取您的微信昵称和头像用于账户设置
+        </p>
+        <p className="privacy-text">
+          登录即表示您同意我们的 
+          <a href="/terms" target="_blank">服务条款</a> 和 
+          <a href="/privacy" target="_blank">隐私政策</a>
+        </p>
+      </div>
+      
       {/* 其他登录方式提示 */}
       <div className="other-login-methods">
         <p>您还可以选择：</p>
@@ -367,42 +475,222 @@ export default WechatLogin;
 ## 交互流程
 
 ```mermaid
+flowchart TD
+    A[检测浏览器环境] --> B{是否在微信内?}
+    B -->|是| C[直接OAuth授权]
+    B -->|否| D[生成登录二维码]
+    
+    C --> E[跳转微信授权页面]
+    E --> F[用户授权确认]
+    F --> G{用户是否同意授权?}
+    G -->|拒绝| H[返回授权失败]
+    G -->|同意| I[获取授权码code]
+    
+    D --> J[显示二维码]
+    J --> K[用户扫码]
+    K --> L[微信内确认授权]
+    L --> M{用户是否确认?}
+    M -->|取消| N[返回取消状态]
+    M -->|确认| I
+    
+    I --> O[服务端验证授权码]
+    O --> P[获取微信用户信息]
+    P --> Q[检查OpenID是否存在]
+    
+    Q --> R{用户是否存在?}
+    R -->|存在| S[获取现有用户信息]
+    R -->|不存在| T[自动创建新用户]
+    
+    T --> U[解析微信用户信息]
+    U --> V[生成用户ID]
+    V --> W[设置用户基本信息]
+    W --> X[下载并存储头像]
+    X --> Y[设置默认昵称]
+    Y --> Z{是否需要绑定手机号?}
+    
+    Z -->|需要| AA[标记needsBinding=true]
+    Z -->|不需要| BB[标记needsBinding=false]
+    
+    AA --> CC[保存用户到数据库]
+    BB --> CC
+    CC --> DD[返回注册成功信息]
+    
+    S --> EE[返回登录成功信息]
+    DD --> FF[前端显示欢迎界面]
+    EE --> GG[前端处理登录状态]
+    
+    FF --> HH{需要绑定手机号?}
+    HH -->|是| II[跳转到手机号绑定页面]
+    HH -->|否| JJ[跳转到个人资料完善页面]
+    
+    GG --> KK[保存凭据和令牌]
+    KK --> LL[跳转到主页/仪表板]
+    
+    II --> MM[用户绑定手机号]
+    MM --> NN[验证手机号]
+    NN --> JJ
+    
+    JJ --> OO[用户完善个人信息]
+    OO --> PP[更新用户资料]
+    PP --> LL
+    
+    style T fill:#e1f5fe
+    style U fill:#e1f5fe
+    style V fill:#e1f5fe
+    style W fill:#e1f5fe
+    style X fill:#e1f5fe
+    style Y fill:#e1f5fe
+    style CC fill:#e1f5fe
+    style DD fill:#e8f5e8
+    style FF fill:#fff3e0
+    style II fill:#fce4ec
+    style JJ fill:#f3e5f5
+```
+
+## 微信用户数据处理流程
+
+```mermaid
+flowchart TD
+    A[获取微信用户原始数据] --> B[数据清洗和验证]
+    B --> C{昵称是否合规?}
+    C -->|否| D[使用默认昵称]
+    C -->|是| E[检查昵称重复]
+    
+    E --> F{昵称是否重复?}
+    F -->|是| G[添加数字后缀]
+    F -->|否| H[保持原昵称]
+    
+    D --> I[处理头像URL]
+    G --> I
+    H --> I
+    
+    I --> J{头像URL是否有效?}
+    J -->|否| K[使用默认头像]
+    J -->|是| L[下载微信头像]
+    
+    L --> M{下载是否成功?}
+    M -->|否| K
+    M -->|是| N[转换为本地URL]
+    
+    K --> O[构建用户对象]
+    N --> O
+    
+    O --> P[地理位置信息处理]
+    P --> Q[性别信息映射]
+    Q --> R[UnionID处理]
+    R --> S[保存到数据库]
+    
+    style A fill:#e3f2fd
+    style B fill:#e3f2fd
+    style I fill:#fff3e0
+    style L fill:#fff3e0
+    style O fill:#e8f5e8
+    style S fill:#e8f5e8
+```
+
+## 微信注册数据模型
+
+```mermaid
+erDiagram
+    User {
+        string id PK "用户唯一标识"
+        string openid UK "微信OpenID"
+        string unionid UK "微信UnionID"
+        string phone UK "绑定手机号"
+        string nickname "用户昵称"
+        string original_nickname "微信原始昵称"
+        string avatar "头像URL"
+        string original_avatar "微信原始头像URL"
+        int sex "性别(1男2女0未知)"
+        string city "城市"
+        string province "省份"
+        string country "国家"
+        datetime created_at "创建时间"
+        datetime updated_at "更新时间"
+        boolean is_phone_verified "手机号验证状态"
+        boolean profile_completed "资料完善状态"
+        string registration_source "注册来源"
+        json wechat_raw_data "微信原始数据"
+    }
+    
+    UserProfile {
+        string user_id PK "用户ID"
+        string real_name "真实姓名"
+        date birth_date "出生日期"
+        string gender "性别偏好"
+        string bio "个人简介"
+        json social_links "社交链接"
+        json preferences "用户偏好设置"
+        datetime profile_updated_at "资料更新时间"
+    }
+    
+    WechatBinding {
+        string id PK "绑定记录ID"
+        string user_id FK "用户ID"
+        string openid "微信OpenID"
+        string unionid "微信UnionID"
+        string app_id "微信应用ID"
+        json scope_info "授权范围信息"
+        datetime bind_time "绑定时间"
+        datetime last_login "最后登录时间"
+        boolean is_active "是否激活"
+    }
+    
+    LoginRecord {
+        string id PK "登录记录ID"
+        string user_id FK "用户ID"
+        string login_method "登录方式"
+        string openid "微信OpenID"
+        string ip_address "登录IP"
+        string user_agent "用户代理"
+        string login_source "登录来源(app/web/mini)"
+        datetime login_time "登录时间"
+        boolean is_new_user "是否新用户"
+        json extra_data "额外数据"
+    }
+    
+    User ||--o| UserProfile : "拥有"
+    User ||--o{ WechatBinding : "关联"
+    User ||--o{ LoginRecord : "产生"
+    WechatBinding ||--o{ LoginRecord : "记录"
+```
+
+```mermaid
 sequenceDiagram
     actor User as 用户
     participant Client as 前端应用
     participant Server as 后端服务
     participant WeChat as 微信服务器
+    participant DB as 数据库
     
     alt 在微信浏览器内
-        Client->>WeChat: 重定向到OAuth授权页
-        WeChat-->>User: 显示授权确认
+        Client->>WeChat: 重定向到OAuth授权页(snsapi_userinfo)
+        WeChat-->>User: 显示授权确认(包含个人信息)
         User->>WeChat: 同意授权
         WeChat-->>Client: 重定向回应用(带授权code)
-        Client->>Server: 验证授权code
-        Server->>WeChat: 请求访问令牌
-        WeChat-->>Server: 返回访问令牌和用户信息
-        Server-->>Client: 返回登录结果和用户令牌
-    else 在普通浏览器
-        Client->>Server: 请求登录二维码
-        Server->>WeChat: 创建临时场景值和二维码
-        WeChat-->>Server: 返回二维码URL
-        Server-->>Client: 返回二维码URL和场景ID
-        Client-->>User: 显示二维码
+        Client->>Server: 验证授权code(autoRegister=true)
+        Server->>WeChat: 请求访问令牌和用户信息
+        WeChat-->>Server: 返回访问令牌和用户详细信息
         
-        loop 轮询状态检查
-            Client->>Server: 检查登录状态
-            Server->>WeChat: 查询扫码状态
-            WeChat-->>Server: 返回当前状态
-            Server-->>Client: 更新登录状态
+        Server->>DB: 检查OpenID是否存在
+        alt 用户已存在
+            DB-->>Server: 返回现有用户信息
+            Server-->>Client: 返回登录成功(isNewUser=false)
+        else 用户不存在
+            Server->>DB: 创建新用户(使用微信信息)
+            DB-->>Server: 返回新用户信息
+            Server-->>Client: 返回注册成功(isNewUser=true)
+            Client-->>User: 显示欢迎信息和微信资料
         end
         
-        User->>WeChat: 扫描二维码(在微信中)
-        WeChat-->>User: 请求确认登录
-        User->>WeChat: 确认登录
-        WeChat->>Server: 推送认证结果
-        Client->>Server: 检测到认证成功
-        Server-->>Client: 返回登录令牌
-        Client-->>User: 显示登录成功，跳转
+        alt 需要绑定手机号
+            Client-->>User: 跳转到手机号绑定页面
+        else 不需要绑定
+            Client-->>User: 跳转到个人中心或主页
+        end
+        
+    else 在普通浏览器
+        Note over Client,DB: 扫码登录流程(同上逻辑)
     end
 ```
 
@@ -492,35 +780,39 @@ useEffect(() => {
    - 需在微信开放平台注册应用
    - 配置回调域名和安全域名
    - 获取 AppID 和 AppSecret
+   - **申请 snsapi_userinfo 权限以获取用户详细信息**
 
-2. **技术要求**
-   - 服务端需支持 HTTPS
-   - 需实现微信回调接口
-   - 处理各类异常情况与超时
+2. **用户信息处理**
+   - **合规获取** - 明确告知用户获取哪些信息及用途
+   - **数据映射** - 将微信用户信息映射到应用用户模型
+   - **头像处理** - 下载并存储微信头像到本地存储
+   - **昵称去重** - 处理相同昵称的用户注册情况
 
-3. **开发环境测试**
-   - 微信扫码登录需在公网环境测试
-   - 可使用微信开发者工具模拟授权流程
-   - 移动端与 PC 端需分别验证
+3. **账号关联策略**
+   - **UnionID 优先** - 如有 UnionID，优先使用它关联多个应用
+   - **OpenID 备选** - 单应用场景使用 OpenID 作为唯一标识
+   - **手机号绑定** - 新用户可选择性绑定手机号增强安全性
+   - **多账号整合** - 处理用户既有手机注册又有微信注册的情况
 
-4. **账号关联**
-   - 设计用户首次微信登录的账号关联流程
-   - 处理已有账号的绑定与解绑
-   - 考虑多个社交账号关联同一用户的情况
+4. **数据安全与隐私**
+   - **最小化原则** - 只获取必要的用户信息
+   - **加密存储** - 敏感信息加密存储
+   - **权限控制** - 实现细粒度的数据访问权限
+   - **用户控制** - 允许用户管理授权信息和删除数据
 
-5. **凭据管理注意事项**
-   - Credential Management API 仅在 HTTPS 环境可用
-   - 浏览器支持情况需要检测并降级处理
-   - 考虑令牌刷新机制，避免令牌过期问题
-   - 提供凭据注销机制，允许用户完全退出登录状态
+5. **用户体验优化**
+   - **渐进式引导** - 新用户分步骤完成账户设置
+   - **智能跳转** - 根据用户状态智能选择跳转页面
+   - **个性化欢迎** - 使用微信昵称和头像提供个性化体验
+   - **错误处理** - 优雅处理各种异常情况
 
 ## 最佳实践
 
-1. 使用状态管理库（如 Redux）管理复杂的登录状态
-2. 实现令牌刷新机制，延长用户登录会话
-3. 在微信生态内提供更深度的整合，如小程序跳转
-4. 实现防刷机制，避免恶意扫码请求
-5. 优化二维码展示，可考虑添加应用 logo 提升品牌辨识度
-6. 优先使用 `FederatedCredential` 存储微信等 OpenID 凭据
-7. 实现完全的 OpenID Connect 流程，包括 ID 令牌验证等安全机制
-8. 考虑多种身份提供商之间的互操作性，为用户提供一致体验
+1. **统一注册入口** - 所有登录方式都支持自动注册，提供一致体验
+2. **渐进式信息收集** - 注册时只获取必要信息，后续渐进式完善
+3. **多重身份验证** - 新用户可选择绑定多种验证方式提升安全性
+4. **数据同步机制** - 定期同步微信用户信息，保持数据新鲜度
+5. **用户画像构建** - 基于微信信息和行为数据构建用户画像
+6. **兼容性考虑** - 确保自动注册功能在各种设备和浏览器上正常工作
+7. **监控和分析** - 监控注册转化率和用户行为，持续优化体验
+8. **合规性保障** - 确保用户信息收集和使用符合相关法律法规

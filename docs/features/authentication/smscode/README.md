@@ -8,6 +8,7 @@
 - 验证码发送与倒计时管理
 - 防刷机制与流量控制
 - 多场景验证码登录支持（注册、登录、找回）
+- **自动注册账户** - 首次登录用户自动创建账户
 - 完整的错误处理与用户反馈
 
 ## 代码实现
@@ -29,6 +30,17 @@ const smsLoginSchema = z.object({
 
 type SmsLoginData = z.infer<typeof smsLoginSchema>;
 
+// 添加用户信息状态
+interface UserRegistrationData {
+  isNewUser: boolean;
+  needsProfile: boolean;
+  userId?: string;
+  profile?: {
+    nickname?: string;
+    avatar?: string;
+  };
+}
+
 const SmsLoginForm: React.FC = () => {
   const [formData, setFormData] = useState<SmsLoginData>({
     phone: '',
@@ -39,6 +51,7 @@ const SmsLoginForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [codeStatus, setCodeStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [userRegistration, setUserRegistration] = useState<UserRegistrationData | null>(null);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
@@ -175,36 +188,76 @@ const SmsLoginForm: React.FC = () => {
       setErrors({});
       setIsSubmitting(true);
       
-      // 实际登录逻辑
-      console.log('登录信息:', formData);
+      // 提交登录请求，支持自动注册
+      const response = await fetch('/api/auth/sms/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone: formData.phone,
+          code: formData.code,
+          autoRegister: true // 启用自动注册
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('登录失败');
+      }
+
+      const result = await response.json();
       
-      // 模拟 API 请求
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // 登录成功后保存凭据
-      if (formData.remember && 'credentials' in navigator) {
-        try {
-          // 创建新凭据对象 - 对于 SMS 登录，我们只存储手机号码
-          const cred = new PasswordCredential({
-            id: formData.phone, // 手机号作为 ID
-            password: '', // 验证码不保存
-            name: `手机用户-${formData.phone.substring(7)}` // 可选的显示名称
+      if (result.success) {
+        // 检查是否为新注册用户
+        if (result.isNewUser) {
+          console.log('新用户自动注册成功');
+          setUserRegistration({
+            isNewUser: true,
+            needsProfile: result.needsProfile || false,
+            userId: result.userId,
+            profile: result.profile
           });
-          
-          // 存储凭据
-          await navigator.credentials.store(cred);
-          console.log('凭据已保存');
-        } catch (err) {
-          console.error('保存凭据失败:', err);
         }
+
+        // 登录成功后保存凭据
+        if (formData.remember && 'credentials' in navigator) {
+          try {
+            // 创建新凭据对象 - 对于 SMS 登录，我们只存储手机号码
+            const cred = new PasswordCredential({
+              id: formData.phone, // 手机号作为 ID
+              password: '', // 验证码不保存
+              name: result.isNewUser 
+                ? `新用户-${formData.phone.substring(7)}` 
+                : (result.nickname || `手机用户-${formData.phone.substring(7)}`) // 显示昵称或默认名称
+            });
+            
+            // 存储凭据
+            await navigator.credentials.store(cred);
+            console.log('凭据已保存');
+          } catch (err) {
+            console.error('保存凭据失败:', err);
+          }
+        }
+        
+        // 如果用户选择了记住登录状态，可以存储令牌
+        if (formData.remember) {
+          localStorage.setItem('auth_token', result.token);
+          localStorage.setItem('user_info', JSON.stringify({
+            phone: formData.phone,
+            userId: result.userId,
+            isNewUser: result.isNewUser,
+            nickname: result.nickname
+          }));
+        }
+        
+        // 直接跳转到首页或指定页面
+        setTimeout(() => {
+          const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+          window.location.href = redirectUrl;
+        }, 1500);
+      } else {
+        throw new Error(result.message || '登录失败');
       }
-      
-      // 如果用户选择了记住登录状态，可以存储令牌
-      if (formData.remember) {
-        localStorage.setItem('auth_token', 'sample-token-value');
-      }
-      
-      // 登录成功后的重定向逻辑
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Partial<Record<keyof SmsLoginData, string>> = {};
@@ -224,6 +277,7 @@ const SmsLoginForm: React.FC = () => {
   return (
     <div className="sms-login-container">
       <h2>手机验证码登录</h2>
+
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="phone">手机号码</label>
@@ -291,9 +345,21 @@ const SmsLoginForm: React.FC = () => {
           className="submit-button" 
           disabled={isSubmitting}
         >
-          {isSubmitting ? '登录中...' : '登录'}
+          {isSubmitting ? '验证中...' : '登录 / 注册'}
         </button>
       </form>
+      
+      {/* 自动注册说明 */}
+      <div className="auto-register-notice">
+        <p className="notice-text">
+          📱 首次使用该手机号将自动为您创建账户
+        </p>
+        <p className="privacy-text">
+          登录即表示您同意我们的 
+          <a href="/terms" target="_blank">服务条款</a> 和 
+          <a href="/privacy" target="_blank">隐私政策</a>
+        </p>
+      </div>
     </div>
   );
 };
@@ -303,79 +369,94 @@ export default SmsLoginForm;
 
 ## 交互流程
 
+## 新用户注册流程
+
+```mermaid
+flowchart TD
+    A[用户输入手机号] --> B[点击获取验证码]
+    B --> C{手机号格式验证}
+    C -->|格式错误| D[显示错误提示]
+    C -->|格式正确| E[发送验证码]
+    
+    E --> F[用户输入验证码]
+    F --> G[提交登录表单]
+    G --> H{验证码校验}
+    H -->|验证失败| I[显示验证错误]
+    H -->|验证成功| J[检查用户是否存在]
+    
+    J --> K{用户是否存在?}
+    K -->|存在| L[返回用户信息]
+    K -->|不存在| M[自动创建新账户]
+    
+    M --> N[生成用户ID]
+    N --> O[设置默认信息]
+    O --> S[保存用户到数据库]
+    S --> T[返回注册成功信息]
+    
+    L --> U[返回登录成功信息]
+    T --> V[前端显示欢迎界面]
+    U --> W[前端处理登录状态]
+    
+    V --> Z[跳转到主页/仪表板]
+    W --> AA[保存凭据和令牌]
+    AA --> Z
+    
+    style M fill:#e1f5fe
+    style N fill:#e1f5fe
+    style O fill:#e1f5fe
+    style S fill:#e1f5fe
+    style T fill:#e8f5e8
+    style V fill:#fff3e0
+```
+
 ```mermaid
 sequenceDiagram
     actor User as 用户
     participant Form as 登录表单
     participant Client as 客户端逻辑
     participant Server as 服务端 API
+    participant DB as 数据库
     
-    User->>Form: 输入手机号
-    Form->>Client: 验证手机号格式
-    alt 手机号格式有误
-        Client-->>Form: 显示错误提示
-    else 手机号格式正确
-        User->>Form: 点击 "获取验证码"
-        Form->>Client: 禁用按钮，启动倒计时
-        Client->>Server: 请求发送验证码
-        Server-->>Client: 返回发送结果
-        
-        alt 发送成功
-            Client-->>Form: 显示倒计时，聚焦验证码输入框
-            Server->>User: 短信发送到用户手机
-            User->>Form: 输入收到的验证码
-        else 发送失败
-            Client-->>Form: 显示错误，重置按钮状态
-        end
-    end
+    User->>Form: 输入手机号和验证码
+    Form->>Client: 验证表单数据
+    Client->>Server: 提交登录请求(autoRegister=true)
+    Server->>DB: 检查手机号是否存在
     
-    User->>Form: 提交表单
-    Form->>Client: 验证所有字段
-    
-    alt 验证失败
-        Client-->>Form: 显示具体错误
-    else 验证通过
-        Client->>Server: 提交登录请求
-        Server-->>Client: 返回认证结果
-        
-        alt 认证成功
-            Client-->>User: 登录成功，跳转或刷新
-        else 认证失败
-            Client-->>Form: 显示登录失败信息
-        end
+    alt 用户已存在
+        DB-->>Server: 返回用户信息
+        Server-->>Client: 返回登录成功(isNewUser=false)
+        Client-->>User: 直接跳转到主页
+    else 用户不存在
+        Server->>DB: 创建新用户账户
+        DB-->>Server: 返回新用户信息
+        Server-->>Client: 返回注册成功(isNewUser=true)
+        Client-->>User: 显示欢迎信息
+        Client-->>User: 跳转到主页
     end
 ```
 
 ## 用户体验
 
-### 输入优化
+### 无缝注册体验
 
-1. **智能输入类型** - 手机号使用 `inputMode="tel"`，验证码使用 `inputMode="numeric"` 优化移动键盘
-2. **自动聚焦流程** - 验证码发送成功后自动将焦点切换到验证码输入框
-3. **输入限制** - 验证码输入限制为 6 位纯数字，实时过滤无效输入
-4. **自动完成支持** - 适当使用 `autoComplete` 属性，支持浏览器自动填充功能
+1. **统一入口** - 登录和注册使用同一个表单，减少用户认知负担
+2. **自动识别** - 系统自动判断是否为新用户，无需用户手动选择
+3. **欢迎引导** - 新用户注册成功后显示欢迎信息，提升归属感
+4. **渐进式完善** - 支持后续完善个人信息，不阻塞主流程
 
-### 状态反馈
+### 状态反馈优化
 
-1. **倒计时显示** - 直观的倒计时显示防止用户频繁请求验证码
-2. **多状态按钮** - 验证码按钮根据不同状态（空闲、发送中、倒计时中）显示不同文本
-3. **加载状态** - 登录提交时显示加载状态，防止重复提交
-4. **错误位置** - 错误信息紧随相关字段显示，便于用户快速定位问题
+1. **按钮文案** - 将按钮文本改为"登录 / 注册"，明确表达功能
+2. **进度提示** - 新用户显示注册进度和后续引导
+3. **个性化信息** - 保存用户注册状态，用于后续个性化体验
+4. **明确说明** - 提供自动注册的说明文字，让用户了解流程
 
-### 凭据 API 集成
+### 隐私与合规
 
-1. **自动填充** - 使用浏览器的 Credential Management API 存储和检索用户手机号
-2. **智能识别** - 基于保存的凭据类型提供不同级别的自动完成体验
-3. **无缝体验** - 用户再次访问时自动填充手机号，减少输入步骤
-4. **用户控制** - 通过 "记住登录状态" 选项，让用户决定是否保存凭据
-5. **兼容性处理** - 优雅降级，在不支持凭据 API 的浏览器中依然提供基础功能
-
-### 安全考量
-
-1. **流量控制** - 验证码发送频率限制防止恶意请求
-2. **验证码时效性** - 验证码设置合理的有效期
-3. **防刷保护** - 服务端实现防刷机制，限制单一 IP 或设备的请求次数
-4. **敏感信息保护** - 验证码不在客户端存储，仅在服务端进行验证
+1. **明确告知** - 在注册前告知用户将自动创建账户
+2. **协议同意** - 提供服务条款和隐私政策链接
+3. **最小权限** - 只获取手机号等必要信息
+4. **用户控制** - 允许用户后续修改或删除账户
 
 ## 实施注意事项
 
