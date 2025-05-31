@@ -1661,3 +1661,32 @@ class ClientDecryption {
 - **身份验证**：结合 JWT 或其他认证机制验证通信双方身份
 - **重放攻击防护**：可添加时间戳和 nonce 防止重放攻击
 - **错误处理**：避免在错误信息中泄露密钥信息
+
+## 参考资料
+
+### 加密标准与规范
+- [NIST - 高级加密标准 (AES)](https://csrc.nist.gov/publications/detail/fips/197/final)
+- [RSA 实验室 PKCS #1：RSA 加密标准](https://www.rfc-editor.org/rfc/rfc8017)
+- [GCM 模式推荐使用参数](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf)
+- [OWASP - 密码存储指南](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+
+### Web 加密 API
+- [MDN Web Doc - Web Crypto API](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Crypto_API)
+- [SubtleCrypto API 文档](https://developer.mozilla.org/zh-CN/docs/Web/API/SubtleCrypto)
+- [使用 Web Crypto API 的最佳实践](https://www.w3.org/TR/WebCryptoAPI/)
+
+### 安全最佳实践
+- [OWASP - 传输层保护备忘单](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)
+- [OWASP - 加密存储备忘单](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
+- [密钥管理最佳实践](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
+- [浏览器中的安全加密](https://www.manning.com/books/real-world-cryptography)
+
+### 工具与调试
+- [OpenSSL 命令行工具](https://www.openssl.org/docs/)
+- [加密安全在线验证工具](https://www.ssllabs.com/ssltest/)
+- [JWT 调试工具](https://jwt.io/)
+
+### 法规与合规
+- [GDPR 数据保护与加密要求](https://gdpr-info.eu/)
+- [PCI DSS 加密传输要求](https://www.pcisecuritystandards.org/)
+
