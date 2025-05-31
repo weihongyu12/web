@@ -552,53 +552,1015 @@ class ClientEncryption {
 
 ### 后端实现（接收加密数据）
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="nestjs" label="NestJS" default>
+
+**Controller**
+
 ```typescript
-import crypto from 'crypto';
-import express from 'express';
+// filepath: src/encryption/encryption.controller.ts
+import { Controller, Post, Get, Body, Headers, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { EncryptionService } from './encryption.service';
 
-// 服务器RSA密钥对
-const { privateKey: serverPrivateKey, publicKey: serverPublicKey } = crypto.generateKeyPairSync('rsa', {
-  modulusLength: 2048,
-  publicKeyEncoding: { type: 'spki', format: 'pem' },
-  privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-});
+@Controller('api')
+export class EncryptionController {
+  constructor(private readonly encryptionService: EncryptionService) {}
 
-// 提供服务器RSA公钥
-app.get('/api/server-public-key', (req, res) => {
-  const publicKeyBase64 = Buffer.from(serverPublicKey).toString('base64');
-  res.json({ publicKey: publicKeyBase64 });
-});
-
-// 接收并解密前端数据
-app.post('/api/secure-data', (req, res) => {
-  try {
-    const { encryptedAesKey, encryptedData, iv } = req.body;
-
-    // 1. 用服务器私钥解密AES密钥
-    const encryptedAesKeyBuffer = Buffer.from(encryptedAesKey, 'base64');
-    const aesKeyBuffer = crypto.privateDecrypt(
-      { key: serverPrivateKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING },
-      encryptedAesKeyBuffer
-    );
-
-    // 2. 用AES密钥解密数据
-    const ivBuffer = Buffer.from(iv, 'base64');
-    const encryptedDataBuffer = Buffer.from(encryptedData, 'base64');
-    
-    const decipher = crypto.createDecipheriv('aes-256-gcm', aesKeyBuffer, ivBuffer);
-    let decryptedData = decipher.update(encryptedDataBuffer, null, 'utf8');
-    decryptedData += decipher.final('utf8');
-
-    const businessData = JSON.parse(decryptedData);
-    console.log('接收到前端加密数据:', businessData);
-
-    res.json({ success: true, message: '数据接收成功', data: businessData });
-  } catch (error) {
-    console.error('解密前端数据失败:', error);
-    res.status(400).json({ success: false, message: '数据解密失败' });
+  @Get('server-public-key')
+  getServerPublicKey() {
+    return { publicKey: this.encryptionService.getServerPublicKey() };
   }
-});
+
+  @Post('secure-data')
+  receiveEncryptedData(@Body() body: { encryptedAesKey: string; encryptedData: string; iv: string }) {
+    try {
+      const { encryptedAesKey, encryptedData, iv } = body;
+      const businessData = this.encryptionService.decryptClientData(encryptedAesKey, encryptedData, iv);
+      
+      console.log('接收到前端加密数据:', businessData);
+      return { success: true, message: '数据接收成功', data: businessData };
+    } catch (error) {
+      throw new BadRequestException('数据解密失败');
+    }
+  }
+
+  @Post('encrypted-response')
+  sendEncryptedData(@Headers('x-client-public-key') clientPublicKey: string) {
+    try {
+      if (!clientPublicKey) {
+        throw new BadRequestException('缺少客户端公钥');
+      }
+
+      const responseData = {
+        message: "这是来自服务器的敏感数据",
+        timestamp: new Date().toISOString(),
+        userInfo: { id: 123, role: "admin" }
+      };
+
+      const encryptedResponse = this.encryptionService.encryptDataForClient(responseData, clientPublicKey);
+      console.log('发送加密数据给前端');
+      return encryptedResponse;
+    } catch (error) {
+      throw new InternalServerErrorException('服务器加密失败');
+    }
+  }
+}
 ```
+
+**Service**
+
+```typescript
+// filepath: src/encryption/encryption.service.ts
+import { Injectable } from '@nestjs/common';
+import * as crypto from 'crypto';
+
+@Injectable()
+export class EncryptionService {
+  private serverKeyPair: { privateKey: string; publicKey: string };
+
+  constructor() {
+    // 生成服务器RSA密钥对
+    this.serverKeyPair = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+  }
+
+  getServerPublicKey(): string {
+    return Buffer.from(this.serverKeyPair.publicKey).toString('base64');
+  }
+
+  decryptClientData(encryptedAesKey: string, encryptedData: string, iv: string): any {
+    try {
+      // 1. 用服务器私钥解密AES密钥
+      const encryptedAesKeyBuffer = Buffer.from(encryptedAesKey, 'base64');
+      const aesKeyBuffer = crypto.privateDecrypt(
+        { key: this.serverKeyPair.privateKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING },
+        encryptedAesKeyBuffer
+      );
+
+      // 2. 用AES密钥解密数据
+      const ivBuffer = Buffer.from(iv, 'base64');
+      const encryptedDataBuffer = Buffer.from(encryptedData, 'base64');
+      
+      const decipher = crypto.createDecipheriv('aes-256-gcm', aesKeyBuffer, ivBuffer);
+      let decryptedData = decipher.update(encryptedDataBuffer, undefined, 'utf8');
+      decryptedData += decipher.final('utf8');
+
+      return JSON.parse(decryptedData);
+    } catch (error) {
+      throw new Error('数据解密失败');
+    }
+  }
+
+  encryptDataForClient(data: any, clientPublicKey: string): any {
+    try {
+      const publicKey = crypto.createPublicKey({
+        key: Buffer.from(clientPublicKey, 'base64'),
+        format: 'der',
+        type: 'spki'
+      });
+
+      // 生成随机AES密钥
+      const aesKey = crypto.randomBytes(32);
+      
+      // 用客户端公钥加密AES密钥
+      const encryptedAesKey = crypto.publicEncrypt(
+        { key: publicKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING },
+        aesKey
+      );
+
+      // 使用AES加密响应数据
+      const iv = crypto.randomBytes(12);
+      const cipher = crypto.createCipheriv('aes-256-gcm', aesKey, iv);
+      let encryptedData = cipher.update(JSON.stringify(data), 'utf8');
+      encryptedData = Buffer.concat([encryptedData, cipher.final()]);
+
+      return {
+        encryptedAesKey: encryptedAesKey.toString('base64'),
+        encryptedData: encryptedData.toString('base64'),
+        iv: iv.toString('base64')
+      };
+    } catch (error) {
+      throw new Error('数据加密失败');
+    }
+  }
+}
+```
+
+**Module**
+
+```typescript
+// filepath: src/encryption/encryption.module.ts
+import { Module } from '@nestjs/common';
+import { EncryptionController } from './encryption.controller';
+import { EncryptionService } from './encryption.service';
+
+@Module({
+  controllers: [EncryptionController],
+  providers: [EncryptionService],
+  exports: [EncryptionService]
+})
+export class EncryptionModule {}
+```
+
+</TabItem>
+<TabItem value="springboot" label="Spring Boot">
+
+**Controller**
+
+```java
+// filepath: src/main/java/com/example/encryption/controller/EncryptionController.java
+package com.example.encryption.controller;
+
+import com.example.encryption.service.EncryptionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class EncryptionController {
+
+    @Autowired
+    private EncryptionService encryptionService;
+
+    @GetMapping("/server-public-key")
+    public ResponseEntity<Map<String, String>> getServerPublicKey() {
+        String publicKey = encryptionService.getServerPublicKey();
+        return ResponseEntity.ok(Map.of("publicKey", publicKey));
+    }
+
+    @PostMapping("/secure-data")
+    public ResponseEntity<Map<String, Object>> receiveEncryptedData(@RequestBody Map<String, String> request) {
+        try {
+            String encryptedAesKey = request.get("encryptedAesKey");
+            String encryptedData = request.get("encryptedData");
+            String iv = request.get("iv");
+            
+            Object businessData = encryptionService.decryptClientData(encryptedAesKey, encryptedData, iv);
+            System.out.println("接收到前端加密数据: " + businessData);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "数据接收成功",
+                "data", businessData
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "数据解密失败"
+            ));
+        }
+    }
+
+    @PostMapping("/encrypted-response")
+    public ResponseEntity<Map<String, String>> sendEncryptedData(
+            @RequestHeader("X-Client-Public-Key") String clientPublicKey) {
+        try {
+            if (clientPublicKey == null || clientPublicKey.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "缺少客户端公钥"));
+            }
+
+            Map<String, Object> responseData = Map.of(
+                "message", "这是来自服务器的敏感数据",
+                "timestamp", java.time.Instant.now().toString(),
+                "userInfo", Map.of("id", 123, "role", "admin")
+            );
+
+            Map<String, String> encryptedResponse = encryptionService.encryptDataForClient(responseData, clientPublicKey);
+            System.out.println("发送加密数据给前端");
+            return ResponseEntity.ok(encryptedResponse);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "服务器加密失败"));
+        }
+    }
+}
+```
+
+**Service**
+
+```java
+// filepath: src/main/java/com/example/encryption/service/EncryptionService.java
+package com.example.encryption.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Service;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class EncryptionService {
+    
+    private final KeyPair serverKeyPair;
+    private final ObjectMapper objectMapper;
+
+    public EncryptionService() {
+        this.objectMapper = new ObjectMapper();
+        this.serverKeyPair = generateRSAKeyPair();
+    }
+
+    private KeyPair generateRSAKeyPair() {
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+            keyGen.initialize(2048);
+            return keyGen.generateKeyPair();
+        } catch (Exception e) {
+            throw new RuntimeException("RSA密钥对生成失败", e);
+        }
+    }
+
+    public String getServerPublicKey() {
+        byte[] publicKeyBytes = serverKeyPair.getPublic().getEncoded();
+        return Base64.getEncoder().encodeToString(publicKeyBytes);
+    }
+
+    public Object decryptClientData(String encryptedAesKey, String encryptedData, String iv) throws Exception {
+        // 1. 用服务器私钥解密AES密钥
+        byte[] encryptedAesKeyBytes = Base64.getDecoder().decode(encryptedAesKey);
+        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        rsaCipher.init(Cipher.DECRYPT_MODE, serverKeyPair.getPrivate());
+        byte[] aesKeyBytes = rsaCipher.doFinal(encryptedAesKeyBytes);
+
+        // 2. 用AES密钥解密数据
+        SecretKey aesKey = new SecretKeySpec(aesKeyBytes, "AES");
+        byte[] ivBytes = Base64.getDecoder().decode(iv);
+        byte[] encryptedDataBytes = Base64.getDecoder().decode(encryptedData);
+
+        Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, ivBytes);
+        aesCipher.init(Cipher.DECRYPT_MODE, aesKey, gcmSpec);
+        
+        byte[] decryptedBytes = aesCipher.doFinal(encryptedDataBytes);
+        String decryptedJson = new String(decryptedBytes, "UTF-8");
+        
+        return objectMapper.readValue(decryptedJson, Object.class);
+    }
+
+    public Map<String, String> encryptDataForClient(Object data, String clientPublicKeyB64) throws Exception {
+        // 导入客户端公钥
+        byte[] publicKeyBytes = Base64.getDecoder().decode(clientPublicKeyB64);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey clientPublicKey = keyFactory.generatePublic(keySpec);
+
+        // 生成随机AES密钥
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(256);
+        SecretKey aesKey = keyGen.generateKey();
+
+        // 用客户端公钥加密AES密钥
+        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        rsaCipher.init(Cipher.ENCRYPT_MODE, clientPublicKey);
+        byte[] encryptedAesKey = rsaCipher.doFinal(aesKey.getEncoded());
+
+        // 使用AES加密响应数据
+        String jsonData = objectMapper.writeValueAsString(data);
+        byte[] iv = new byte[12];
+        new SecureRandom().nextBytes(iv);
+
+        Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+        aesCipher.init(Cipher.ENCRYPT_MODE, aesKey, gcmSpec);
+        byte[] encryptedData = aesCipher.doFinal(jsonData.getBytes("UTF-8"));
+
+        Map<String, String> result = new HashMap<>();
+        result.put("encryptedAesKey", Base64.getEncoder().encodeToString(encryptedAesKey));
+        result.put("encryptedData", Base64.getEncoder().encodeToString(encryptedData));
+        result.put("iv", Base64.getEncoder().encodeToString(iv));
+        
+        return result;
+    }
+}
+```
+
+</TabItem>
+<TabItem value="django" label="Django">
+
+**Views**
+
+```python
+# filepath: encryption/views.py
+import json
+import base64
+import os
+from datetime import datetime
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import logging
+
+from .services import EncryptionService
+
+logger = logging.getLogger(__name__)
+
+# 全局加密服务实例
+encryption_service = EncryptionService()
+
+@require_http_methods(["GET"])
+def get_server_public_key(request):
+    """获取服务器RSA公钥"""
+    try:
+        public_key = encryption_service.get_server_public_key()
+        return JsonResponse({'publicKey': public_key})
+    except Exception as e:
+        logger.error(f"获取服务器公钥失败: {str(e)}")
+        return JsonResponse({'error': '获取公钥失败'}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def receive_encrypted_data(request):
+    """接收并解密前端数据"""
+    try:
+        data = json.loads(request.body)
+        encrypted_aes_key = data.get('encryptedAesKey')
+        encrypted_data = data.get('encryptedData')
+        iv = data.get('iv')
+
+        if not all([encrypted_aes_key, encrypted_data, iv]):
+            return JsonResponse({'error': '缺少必要参数'}, status=400)
+
+        business_data = encryption_service.decrypt_client_data(
+            encrypted_aes_key, encrypted_data, iv
+        )
+        
+        logger.info(f"接收到前端加密数据: {business_data}")
+        return JsonResponse({
+            'success': True,
+            'message': '数据接收成功',
+            'data': business_data
+        })
+    except Exception as e:
+        logger.error(f"解密前端数据失败: {str(e)}")
+        return JsonResponse({'success': False, 'message': '数据解密失败'}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def send_encrypted_data(request):
+    """发送加密数据给前端"""
+    try:
+        client_public_key = request.META.get('HTTP_X_CLIENT_PUBLIC_KEY')
+        if not client_public_key:
+            return JsonResponse({'error': '缺少客户端公钥'}, status=400)
+
+        response_data = {
+            'message': "这是来自服务器的敏感数据",
+            'timestamp': datetime.now().isoformat(),
+            'userInfo': {'id': 123, 'role': 'admin'}
+        }
+
+        encrypted_response = encryption_service.encrypt_data_for_client(
+            response_data, client_public_key
+        )
+        
+        logger.info("发送加密数据给前端")
+        return JsonResponse(encrypted_response)
+    except Exception as e:
+        logger.error(f"加密响应数据失败: {str(e)}")
+        return JsonResponse({'error': '服务器加密失败'}, status=500)
+```
+
+**Services**
+
+```python
+# filepath: encryption/services.py
+import json
+import base64
+import os
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+class EncryptionService:
+    def __init__(self):
+        # 生成服务器RSA密钥对
+        self.server_private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        self.server_public_key = self.server_private_key.public_key()
+
+    def get_server_public_key(self):
+        """获取服务器公钥的Base64编码"""
+        public_key_bytes = self.server_public_key.public_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return base64.b64encode(public_key_bytes).decode('utf-8')
+
+    def decrypt_client_data(self, encrypted_aes_key, encrypted_data, iv):
+        """解密客户端发送的数据"""
+        try:
+            # 1. 用服务器私钥解密AES密钥
+            encrypted_aes_key_bytes = base64.b64decode(encrypted_aes_key)
+            aes_key_bytes = self.server_private_key.decrypt(
+                encrypted_aes_key_bytes,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+
+            # 2. 用AES密钥解密数据
+            iv_bytes = base64.b64decode(iv)
+            encrypted_data_bytes = base64.b64decode(encrypted_data)
+
+            cipher = Cipher(
+                algorithms.AES(aes_key_bytes),
+                modes.GCM(iv_bytes),
+                backend=default_backend()
+            )
+            decryptor = cipher.decryptor()
+            decrypted_data = decryptor.update(encrypted_data_bytes) + decryptor.finalize()
+
+            return json.loads(decrypted_data.decode('utf-8'))
+        except Exception as e:
+            raise Exception(f"数据解密失败: {str(e)}")
+
+    def encrypt_data_for_client(self, data, client_public_key_b64):
+        """为客户端加密数据"""
+        try:
+            # 导入客户端公钥
+            client_public_key_bytes = base64.b64decode(client_public_key_b64)
+            client_public_key = serialization.load_der_public_key(
+                client_public_key_bytes,
+                backend=default_backend()
+            )
+
+            # 生成随机AES密钥
+            aes_key = os.urandom(32)  # 256位密钥
+
+            # 用客户端公钥加密AES密钥
+            encrypted_aes_key = client_public_key.encrypt(
+                aes_key,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+
+            # 使用AES加密响应数据
+            json_data = json.dumps(data)
+            iv = os.urandom(12)  # 96位IV用于GCM
+
+            cipher = Cipher(
+                algorithms.AES(aes_key),
+                modes.GCM(iv),
+                backend=default_backend()
+            )
+            encryptor = cipher.encryptor();
+            encrypted_data = encryptor.update(json_data.encode('utf-8')) + encryptor.finalize();
+
+            return {
+                'encryptedAesKey': base64.b64encode(encrypted_aes_key).decode('utf-8'),
+                'encryptedData': base64.b64encode(encrypted_data).decode('utf-8'),
+                'iv': base64.b64encode(iv).decode('utf-8')
+            };
+        except Exception as e:
+            raise Exception(f"数据加密失败: {str(e)}")
+```
+
+</TabItem>
+<TabItem value="laravel" label="Laravel">
+
+**Controller**
+
+```php
+<?php
+// filepath: app/Http/Controllers/EncryptionController.php
+namespace App\Http\Controllers;
+
+use App\Services\EncryptionService;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
+class EncryptionController extends Controller
+{
+    private $encryptionService;
+
+    public function __construct(EncryptionService $encryptionService)
+    {
+        $this->encryptionService = $encryptionService;
+    }
+
+    public function getServerPublicKey(): JsonResponse
+    {
+        try {
+            $publicKey = $this->encryptionService->getServerPublicKey();
+            return response()->json(['publicKey' => $publicKey]);
+        } catch (Exception $e) {
+            Log::error('获取服务器公钥失败: ' . $e->getMessage());
+            return response()->json(['error' => '获取公钥失败'], 500);
+        }
+    }
+
+    public function receiveEncryptedData(Request $request): JsonResponse
+    {
+        try {
+            $encryptedAesKey = $request->input('encryptedAesKey');
+            $encryptedData = $request->input('encryptedData');
+            $iv = $request->input('iv');
+
+            if (!$encryptedAesKey || !$encryptedData || !$iv) {
+                return response()->json(['error' => '缺少必要参数'], 400);
+            }
+
+            $businessData = $this->encryptionService->decryptClientData(
+                $encryptedAesKey,
+                $encryptedData,
+                $iv
+            );
+
+            Log::info('接收到前端加密数据', $businessData);
+
+            return response()->json([
+                'success' => true,
+                'message' => '数据接收成功',
+                'data' => $businessData
+            ]);
+        } catch (Exception $e) {
+            Log::error('解密前端数据失败: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => '数据解密失败'
+            ], 400);
+        }
+    }
+
+    public function sendEncryptedData(Request $request): JsonResponse
+    {
+        try {
+            $clientPublicKey = $request->header('X-Client-Public-Key');
+            if (!$clientPublicKey) {
+                return response()->json(['error' => '缺少客户端公钥'], 400);
+            }
+
+            $responseData = [
+                'message' => '这是来自服务器的敏感数据',
+                'timestamp' => now()->toISOString(),
+                'userInfo' => ['id' => 123, 'role' => 'admin']
+            ];
+
+            $encryptedResponse = $this->encryptionService->encryptDataForClient(
+                $responseData,
+                $clientPublicKey
+            );
+
+            Log::info('发送加密数据给前端');
+            return response()->json($encryptedResponse);
+        } catch (Exception $e) {
+            Log::error('加密响应数据失败: ' . $e->getMessage());
+            return response()->json(['error' => '服务器加密失败'], 500);
+        }
+    }
+}
+```
+
+**Service**
+
+```php
+<?php
+// filepath: app/Services/EncryptionService.php
+namespace App\Services;
+
+use Exception;
+use Illuminate\Support\Facades\Log;
+
+class EncryptionService
+{
+    private $serverPrivateKey;
+    private $serverPublicKey;
+
+    public function __construct()
+    {
+        // 生成服务器RSA密钥对
+        $config = [
+            "digest_alg" => "sha256",
+            "private_key_bits" => 2048,
+            "private_key_type" => OPENSSL_KEYTYPE_RSA,
+        ];
+
+        $res = openssl_pkey_new($config);
+        openssl_pkey_export($res, $this->serverPrivateKey);
+
+        $details = openssl_pkey_get_details($res);
+        $this->serverPublicKey = $details['key'];
+    }
+
+    public function getServerPublicKey(): string
+    {
+        return base64_encode($this->serverPublicKey);
+    }
+
+    public function decryptClientData(string $encryptedAesKey, string $encryptedData, string $iv): array
+    {
+        try {
+            // 1. 用服务器私钥解密AES密钥
+            $encryptedAesKeyBinary = base64_decode($encryptedAesKey);
+            $aesKey = '';
+            
+            if (!openssl_private_decrypt($encryptedAesKeyBinary, $aesKey, $this->serverPrivateKey, OPENSSL_RAW_DATA)) {
+                throw new Exception('AES密钥解密失败');
+            }
+
+            // 2. 用AES密钥解密数据
+            $ivBinary = base64_decode($iv);
+            $encryptedDataBinary = base64_decode($encryptedData);
+
+            $decryptedData = openssl_decrypt(
+                $encryptedDataBinary,
+                'aes-256-gcm',
+                $aesKey,
+                OPENSSL_RAW_DATA,
+                $ivBinary
+            );
+
+            if ($decryptedData === false) {
+                throw new Exception('数据解密失败');
+            }
+
+            return json_decode($decryptedData, true);
+        } catch (Exception $e) {
+            throw new Exception('数据解密失败: ' . $e->getMessage());
+        }
+    }
+
+    public function encryptDataForClient(array $data, string $clientPublicKeyB64): array
+    {
+        try {
+            // 导入客户端公钥
+            $clientPublicKey = base64_decode($clientPublicKeyB64);
+
+            // 生成随机AES密钥
+            $aesKey = random_bytes(32); // 256位密钥
+
+            // 用客户端公钥加密AES密钥
+            $encryptedAesKey = '';
+            if (!openssl_public_encrypt($aesKey, $encryptedAesKey, $clientPublicKey, OPENSSL_RAW_DATA)) {
+                throw new Exception('AES密钥加密失败');
+            }
+
+            // 使用AES加密响应数据
+            $jsonData = json_encode($data);
+            $iv = random_bytes(12); // 96位IV用于GCM
+
+            $encryptedData = openssl_encrypt(
+                $jsonData,
+                'aes-256-gcm',
+                $aesKey,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            if ($encryptedData === false) {
+                throw new Exception('数据加密失败');
+            }
+
+            return [
+                'encryptedAesKey' => base64_encode($encryptedAesKey),
+                'encryptedData' => base64_encode($encryptedData),
+                'iv' => base64_encode($iv)
+            ];
+        } catch (Exception $e) {
+            throw new Exception('数据加密失败: ' . $e->getMessage());
+        }
+    }
+}
+```
+
+**Routes**
+
+```php
+<?php
+// filepath: routes/api.php
+use App\Http\Controllers\EncryptionController;
+
+Route::get('/server-public-key', [EncryptionController::class, 'getServerPublicKey']);
+Route::post('/secure-data', [EncryptionController::class, 'receiveEncryptedData']);
+Route::post('/encrypted-response', [EncryptionController::class, 'sendEncryptedData']);
+```
+
+</TabItem>
+<TabItem value="aspnet" label="ASP.NET Core">
+
+**Service**
+
+```csharp
+// filepath: Services/EncryptionService.cs
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+
+namespace EncryptionApi.Services
+{
+    public class EncryptionService
+    {
+        private readonly RSA _serverRsa;
+        private readonly ILogger<EncryptionService> _logger;
+
+        public EncryptionService(ILogger<EncryptionService> logger)
+        {
+            _logger = logger;
+            _serverRsa = RSA.Create(2048);
+        }
+
+        public string GetServerPublicKey()
+        {
+            var publicKeyBytes = _serverRsa.ExportRSAPublicKey();
+            return Convert.ToBase64String(publicKeyBytes);
+        }
+
+        public T DecryptClientData<T>(string encryptedAesKey, string encryptedData, string iv)
+        {
+            try
+            {
+                // 1. 用服务器私钥解密AES密钥
+                var encryptedAesKeyBytes = Convert.FromBase64String(encryptedAesKey);
+                var aesKeyBytes = _serverRsa.Decrypt(encryptedAesKeyBytes, RSAEncryptionPadding.OaepSha256);
+
+                // 2. 用AES密钥解密数据
+                var ivBytes = Convert.FromBase64String(iv);
+                var encryptedDataBytes = Convert.FromBase64String(encryptedData);
+
+                using var aes = Aes.Create();
+                aes.Key = aesKeyBytes;
+                aes.IV = ivBytes;
+                aes.Mode = CipherMode.GCM;
+
+                using var decryptor = aes.CreateDecryptor();
+                using var msDecrypt = new MemoryStream(encryptedDataBytes);
+                using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using var srDecrypt = new StreamReader(csDecrypt);
+                
+                var decryptedJson = srDecrypt.ReadToEnd();
+                return JsonSerializer.Deserialize<T>(decryptedJson) ?? throw new InvalidOperationException("反序列化失败");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "解密客户端数据失败");
+                throw new InvalidOperationException("数据解密失败", ex);
+            }
+        }
+
+        public EncryptedResponse EncryptDataForClient<T>(T data, string clientPublicKeyB64)
+        {
+            try
+            {
+                // 导入客户端公钥
+                var clientPublicKeyBytes = Convert.FromBase64String(clientPublicKeyB64);
+                using var clientRsa = RSA.Create();
+                clientRsa.ImportRSAPublicKey(clientPublicKeyBytes, out _);
+
+                // 生成随机AES密钥
+                using var aes = Aes.Create();
+                aes.GenerateKey();
+                aes.GenerateIV();
+                aes.Mode = CipherMode.GCM;
+
+                // 用客户端公钥加密AES密钥
+                var encryptedAesKey = clientRsa.Encrypt(aes.Key, RSAEncryptionPadding.OaepSha256);
+
+                // 使用AES加密响应数据
+                var jsonData = JsonSerializer.Serialize(data);
+                var jsonBytes = Encoding.UTF8.GetBytes(jsonData);
+
+                using var encryptor = aes.CreateEncryptor();
+                using var msEncrypt = new MemoryStream();
+                using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+                
+                csEncrypt.Write(jsonBytes, 0, jsonBytes.Length);
+                csEncrypt.FlushFinalBlock();
+                
+                var encryptedData = msEncrypt.ToArray();
+
+                return new EncryptedResponse
+                {
+                    EncryptedAesKey = Convert.ToBase64String(encryptedAesKey),
+                    EncryptedData = Convert.ToBase64String(encryptedData),
+                    Iv = Convert.ToBase64String(aes.IV)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "为客户端加密数据失败");
+                throw new InvalidOperationException("数据加密失败", ex);
+            }
+        }
+    }
+
+    public class EncryptedResponse
+    {
+        public string EncryptedAesKey { get; set; } = string.Empty;
+        public string EncryptedData { get; set; } = string.Empty;
+        public string Iv { get; set; } = string.Empty;
+    }
+}
+```
+
+**Controller**
+
+```csharp
+// filepath: Controllers/EncryptionController.cs
+using EncryptionApi.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EncryptionApi.Controllers
+{
+    [ApiController]
+    [Route("api")]
+    public class EncryptionController : ControllerBase
+    {
+        private readonly EncryptionService _encryptionService;
+        private readonly ILogger<EncryptionController> _logger;
+
+        public EncryptionController(EncryptionService encryptionService, ILogger<EncryptionController> logger)
+        {
+            _encryptionService = encryptionService;
+            _logger = logger;
+        }
+
+        [HttpGet("server-public-key")]
+        public IActionResult GetServerPublicKey()
+        {
+            try
+            {
+                var publicKey = _encryptionService.GetServerPublicKey();
+                return Ok(new { publicKey });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "获取服务器公钥失败");
+                return StatusCode(500, new { error = "获取公钥失败" });
+            }
+        }
+
+        [HttpPost("secure-data")]
+        public IActionResult ReceiveEncryptedData([FromBody] EncryptedRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.EncryptedAesKey) || 
+                    string.IsNullOrEmpty(request.EncryptedData) || 
+                    string.IsNullOrEmpty(request.Iv))
+                {
+                    return BadRequest(new { error = "缺少必要参数" });
+                }
+
+                var businessData = _encryptionService.DecryptClientData<object>(
+                    request.EncryptedAesKey, 
+                    request.EncryptedData, 
+                    request.Iv
+                );
+
+                _logger.LogInformation("接收到前端加密数据: {Data}", businessData);
+
+                return Ok(new 
+                { 
+                    success = true, 
+                    message = "数据接收成功", 
+                    data = businessData 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "解密前端数据失败");
+                return BadRequest(new { success = false, message = "数据解密失败" });
+            }
+        }
+
+        [HttpPost("encrypted-response")]
+        public IActionResult SendEncryptedData()
+        {
+            try
+            {
+                var clientPublicKey = Request.Headers["X-Client-Public-Key"].FirstOrDefault();
+                if (string.IsNullOrEmpty(clientPublicKey))
+                {
+                    return BadRequest(new { error = "缺少客户端公钥" });
+                }
+
+                var responseData = new
+                {
+                    message = "这是来自服务器的敏感数据",
+                    timestamp = DateTime.UtcNow.ToString("O"),
+                    userInfo = new { id = 123, role = "admin" }
+                };
+
+                var encryptedResponse = _encryptionService.EncryptDataForClient(responseData, clientPublicKey);
+                _logger.LogInformation("发送加密数据给前端");
+                
+                return Ok(encryptedResponse);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "加密响应数据失败");
+                return StatusCode(500, new { error = "服务器加密失败" });
+            }
+        }
+    }
+
+    public class EncryptedRequest
+    {
+        public string EncryptedAesKey { get; set; } = string.Empty;
+        public string EncryptedData { get; set; } = string.Empty;
+        public string Iv { get; set; } = string.Empty;
+    }
+}
+```
+
+**Program**
+
+```csharp
+// filepath: Program.cs
+using EncryptionApi.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddSingleton<EncryptionService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+```
+
+</TabItem>
+</Tabs>
 
 ## 后端到前端加密
 
@@ -721,112 +1683,6 @@ class ClientDecryption {
     }
     return bytes.buffer;
   }
-}
-```
-
-### 后端实现（发送加密数据）
-
-```typescript
-// 存储客户端公钥的Map（实际应用中应使用数据库）
-const clientPublicKeys = new Map<string, crypto.KeyObject>();
-
-// 处理客户端公钥注册
-app.post('/api/register-client-key', (req, res) => {
-  try {
-    const { clientId, publicKey } = req.body;
-    const keyObject = crypto.createPublicKey({
-      key: Buffer.from(publicKey, 'base64'),
-      format: 'der',
-      type: 'spki'
-    });
-    clientPublicKeys.set(clientId, keyObject);
-    res.json({ success: true, message: '客户端公钥注册成功' });
-  } catch (error) {
-    console.error('客户端公钥注册失败:', error);
-    res.status(400).json({ success: false, message: '公钥注册失败' });
-  }
-});
-
-// 发送加密数据给前端
-app.post('/api/encrypted-response', (req, res) => {
-  try {
-    const clientPublicKeyB64 = req.headers['x-client-public-key'] as string;
-    if (!clientPublicKeyB64) {
-      return res.status(400).json({ error: '缺少客户端公钥' });
-    }
-
-    // 导入客户端公钥
-    const clientPublicKey = crypto.createPublicKey({
-      key: Buffer.from(clientPublicKeyB64, 'base64'),
-      format: 'der',
-      type: 'spki'
-    });
-
-    // 生成随机AES密钥
-    const aesKey = crypto.randomBytes(32);
-    
-    // 用客户端公钥加密AES密钥
-    const encryptedAesKey = crypto.publicEncrypt(
-      { key: clientPublicKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING },
-      aesKey
-    );
-
-    // 准备要发送的数据
-    const responseData = {
-      message: "这是来自服务器的敏感数据",
-      timestamp: new Date().toISOString(),
-      userInfo: { id: 123, role: "admin" }
-    };
-
-    // 使用AES加密响应数据
-    const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('aes-256-gcm', aesKey, iv);
-    let encryptedData = cipher.update(JSON.stringify(responseData), 'utf8');
-    encryptedData = Buffer.concat([encryptedData, cipher.final()]);
-
-    const encryptedResponse = {
-      encryptedAesKey: encryptedAesKey.toString('base64'),
-      encryptedData: encryptedData.toString('base64'),
-      iv: iv.toString('base64')
-    };
-
-    console.log('发送加密数据给前端');
-    res.json(encryptedResponse);
-  } catch (error) {
-    console.error('加密响应数据失败:', error);
-    res.status(500).json({ success: false, message: '服务器加密失败' });
-  }
-});
-```
-
-```typescript
-// 初始化双向加密
-const clientEncryption = new ClientEncryption();
-const clientDecryption = new ClientDecryption();
-
-await clientEncryption.init();
-await clientDecryption.init();
-
-// 1. 前端到后端加密通信
-const sensitiveData = {
-  username: "user123",
-  password: "secret123",
-  creditCard: "1234-5678-9012-3456"
-};
-
-try {
-  const result = await clientEncryption.sendEncryptedData(sensitiveData);
-  console.log("前端到后端加密传输成功:", result);
-} catch (error) {
-  console.error("前端到后端传输失败:", error);
-}
-
-// 2. 后端到前端加密通信
-try {
-  const encryptedResponse = await clientDecryption.requestEncryptedData("/api/encrypted-response");
-  console.log("接收到后端加密数据:", encryptedResponse);
-} catch (error) {
-  console.error("接收后端数据失败:", error);
 }
 ```
 
