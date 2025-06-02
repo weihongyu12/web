@@ -1,8 +1,8 @@
 # 文件上传
 
-文件上传系统需要综合考虑性能、可靠性和安全性。通过checksum校验确保文件完整性，分片上传提高传输效率，断点续传增强用户体验，多层安全检查保护系统安全。
+文件上传系统需要综合考虑性能、可靠性和安全性。通过 checksum 校验确保文件完整性，分片上传提高传输效率，断点续传增强用户体验，多层安全检查保护系统安全。
 
-## 文件Checksum校验
+## 文件 Checksum 校验
 
 通过计算文件的哈希值来确保文件完整性，防止传输过程中的数据损坏。
 
@@ -19,13 +19,13 @@ sequenceDiagram
         Note over C: 客户端预校验
         C->>C: 文件类型检查
         C->>C: 文件大小检查
-        C->>C: 计算文件MD5
+        C->>C: 计算文件 MD5
     end
     
     rect rgb(255, 248, 240)
         Note over S,V: 分片级校验
-        C->>S: 上传分片+分片MD5
-        S->>V: 验证分片MD5
+        C->>S: 上传分片+分片 MD5
+        S->>V: 验证分片 MD5
         alt 分片校验失败
             V->>S: 校验失败
             S->>C: 要求重新上传分片
@@ -40,8 +40,8 @@ sequenceDiagram
         Note over S,V: 文件级最终校验
         C->>S: 请求合并文件
         S->>FS: 合并所有分片
-        S->>V: 计算完整文件MD5
-        V->>V: 对比预期MD5值
+        S->>V: 计算完整文件 MD5
+        V->>V: 对比预期 MD5 值
         
         alt 文件校验失败
             V->>S: 校验失败
@@ -58,12 +58,12 @@ sequenceDiagram
 
 ### 校验策略
 
-1. **预校验**: 上传前计算本地文件checksum
+1. **预校验**: 上传前计算本地文件 checksum
 2. **服务端校验**: 接收完成后重新计算并对比
 3. **分片校验**: 每个分片都进行独立校验
 4. **最终校验**: 合并后的完整文件校验
 
-### 基于Checksum的文件路径设计
+### 基于 Checksum 的文件路径设计
 
 使用 `{checksum}/文件名` 的路径结构具有多重优势：自动去重、快速定位、内容验证和缓存优化。
 
@@ -78,13 +78,55 @@ sequenceDiagram
     └── video.mp4
 ```
 
-### 数据库表结构设计
+#### 数据库表结构设计
 
 | 字段名 | 类型 | 长度 | 约束 | 说明 |
 |-------|------|------|------|------|
-| id | BIGINT | - | PRIMARY KEY, AUTO_INCREMENT | 文件ID |
-| checksum | VARCHAR | 64 | NOT NULL, UNIQUE | 文件校验和(MD5/SHA256) |
-| original_name | VARCHAR | 500 | NOT NULL | 原始文件名 |
+| `id` | `BIGINT` | - | `PRIMARY KEY, AUTO_INCREMENT` | 文件 ID |
+| `checksum` | `VARCHAR` | `64` | `NOT NULL, UNIQUE` | 文件校验和(SHA256) |
+| `original_name` | `VARCHAR` | `500` | `NOT NULL` | 原始文件名 |
+| `file_size` | `BIGINT` | - | `NOT NULL` | 文件大小（字节） |
+| `mime_type` | `VARCHAR` | `100` | `NOT NULL` | 文件 MIME 类型 |
+| `file_extension` | `VARCHAR` | `20` | `NOT NULL` | 文件扩展名 |
+| `storage_path` | `VARCHAR` | `1000` | `NOT NULL` | 存储路径 |
+| `status` | `TINYINT` | - | `NOT NULL DEFAULT 0` | 文件状态（0:上传中 1:完成 2:失败） |
+| `upload_id` | `VARCHAR` | `100` | `NULL` | 分片上传标识 |
+| `total_chunks` | `INT` | - | `NULL` | 总分片数 |
+| `uploaded_chunks` | `INT` | - | `NULL DEFAULT 0` | 已上传分片数 |
+| `user_id` | `BIGINT` | - | `NOT NULL` | 上传用户 ID |
+| `created_at` | `TIMESTAMP` | - | `NOT NULL DEFAULT CURRENT_TIMESTAMP` | 创建时间 |
+| `updated_at` | `TIMESTAMP` | - | `NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` | 更新时间 |
+| `completed_at` | `TIMESTAMP` | - | `NULL` | 完成时间 |
+
+##### 索引设计
+
+| 索引名称 | 索引类型 | 字段 | 说明 |
+|---------|---------|------|------|
+| `PRIMARY` | 主键索引 | `id` | 主键，自动创建 |
+| `uk_checksum` | 唯一索引 | `checksum` | 确保文件唯一性，支持秒传 |
+| `idx_user_id` | 普通索引 | `user_id` | 查询用户文件列表 |
+| `idx_status` | 普通索引 | `status` | 按状态筛选文件 |
+| `idx_upload_id` | 普通索引 | `upload_id` | 断点续传状态查询 |
+| `idx_created_at` | 普通索引 | `created_at` | 按时间排序和范围查询 |
+| `idx_user_status` | 复合索引 | `user_id, status` | 查询用户特定状态的文件 |
+
+
+#### 接口返回
+
+```json
+{
+  "file": {
+    "id": "bRgXe4N9mK",
+    "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalName": "document.pdf",
+    "size": 1024000,
+    "mimeType": "application/pdf",
+    "extension": "pdf",
+    "uploadedAt": "2024-01-15T10:30:00Z",
+    "url": "https://cdn.example.com/files/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/document.pdf"
+  }
+}
+```
 
 ## 分片上传
 
@@ -100,7 +142,7 @@ sequenceDiagram
 
     U->>C: 选择文件
     C->>C: 文件预校验(类型/大小)
-    C->>C: 计算文件MD5
+    C->>C: 计算文件 MD5
     
     Note over C,S: 1. 初始化上传
     C->>S: POST /api/upload/init
@@ -111,7 +153,7 @@ sequenceDiagram
         C->>U: 上传完成
     else 文件不存在
         S->>DB: 创建上传记录
-        S->>C: 返回uploadId和已上传分片
+        S->>C: 返回 uploadId 和已上传分片
         Note right of S: {uploadId, uploadedChunks[]}
         
         Note over C,S: 2. 分片上传
@@ -130,7 +172,7 @@ sequenceDiagram
         Note right of C: {uploadId, totalChunks}
         S->>FS: 验证所有分片完整性
         S->>FS: 合并分片为完整文件
-        S->>S: 计算合并后文件checksum
+        S->>S: 计算合并后文件 checksum
         S->>S: 病毒扫描和安全检查
         S->>FS: 移动到正式存储位置
         S->>DB: 更新文件记录状态
@@ -236,10 +278,10 @@ class ChunkedUploader {
 </details>
 
 <details>
-<summary>OSS分片上传</summary>
+<summary>OSS 分片上传</summary>
 
 ```javascript
-// OSS分片上传实现
+// OSS 分片上传实现
 class OSSChunkedUploader {
   constructor(config) {
     this.config = config;
@@ -299,7 +341,7 @@ class OSSChunkedUploader {
         etag: result.etag
       };
     } catch (error) {
-      console.error('OSS分片上传失败:', error);
+      console.error('OSS 分片上传失败:', error);
       throw error;
     }
   }
@@ -328,7 +370,7 @@ class OSSChunkedUploader {
 
 ### 分片策略
 
-- **固定大小**: 每片2-10MB，适合大部分场景
+- **固定大小**: 每片 2-10MB，适合大部分场景
 - **动态调整**: 根据网络状况自适应调整分片大小
 - **并发控制**: 限制同时上传的分片数量
 
@@ -347,7 +389,7 @@ sequenceDiagram
     Note over U,DB: 网络中断后重新上传
     
     U->>C: 重新选择相同文件
-    C->>C: 生成uploadId
+    C->>C: 生成 uploadId
     C->>LS: 读取本地上传状态
     
     alt 本地有上传记录
@@ -528,10 +570,10 @@ class ResumableUploader extends ChunkedUploader {
 </details>
 
 <details>
-<summary>OSS断点续传</summary>
+<summary>OSS 断点续传</summary>
 
 ```javascript
-// OSS断点续传扩展
+// OSS 断点续传扩展
 class OSSResumableUploader extends OSSChunkedUploader {
   async resumeUpload(file, options = {}) {
     const checkpoint = this.loadCheckpoint(file);
@@ -593,9 +635,9 @@ function validateFileType(file, allowedTypes) {
     throw new Error('不支持的文件类型');
   }
   
-  // MIME类型验证
+  // MIME 类型验证
   if (!allowedTypes.mimeTypes.includes(mimeType)) {
-    throw new Error('文件MIME类型不匹配');
+    throw new Error('文件 MIME 类型不匹配');
   }
   
   return true;
@@ -677,7 +719,7 @@ const fileFilter = (req, file, cb) => {
 // 病毒扫描中间件
 async function virusScanning(req, res, next) {
   try {
-    // 集成ClamAV或其他杀毒引擎
+    // 集成 ClamAV 或其他杀毒引擎
     const scanResult = await scanFile(req.file.path);
     if (!scanResult.clean) {
       fs.unlinkSync(req.file.path); // 删除危险文件
@@ -693,12 +735,12 @@ async function virusScanning(req, res, next) {
 </details>
 
 <details>
-<summary>OSS安全配置</summary>
+<summary>OSS 安全配置</summary>
 
 ```javascript
-// OSS安全配置最佳实践
+// OSS 安全配置最佳实践
 const ossSecurityConfig = {
-  // Bucket CORS配置
+  // Bucket CORS 配置
   cors: [
     {
       allowedOrigin: ['https://yourdomain.com'],
@@ -709,7 +751,7 @@ const ossSecurityConfig = {
     }
   ],
 
-  // Bucket防盗链配置
+  // Bucket 防盗链配置
   referer: {
     allowEmptyReferer: false,
     refererList: ['https://yourdomain.com/*']
@@ -737,7 +779,7 @@ const ossSecurityConfig = {
 // 应用安全配置
 async function applyOSSSecurityConfig(ossClient, bucketName) {
   try {
-    // 设置CORS
+    // 设置 CORS
     await ossClient.putBucketCORS(bucketName, ossSecurityConfig.cors);
     
     // 设置防盗链
@@ -749,9 +791,9 @@ async function applyOSSSecurityConfig(ossClient, bucketName) {
     // 设置生命周期
     await ossClient.putBucketLifecycle(bucketName, ossSecurityConfig.lifecycle);
     
-    console.log('OSS安全配置应用成功');
+    console.log('OSS 安全配置应用成功');
   } catch (error) {
-    console.error('应用OSS安全配置失败:', error);
+    console.error('应用 OSS 安全配置失败:', error);
   }
 }
 ```
@@ -762,7 +804,7 @@ async function applyOSSSecurityConfig(ossClient, bucketName) {
 
 1. **文件类型限制**
    - 白名单机制，只允许特定类型
-   - 多层验证：扩展名、MIME类型、文件头
+   - 多层验证：扩展名、MIME 类型、文件头
 
 2. **文件大小控制**
    - 单文件大小限制
@@ -771,7 +813,7 @@ async function applyOSSSecurityConfig(ossClient, bucketName) {
 
 3. **存储安全**
    - 文件重命名，避免路径遍历
-   - 隔离存储，不在Web根目录
+   - 隔离存储，不在 Web 根目录
    - 定期清理临时文件
 
 4. **访问控制**
@@ -784,21 +826,21 @@ async function applyOSSSecurityConfig(ossClient, bucketName) {
    - 恶意代码检测
    - 图片内容过滤
 
-## 阿里云OSS集成
+## 阿里云 OSS 集成
 
 阿里云对象存储服务(OSS)提供了强大的文件存储和管理能力，支持直传、分片上传、断点续传等功能。
 
 ### 快速开始
 
 ```bash
-# 安装阿里云OSS SDK
+# 安装阿里云 OSS SDK
 npm install ali-oss
 ```
 
 ### 基础配置
 
 ```javascript
-// OSS配置
+// OSS 配置
 const OSS = require('ali-oss');
 
 const ossConfig = {
@@ -811,13 +853,13 @@ const ossConfig = {
 const client = new OSS(ossConfig);
 ```
 
-### STS临时凭证
+### STS 临时凭证
 
 <details>
-<summary>服务端STS实现</summary>
+<summary>服务端 STS 实现</summary>
 
 ```javascript
-// Node.js 后端生成STS凭证
+// Node.js 后端生成 STS 凭证
 const Core = require('@alicloud/pop-core');
 
 class STSService {
@@ -890,10 +932,10 @@ class STSService {
 ### 文件管理
 
 <details>
-<summary>OSS文件操作</summary>
+<summary>OSS 文件操作</summary>
 
 ```javascript
-// OSS文件管理服务
+// OSS 文件管理服务
 class OSSFileManager {
   constructor(ossClient) {
     this.client = ossClient;
@@ -928,7 +970,7 @@ class OSSFileManager {
     }
   }
 
-  // 生成预签名URL
+  // 生成预签名 URL
   async generateSignedURL(objectKey, options = {}) {
     const expires = options.expires || 3600;
     
@@ -940,7 +982,7 @@ class OSSFileManager {
 
       return { url, expires: new Date(Date.now() + expires * 1000) };
     } catch (error) {
-      throw new Error(`生成签名URL失败: ${error.message}`);
+      throw new Error(`生成签名 URL 失败: ${error.message}`);
     }
   }
 }
