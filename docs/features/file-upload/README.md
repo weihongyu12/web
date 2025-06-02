@@ -4,11 +4,7 @@
 
 ## 文件Checksum校验
 
-### 概述
-
 通过计算文件的哈希值来确保文件完整性，防止传输过程中的数据损坏。
-
-### 校验流程图
 
 ```mermaid
 sequenceDiagram
@@ -60,106 +56,6 @@ sequenceDiagram
     end
 ```
 
-### 实现方式
-
-<details>
-<summary>基础MD5计算</summary>
-
-```javascript
-// 计算文件MD5
-async function calculateFileMD5(file) {
-  return new Promise((resolve, reject) => {
-    const spark = new SparkMD5.ArrayBuffer();
-    const fileReader = new FileReader();
-    const chunkSize = 2097152; // 2MB chunks
-    let currentChunk = 0;
-    const chunks = Math.ceil(file.size / chunkSize);
-
-    fileReader.onload = function(e) {
-      spark.append(e.target.result);
-      currentChunk++;
-
-      if (currentChunk < chunks) {
-        loadNext();
-      } else {
-        resolve(spark.end());
-      }
-    };
-
-    fileReader.onerror = reject;
-
-    function loadNext() {
-      const start = currentChunk * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      fileReader.readAsArrayBuffer(file.slice(start, end));
-    }
-
-    loadNext();
-  });
-}
-
-// 校验文件完整性
-async function verifyFileIntegrity(file, expectedChecksum) {
-  const actualChecksum = await calculateFileMD5(file);
-  return actualChecksum === expectedChecksum;
-}
-```
-
-</details>
-
-<details>
-<summary>OSS校验实现</summary>
-
-```javascript
-// OSS文件校验
-class OSSFileValidator {
-  constructor(ossClient) {
-    this.client = ossClient;
-  }
-
-  // 上传时校验
-  async uploadWithChecksum(objectKey, file, expectedMD5) {
-    try {
-      const result = await this.client.put(objectKey, file, {
-        headers: {
-          'Content-MD5': expectedMD5,
-          'x-oss-storage-class': 'Standard'
-        }
-      });
-      
-      return {
-        success: true,
-        etag: result.etag,
-        verified: true
-      };
-    } catch (error) {
-      if (error.code === 'InvalidDigest') {
-        throw new Error('文件MD5校验失败');
-      }
-      throw error;
-    }
-  }
-
-  // 下载后校验
-  async downloadAndVerify(objectKey, expectedMD5) {
-    try {
-      const result = await this.client.get(objectKey);
-      const actualMD5 = await this.calculateMD5(result.content);
-      
-      return {
-        verified: actualMD5 === expectedMD5,
-        actualMD5,
-        expectedMD5
-      };
-    } catch (error) {
-      throw new Error(`下载校验失败: ${error.message}`);
-    }
-  }
-}
-```
-
-</details>
-
 ### 校验策略
 
 1. **预校验**: 上传前计算本地文件checksum
@@ -167,13 +63,32 @@ class OSSFileValidator {
 3. **分片校验**: 每个分片都进行独立校验
 4. **最终校验**: 合并后的完整文件校验
 
+### 基于Checksum的文件路径设计
+
+使用 `{checksum}/文件名` 的路径结构具有多重优势：自动去重、快速定位、内容验证和缓存优化。
+
+```
+/uploads/
+├── a1b2c3d4e5f6.../
+│   ├── document.pdf
+│   └── report.pdf          # 相同内容的不同文件名
+├── f6e5d4c3b2a1.../
+│   └── image.jpg
+└── 9f8e7d6c5b4a.../
+    └── video.mp4
+```
+
+### 数据库表结构设计
+
+| 字段名 | 类型 | 长度 | 约束 | 说明 |
+|-------|------|------|------|------|
+| id | BIGINT | - | PRIMARY KEY, AUTO_INCREMENT | 文件ID |
+| checksum | VARCHAR | 64 | NOT NULL, UNIQUE | 文件校验和(MD5/SHA256) |
+| original_name | VARCHAR | 500 | NOT NULL | 原始文件名 |
+
 ## 分片上传
 
-### 概述
-
 将大文件分割成多个小片段并发上传，提高上传效率和可靠性。
-
-### 分片上传流程图
 
 ```mermaid
 sequenceDiagram
@@ -223,48 +138,6 @@ sequenceDiagram
         S->>C: 返回最终文件信息
         C->>U: 上传完成
     end
-```
-
-### 并发控制流程图
-
-```mermaid
-sequenceDiagram
-    participant C as 前端客户端
-    participant SM as 信号量控制器
-    participant S1 as 上传线程1
-    participant S2 as 上传线程2
-    participant S3 as 上传线程3
-    participant S as 后端服务器
-
-    Note over C,S: 并发限制为3个分片同时上传
-    
-    C->>SM: 初始化信号量(permits=3)
-    
-    par 分片1上传
-        C->>SM: 请求许可
-        SM->>S1: 获得许可
-        S1->>S: 上传分片1
-        S->>S1: 上传完成
-        S1->>SM: 释放许可
-    and 分片2上传
-        C->>SM: 请求许可
-        SM->>S2: 获得许可
-        S2->>S: 上传分片2
-        S->>S2: 上传完成
-        S2->>SM: 释放许可
-    and 分片3上传
-        C->>SM: 请求许可
-        SM->>S3: 获得许可
-        S3->>S: 上传分片3
-        S->>S3: 上传完成
-        S3->>SM: 释放许可
-    end
-    
-    Note over C,S: 分片4等待可用许可
-    C->>SM: 请求许可(等待)
-    SM-->>C: 等待中...
-    S1->>SM: 释放许可
-    SM->>C: 分配许可给分片4
 ```
 
 ### 核心实现
@@ -461,11 +334,7 @@ class OSSChunkedUploader {
 
 ## 断点续传
 
-### 概述
-
 支持网络中断后从断点位置继续上传，避免重复传输已完成的部分。
-
-### 断点续传流程图
 
 ```mermaid
 sequenceDiagram
@@ -706,8 +575,6 @@ class OSSResumableUploader extends OSSChunkedUploader {
 
 ## 文件上传安全性
 
-### 概述
-
 多层安全检查保护系统免受恶意文件攻击，确保上传文件的安全性。
 
 ### 文件类型验证
@@ -919,8 +786,6 @@ async function applyOSSSecurityConfig(ossClient, bucketName) {
 
 ## 阿里云OSS集成
 
-### 概述
-
 阿里云对象存储服务(OSS)提供了强大的文件存储和管理能力，支持直传、分片上传、断点续传等功能。
 
 ### 快速开始
@@ -1082,138 +947,3 @@ class OSSFileManager {
 ```
 
 </details>
-
-## 完整使用示例
-
-### 智能上传器
-
-```javascript
-// 完整的安全文件上传实现
-class SecureFileUploader {
-  constructor(options = {}) {
-    this.maxFileSize = options.maxFileSize || 100 * 1024 * 1024;
-    this.allowedTypes = options.allowedTypes || {
-      extensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-      mimeTypes: ['image/jpeg', 'image/png', 'application/pdf']
-    };
-    this.chunkSize = options.chunkSize || 2 * 1024 * 1024;
-    this.useOSS = options.useOSS || false;
-  }
-
-  async uploadFile(file) {
-    // 1. 安全检查
-    await this.securityCheck(file);
-    
-    // 2. 计算checksum
-    const checksum = await calculateFileMD5(file);
-    
-    // 3. 检查是否已存在（秒传）
-    const existingFile = await this.checkDuplicate(checksum);
-    if (existingFile) {
-      return { success: true, fileId: existingFile.id, message: '文件已存在（秒传）' };
-    }
-    
-    // 4. 选择上传方式
-    let uploader;
-    if (this.useOSS) {
-      uploader = new OSSResumableUploader(this.ossConfig);
-    } else {
-      uploader = new ResumableUploader(file, {
-        chunkSize: this.chunkSize,
-        concurrency: 3
-      });
-    }
-    
-    const result = await uploader.resumeUpload();
-    
-    // 5. 最终校验
-    await this.finalVerification(result.fileId, checksum);
-    
-    return result;
-  }
-
-  async securityCheck(file) {
-    if (file.size > this.maxFileSize) {
-      throw new Error('文件过大');
-    }
-    
-    validateFileType(file, this.allowedTypes);
-    await validateFileSignature(file);
-  }
-
-  async checkDuplicate(checksum) {
-    const response = await fetch(`/api/files/check/${checksum}`);
-    if (response.ok) {
-      return response.json();
-    }
-    return null;
-  }
-
-  async finalVerification(fileId, expectedChecksum) {
-    const response = await fetch(`/api/files/verify/${fileId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checksum: expectedChecksum })
-    });
-    
-    if (!response.ok) {
-      throw new Error('文件校验失败');
-    }
-  }
-}
-```
-
-### 使用示例
-
-```javascript
-// 配置上传器
-const uploader = new SecureFileUploader({
-  maxFileSize: 50 * 1024 * 1024, // 50MB
-  allowedTypes: {
-    extensions: ['jpg', 'png', 'pdf'],
-    mimeTypes: ['image/jpeg', 'image/png', 'application/pdf']
-  },
-  useOSS: true,
-  ossConfig: {
-    region: 'oss-cn-hangzhou',
-    bucket: 'my-bucket'
-  }
-});
-
-// 单文件上传
-document.getElementById('fileInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  try {
-    const result = await uploader.uploadFile(file);
-    console.log('上传成功:', result);
-  } catch (error) {
-    console.error('上传失败:', error.message);
-  }
-});
-
-// 拖拽上传
-const dropZone = document.getElementById('dropZone');
-
-dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropZone.classList.add('drag-over');
-});
-
-dropZone.addEventListener('drop', async (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  
-  const files = Array.from(e.dataTransfer.files);
-  
-  for (const file of files) {
-    try {
-      await uploader.uploadFile(file);
-      console.log(`${file.name} 上传成功`);
-    } catch (error) {
-      console.error(`${file.name} 上传失败:`, error.message);
-    }
-  }
-});
-```
