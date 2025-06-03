@@ -179,7 +179,7 @@ flowchart TD
 ```tsx
 import React, { useState, useRef } from 'react';
 import { z } from 'zod';
-import { checkPasswordStrength } from 'tai-password-strength';
+import PasswordStrength from 'tai-password-strength';
 
 // 密码强度类型定义
 type PasswordStrength = 'weak' | 'medium' | 'strong';
@@ -198,8 +198,9 @@ const registrationSchema = z.object({
     .min(6, '密码至少 6 位')
     .max(32, '密码最多 32 位')
     .refine((password) => {
-      const result = checkPasswordStrength(password);
-      return result.score >= 60; // 要求密码强度分数至少60分
+      const passwordStrength = new PasswordStrength();
+      const result = passwordStrength.check(password);
+      return result.strengthCode !== 'WEAK' && result.strengthCode !== 'VERY_WEAK';
     }, {
       message: '密码强度过弱，请设置更复杂的密码'
     }),
@@ -245,54 +246,40 @@ const RegistrationForm: React.FC = () => {
       };
     }
 
-    const result = checkPasswordStrength(password, {
-      minLength: 6,
-      maxLength: 32,
-      requireLowercase: true,
-      requireUppercase: false,
-      requireNumbers: true,
-      requireSymbols: false
-    });
-
-    let strength: PasswordStrength = 'weak';
-    let feedback: string[] = [];
+    const passwordStrength = new PasswordStrength();
+    const result = passwordStrength.check(password);
     
-    // 根据分数确定强度等级
-    if (result.score >= 80) {
-      strength = 'strong';
-      feedback = ['密码强度很好！'];
-    } else if (result.score >= 60) {
-      strength = 'medium';
-      feedback = ['密码强度中等，建议添加更多字符类型'];
-    } else {
-      strength = 'weak';
-      feedback = [];
-      
-      if (password.length < 8) {
-        feedback.push('建议至少8个字符');
-      }
-      if (!/[a-z]/.test(password)) {
-        feedback.push('建议包含小写字母');
-      }
-      if (!/[A-Z]/.test(password)) {
-        feedback.push('建议包含大写字母');
-      }
-      if (!/[0-9]/.test(password)) {
-        feedback.push('建议包含数字');
-      }
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        feedback.push('建议包含特殊字符');
-      }
-      if (!feedback.length) {
-        feedback.push('密码强度过弱，请设置更复杂的密码');
-      }
+    let strength: PasswordStrength = 'weak';
+    let score = 0;
+    let isValid = false;
+    
+    // 只根据 tai-password-strength 的 strengthCode 确定等级
+    switch (result.strengthCode) {
+      case 'VERY_STRONG':
+      case 'STRONG':
+        strength = 'strong';
+        score = 90;
+        isValid = true;
+        break;
+      case 'REASONABLE':
+        strength = 'medium';
+        score = 65;
+        isValid = true;
+        break;
+      case 'WEAK':
+      case 'VERY_WEAK':
+      default:
+        strength = 'weak';
+        score = 30;
+        isValid = false;
+        break;
     }
 
     return {
       strength,
-      score: result.score,
-      feedback,
-      isValid: result.score >= 60
+      score,
+      feedback: [],
+      isValid
     };
   };
 
@@ -364,7 +351,9 @@ const RegistrationForm: React.FC = () => {
         body: JSON.stringify({
           method: 'email',
           ...formData,
-          passwordStrength: passwordStrength,
+          passwordStrength: passwordStrength ? {
+            strengthCode: new PasswordStrength().check(formData.password).strengthCode
+          } : null,
           source: 'web'
         })
       });
@@ -606,7 +595,7 @@ const RegistrationForm: React.FC = () => {
       
       {/* 密码强度样式说明
       - .password-strength-indicator: 密码强度指示器容器
-      - .strength-meter: 强度计量器，包含进度条和文字
+      - .strength-meter: 进度条容器
       - .strength-bar: 进度条背景，灰色 #e5e7eb
       - .strength-fill: 进度条填充，根据强度显示不同颜色
         - .strength-weak: 红色 #ef4444
