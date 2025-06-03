@@ -707,11 +707,11 @@ package com.example.encryption.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import jakarta.crypto.Cipher;
+import jakarta.crypto.KeyGenerator;
+import jakarta.crypto.SecretKey;
+import jakarta.crypto.spec.GCMParameterSpec;
+import jakarta.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
