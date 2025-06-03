@@ -389,8 +389,6 @@ export default SmsLoginForm;
 
 ## 交互流程
 
-## 新用户注册流程
-
 ```mermaid
 flowchart TD
     A[用户输入手机号] --> B[点击获取验证码]
