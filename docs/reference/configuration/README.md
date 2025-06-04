@@ -338,7 +338,9 @@ export default defineConfig({
 可参考 [HTML5 Boilerplate nginx 配置](https://github.com/h5bp/server-configs-nginx)
 :::
 
-:::note 完整版 nginx.conf 配置
+<details>
+<summary>完整版 nginx.conf 配置</summary>
+
 ```nginx
 # For more information on configuration, see:
 #   * Official English Documentation: http://nginx.org/en/docs/
@@ -646,7 +648,8 @@ http {
     }
 }
 ```
-:::
+
+</details>
 
 ### 伪静态配置
 
@@ -1388,5 +1391,192 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
+
+<details>
+<summary>最完整配置（Docker Compose + Nginx 反向代理 + Next.js 服务）</summary>
+
+**docker-compose.yml**
+
+```yaml
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs
+    container_name: nextjs-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/ssl/certs
+    depends_on:
+      - nextjs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+**Dockerfile.nextjs**
+
+```dockerfile
+FROM node:lts-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable pnpm && pnpm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
+```
+
+**Dockerfile.nginx**
+
+```dockerfile
+FROM nginx:stable-alpine
+
+# Install build dependencies
+RUN apk update && apk upgrade \
+    && apk add --no-cache \
+    gcc \
+    libc-dev \
+    make \
+    pcre-dev \
+    zlib-dev \
+    linux-headers \
+    curl \
+    gnupg \
+    libxml2-dev \
+    git \
+    openssl-dev \
+    geoip-dev \
+    perl-dev \
+    libedit-dev \
+    mercurial \
+    alpine-sdk \
+    findutils \
+    autoconf \
+    automake \
+    libtool \
+    yajl-dev \
+    lmdb-dev \
+    libmaxminddb-dev \
+    pcre2-dev \
+    curl-dev \
+    lua-dev \
+    && rm -rf /var/cache/apk/*
+
+# Install brotli
+RUN cd /opt \
+    && git clone --depth 1 https://github.com/google/ngx_brotli.git \
+    && cd ngx_brotli \
+    && git submodule update --init
+
+# Install ModSecurity
+RUN cd /opt \
+    && git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity \
+    && cd ModSecurity \
+    && git submodule init \
+    && git submodule update \
+    && ./build.sh \
+    && ./configure \
+    && make \
+    && make install
+
+# Download and compile Nginx with modules
+RUN cd /opt \
+    && git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git \
+    && NGINX_VERSION=$(nginx -v 2>&1 | sed 's/nginx version: nginx\///') \
+    && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+    && tar -zxf nginx.tar.gz \
+    && cd nginx-$NGINX_VERSION \
+    && ./configure \
+        --with-compat \
+        --add-dynamic-module=/opt/ngx_brotli \
+        --add-dynamic-module=/opt/ModSecurity-nginx \
+    && make modules
+
+# Copy compiled modules
+RUN cp /opt/nginx-$(nginx -v 2>&1 | sed 's/nginx version: nginx\///')/objs/*.so /etc/nginx/modules/
+
+# Install OWASP CRS
+RUN mkdir -p /etc/nginx/modsecurity \
+    && cd /etc/nginx/modsecurity \
+    && git clone -b v4.15.0 https://github.com/coreruleset/coreruleset.git \
+    && mv coreruleset/crs-setup.conf.example coreruleset/crs-setup.conf \
+    && mv coreruleset/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example coreruleset/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+
+# Configure ModSecurity
+RUN cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsecurity/modsecurity.conf \
+    && echo 'Include /etc/nginx/modsecurity/coreruleset/crs-setup.conf' >> /etc/nginx/modsecurity/modsecurity.conf \
+    && echo 'Include /etc/nginx/modsecurity/coreruleset/rules/*.conf' >> /etc/nginx/modsecurity/modsecurity.conf \
+    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsecurity/modsecurity.conf \
+    && cp /opt/ModSecurity/unicode.mapping /etc/nginx/modsecurity/unicode.mapping
+
+# Clean up
+RUN apk del gcc libc-dev make pcre-dev zlib-dev linux-headers curl gnupg libxml2-dev git openssl-dev \
+    geoip-dev perl-dev libedit-dev mercurial alpine-sdk findutils autoconf automake libtool yajl-dev \
+    lmdb-dev libmaxminddb-dev pcre2-dev curl-dev lua-dev \
+    && rm -rf /opt/* \
+    && rm -rf /var/cache/apk/*
+
+# Copy nginx configuration
+COPY nginx-nextjs.conf /etc/nginx/nginx.conf
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+</details>
   </TabItem>
 </Tabs>
