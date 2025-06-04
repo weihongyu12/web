@@ -1172,7 +1172,8 @@ module.exports = defineConfig({
 
 [production]
 last 2 version
-> 1%
+> 0.3%
+> 0.3% in CN
 not dead
 not ie <= 11
 not op_mini all
