@@ -1227,141 +1227,109 @@ EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-:::note 最完整配置（包括 Brotli 和 ModSecurity）
+<details>
+<summary>最完整配置（包括 Brotli 和 ModSecurity）</summary>
 
 ```dockerfile
 # Dockerfile
 
-# nginx 使用最新的 stable 版本
-ARG NGINX_VERSION="1.26.3"
+FROM nginx:stable-alpine
 
-# 编译 nginx 模块，运行 nginx
-FROM nginx:stable-alpine AS deploy
-ARG SSDEEP_VERSION="2.14.1"
-## OWASP® ModSecurity Core Rule Set(CRS) 使用最新的 release 版本
-ARG OWASP_CRS_VERSION="4.13.0"
-## 安装依赖
-RUN apk add \
-     autoconf \
-     automake \
-     brotli-dev \
-     ca-certificates \
-     coreutils \
-     curl-dev \
-     g++ \
-     gcc \
-     geoip-dev \
-     git \
-     libc-dev \
-     libmaxminddb-dev \
-     libstdc++ \
-     libtool \
-     libxml2-dev \
-     linux-headers \
-     lmdb-dev \
-     make \
-     openssl \
-     openssl-dev \
-     pkgconfig \
-     pcre-dev \
-     yajl-dev \
-     zlib-dev
-## 安装Brotli
-RUN git clone https://github.com/google/ngx_brotli.git
-RUN cd ngx_brotli && git submodule update --init
-## 安装ssdeep
-RUN wget --quiet https://github.com/ssdeep-project/ssdeep/releases/download/release-${SSDEEP_VERSION}/ssdeep-${SSDEEP_VERSION}.tar.gz \
-    && tar -xvzf ssdeep-${SSDEEP_VERSION}.tar.gz \
-    && cd ssdeep-${SSDEEP_VERSION} \
-    && ./configure \
-    && make \
-    && make install
-## 安装ModSecurity
-RUN git clone https://github.com/SpiderLabs/ModSecurity.git \
-    && cd /ModSecurity \
-    && ./build.sh \
+# Install build dependencies
+RUN apk update && apk upgrade \
+    && apk add --no-cache \
+    gcc \
+    libc-dev \
+    make \
+    pcre-dev \
+    zlib-dev \
+    linux-headers \
+    curl \
+    gnupg \
+    libxml2-dev \
+    git \
+    openssl-dev \
+    geoip-dev \
+    perl-dev \
+    libedit-dev \
+    mercurial \
+    alpine-sdk \
+    findutils \
+    autoconf \
+    automake \
+    libtool \
+    yajl-dev \
+    lmdb-dev \
+    libmaxminddb-dev \
+    pcre2-dev \
+    curl-dev \
+    lua-dev \
+    && rm -rf /var/cache/apk/*
+
+# Install brotli
+RUN cd /opt \
+    && git clone --depth 1 https://github.com/google/ngx_brotli.git \
+    && cd ngx_brotli \
+    && git submodule update --init
+
+# Install ModSecurity
+RUN cd /opt \
+    && git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity \
+    && cd ModSecurity \
     && git submodule init \
     && git submodule update \
-    && ./configure --with-yajl --with-ssdeep --with-lmdb --with-geoip \
+    && ./build.sh \
+    && ./configure \
     && make \
     && make install
-RUN git clone https://github.com/SpiderLabs/ModSecurity-nginx.git \
-    && mkdir -p /etc/modsecurity.d  \
-    && cd /etc/modsecurity.d  \
-    && wget --quiet https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/modsecurity.conf-recommended \
-    && mv modsecurity.conf-recommended modsecurity-recommended.conf \
-    && wget --quiet https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/unicode.mapping \
-    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' modsecurity-recommended.conf \
-    && wget --quiet https://github.com/coreruleset/coreruleset/archive/refs/tags/v${OWASP_CRS_VERSION}.tar.gz \
-    && mv v${OWASP_CRS_VERSION}.tar.gz owasp-modsecurity-crs.tar.gz \
-    && tar -zxvf owasp-modsecurity-crs.tar.gz \
-    && mv coreruleset-${OWASP_CRS_VERSION} owasp-modsecurity-crs \
-    && mv owasp-modsecurity-crs/crs-setup.conf.example owasp-modsecurity-crs/crs-setup.conf \
-    && mv owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf \
-    && mv owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf \
-    && touch modsecurity.conf \
-    && echo -e "# Include the recommended configuration\nInclude modsecurity-recommended.conf\n# Include OWASP CRS v3 rules\nInclude owasp-modsecurity-crs/crs-setup.conf\nInclude owasp-modsecurity-crs/rules/*.conf" > modsecurity.conf
-## 编译模块
-RUN wget --quiet https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-    && tar -xzf nginx-${NGINX_VERSION}.tar.gz \
-    && cd /nginx-${NGINX_VERSION}  \
-    && ./configure \
-     --prefix=/etc/nginx \
-     --sbin-path=/usr/sbin/nginx \
-     --modules-path=/usr/lib/nginx/modules \
-     --conf-path=/etc/nginx/nginx.conf \
-     --error-log-path=/var/log/nginx/error.log \
-     --http-log-path=/var/log/nginx/access.log \
-     --pid-path=/var/run/nginx.pid \
-     --lock-path=/var/run/nginx.lock \
-     --http-client-body-temp-path=/var/cache/nginx/client_temp \
-     --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
-     --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
-     --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
-     --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-     --with-perl_modules_path=/usr/lib/perl5/vendor_perl \
-     --user=nginx \
-     --group=nginx \
-     --with-compat \
-     --with-file-aio \
-     --with-threads \
-     --with-http_addition_module \
-     --with-http_auth_request_module \
-     --with-http_dav_module \
-     --with-http_flv_module \
-     --with-http_gunzip_module \
-     --with-http_gzip_static_module \
-     --with-http_mp4_module \
-     --with-http_random_index_module \
-     --with-http_realip_module \
-     --with-http_secure_link_module \
-     --with-http_slice_module \
-     --with-http_ssl_module \
-     --with-http_stub_status_module \
-     --with-http_sub_module \
-     --with-http_v2_module \
-     --with-mail \
-     --with-mail_ssl_module \
-     --with-stream \
-     --with-stream_realip_module \
-     --with-stream_ssl_module \
-     --with-stream_ssl_preread_module \
-     --with-cc-opt='-Os -fomit-frame-pointer -g' \
-     --with-ld-opt=-Wl,--as-needed,-O1,--sort-common \
-     --add-dynamic-module=/ngx_brotli \
-     --add-dynamic-module=/ModSecurity-nginx \
-     && make modules
-RUN cp /nginx-${NGINX_VERSION}/objs/ngx_http_brotli_filter_module.so /usr/lib/nginx/modules/ \
-    && cp /nginx-${NGINX_VERSION}/objs/ngx_http_brotli_static_module.so /usr/lib/nginx/modules/  \
-    && cp /nginx-${NGINX_VERSION}/objs/ngx_http_modsecurity_module.so /usr/lib/nginx/modules/
 
-## 部署代码
+# Download and compile Nginx with modules
+RUN cd /opt \
+    && git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git \
+    && NGINX_VERSION=$(nginx -v 2>&1 | sed 's/nginx version: nginx\///') \
+    && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+    && tar -zxf nginx.tar.gz \
+    && cd nginx-$NGINX_VERSION \
+    && ./configure \
+        --with-compat \
+        --add-dynamic-module=/opt/ngx_brotli \
+        --add-dynamic-module=/opt/ModSecurity-nginx \
+    && make modules
+
+# Copy compiled modules
+RUN cp /opt/nginx-$(nginx -v 2>&1 | sed 's/nginx version: nginx\///')/objs/*.so /etc/nginx/modules/
+
+# Install OWASP CRS
+RUN mkdir -p /etc/nginx/modsecurity \
+    && cd /etc/nginx/modsecurity \
+    && git clone -b v4.15.0 https://github.com/coreruleset/coreruleset.git \
+    && mv coreruleset/crs-setup.conf.example coreruleset/crs-setup.conf \
+    && mv coreruleset/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example coreruleset/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+
+# Configure ModSecurity
+RUN cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsecurity/modsecurity.conf \
+    && echo 'Include /etc/nginx/modsecurity/coreruleset/crs-setup.conf' >> /etc/nginx/modsecurity/modsecurity.conf \
+    && echo 'Include /etc/nginx/modsecurity/coreruleset/rules/*.conf' >> /etc/nginx/modsecurity/modsecurity.conf \
+    && sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsecurity/modsecurity.conf \
+    && cp /opt/ModSecurity/unicode.mapping /etc/nginx/modsecurity/unicode.mapping
+
+# Clean up
+RUN apk del gcc libc-dev make pcre-dev zlib-dev linux-headers curl gnupg libxml2-dev git openssl-dev \
+    geoip-dev perl-dev libedit-dev mercurial alpine-sdk findutils autoconf automake libtool yajl-dev \
+    lmdb-dev libmaxminddb-dev pcre2-dev curl-dev lua-dev \
+    && rm -rf /opt/* \
+    && rm -rf /var/cache/apk/*
+
+# Copy application files
 COPY dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 443
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
 ```
-:::
+
+</details>
   </TabItem>
   <TabItem value="next" label="Next.js">
 ```dockerfile
