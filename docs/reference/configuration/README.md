@@ -1174,7 +1174,7 @@ module.exports = defineConfig({
 last 2 version
 > 1%
 not dead
-not ie < 11
+not ie <= 11
 not op_mini all
 
 [development]
