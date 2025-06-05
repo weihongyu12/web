@@ -173,6 +173,21 @@ Jest 测试规范定义了单元测试和集成测试的编写准则：
 
 [查看 Jest 规范详情](./jest/)
 
+### Testing Library
+
+Testing Library 规范定义了基于用户行为的测试编写准则，适用于 React 和 Vue 等框架：
+
+- 优先使用用户可见的查询方式（getByRole、getByText 等）
+- 异步操作的正确处理（await async queries/events）
+- 避免直接操作 DOM 容器和节点
+- 使用 screen 对象进行统一查询
+- 合理使用等待策略和断言
+- 遵循可访问性最佳实践
+- 测试清理和隔离机制
+- 调试工具的正确使用
+
+[查看 Testing Library 规范详情](./testing-library/)
+
 ### Playwright
 
 Playwright 端到端测试规范定义了 E2E 测试的编写和组织方式：
