@@ -1118,4 +1118,4 @@ Content-Type: multipart/form-data
 
 ## 文档
 
-文档推荐使用 [Spring REST Docs](https://spring.io/projects/spring-restdocs)
+文档推荐使用 [OpenAPI Specification](https://swagger.io/)
