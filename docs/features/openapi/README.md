@@ -54,6 +54,16 @@ export default defineConfig({
       },
       schemas: 'src/api/models',
     },
+  }, 
+  zod: {
+    input: {
+      target: './swagger.json',
+      // 或远程: 'http://localhost:3000/api/swagger.json'
+    },
+    output: {
+      target: 'src/api/zod-schemas',
+      client: 'zod',
+    },
   },
 });
 ```
@@ -298,7 +308,7 @@ const UserListWithPagination: FC = function UserListWithPagination() {
 ```tsx
 import { type FC } from 'react';
 import { z } from 'zod';
-import { UserSchema } from '../api/generated/zod-schemas';
+import { UserSchema } from '@/api/zod-schemas';
 
 interface UserCardProps {
     userId: string
