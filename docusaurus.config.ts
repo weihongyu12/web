@@ -169,6 +169,21 @@ const config: Config = {
 
   plugins: [
     '@docusaurus/plugin-pwa',
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            to: '/docs/features/authentication/smscode/',
+            from: ['/docs/features/', '/docs/features/authentication/'],
+          },
+          {
+            to: '/docs/features/payment/alipay/',
+            from: ['/docs/features/payment/'],
+          },
+        ],
+      },
+    ],
   ],
 
   themes: ['@docusaurus/theme-mermaid'],
