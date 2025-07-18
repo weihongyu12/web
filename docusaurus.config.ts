@@ -174,12 +174,12 @@ const config: Config = {
       {
         redirects: [
           {
-            to: '/docs/features/authentication/smscode/',
-            from: ['/docs/features/', '/docs/features/authentication/'],
+            to: '/web/docs/features/authentication/smscode/',
+            from: ['/web/docs/features/', '/web/docs/features/authentication/'],
           },
           {
-            to: '/docs/features/payment/alipay/',
-            from: ['/docs/features/payment/'],
+            to: '/web/docs/features/payment/alipay/',
+            from: ['/web/docs/features/payment/'],
           },
         ],
       },
