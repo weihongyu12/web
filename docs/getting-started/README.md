@@ -42,7 +42,7 @@ description: 架构指南和总览
 - **打包工具**：大部分平台使用 RSpack 作为打包工具，但移动端 Vue 项目使用 Vite
   - RSPack 是基于 Rust 的高性能 Web 打包工具，并且兼容部分 Webpack 插件
   - Vite 是一个现代化的前端构建工具，尤其在 Vue 项目中表现出色
-- **UI 组件/框架**：除了B端PC端使用 Ant Design Pro 外，其他均采用 Tailwind CSS
+- **UI 组件/框架**：除了B端使用 Ant Design Pro 外，其他均采用 Tailwind CSS
   - Tailwind CSS 是一个实用优先的 CSS 框架，提供了丰富的样式类，适合快速构建响应式布局，适用于有 UI 设计规范的项目
   - Ant Design Pro 是一个基于 Ant Design 的企业级 UI 组件库，对B端项目提供了丰富的组件和设计规范，适合复杂的管理系统
     - Ant Design Pro 经过改造，在原来的基础上，去除了 umi 的依赖，仅保留 Ant Design 和 Pro Components
