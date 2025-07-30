@@ -54,8 +54,9 @@ description: 架构指南和总览
 - **代码质量工具**：支持 TypeScript，并广泛采用 ESLint 进行代码风格检查；同时部分项目还启用了 stylelint 和 HTML Validate。
 - **PWA**：持渐进式 Web 应用（PWA），提供更好的用户体验和离线支持
 - **服务端渲染(SSR)**：提升 SEO 和首屏加载速度，适用于C端项目
-- **Electron**：专门针对B端项目提供桌面应用开发能力。
-- **Capacitor**：为移动端提供了构建跨平台原生应用的能力。
+- **Electron**：专门针对B端项目提供桌面应用开发能力
+- **Capacitor**：为移动端提供了构建跨平台原生应用的能力
+  - Capacitor 是一个跨平台的原生应用开发框架，支持 iOS、Android 和 Web 应用，但是其是基于 Webview 的，因此在性能和功能上可能不如原生应用，适用于项目初期阶段快速开发和迭代。如果产品周期成熟后，建议使用原生开发框架，如 React Native、Flutter 甚至原生 iOS/Android 开发
 - **测试工具**：
   - 单元测试使用 Jest，组件挂载库依据所用框架不同选择 React Testing Library 或 Vue Test Utils
   - E2E 测试工具均为 Playwright
