@@ -81,9 +81,10 @@ description: 架构指南和总览
 | [crypto-js](http://github.com/brix/crypto-js)                                    | 实现 MD5、SHA1、RSA 等常用加密算法                                                            |
 | [date-fns](https://date-fns.org/)                                                | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
 | [dompurify](https://www.npmjs.com/package/dompurify)                             | 适用于 DOM 的 XSS 清理器，用于防御针对 HTML 的 XSS 攻击                                             |
+| [es-toolkit](https://es-toolkit.dev/zh_hans/)                                    | JavaScript 工具库，Lodash 的现代化替代品                                                      |
 | [js-cookie](https://github.com/js-cookie/js-cookie)                              | 浏览器cookie操作                                                                        |
 | [localforage](https://localforage.github.io/localForage/)                        | 浏览器本地存储（IndexedDB、Storage、~~WebSQL~~），常用于IndexedDB的操作                              |
-| [lodash](https://lodash.com/)                                                    | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
+| ~~[lodash](https://lodash.com/)~~                                                | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
 | [mathjs](https://mathjs.org/)                                                    | JS 数学计算函数，能有效避免 JS 数学计算中可能出现的数值精度问题                                                |
 | [nzh](http://cnwhy.github.io/nzh)                                                | 实现数值转中文大写字符功能                                                                      |
 | [print-js](http://printjs.crabbly.com/)                                          | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
