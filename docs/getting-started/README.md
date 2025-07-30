@@ -10,33 +10,51 @@ description: 架构指南和总览
 
 ## 总览
 
-| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端                |
-|---------------|-----------------------|-----------------------|------------------------|-------------------------|
-| 框架            | Next.js               | Next.js               | Vue                    | React（基于Ant Design Pro） |
-| 打包工具          | RSpack                | RSpack                | Vite                   | Umi Max                 |
-| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro          |
-| 路由            | -                     | -                     | Vue Router             | Umi Router              |
-| 路由模式          | history               | history               | hash                   | hash                    |
-| 状态管理          | -                     | -                     | Pinia                  | Zustand                 |
-| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                  |
-|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript       |
-|               | next/recommended      | next/recommended      |                        |                         |
-| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap               |
-| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                       |
-| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                       |
-| Electron      | ❌                     | ❌                     | ❌                      | ✔️                      |
-| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                       |
-| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                    |
-| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library   |
-| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright              |
+| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
+|---------------|-----------------------|-----------------------|------------------------|-----------------------|
+| 框架            | Next.js               | Next.js               | Vue                    | React                 |
+| 打包工具          | RSpack                | RSpack                | Vite                   | RSpack                |
+| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
+| 路由            | -                     | -                     | Vue Router             | React Router          |
+| 路由模式          | history               | history               | hash                   | hash                  |
+| 状态管理          | -                     | -                     | Pinia                  | Zustand               |
+| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                |
+|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript     |
+|               | next/recommended      | next/recommended      |                        |                       |
+| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap             |
+| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                     |
+| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                     |
+| Electron      | ❌                     | ❌                     | ❌                      | ✔️                    |
+| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                     |
+| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                  |
+| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library |
+| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright            |
 
 
-- 严格的代码检查工具，提升代码维护性：包括 ESLint、stylelint 和 HTML Validate
-- 使用 PWA 为用户提供更好的用户体验
-- 使用前端工具链为项目提供最佳构建支持
+- **框架**：各平台使用了不同的前端框架，如 Next.js、Vue、React
+  - 选择 Next.js 或者 Vue、React，取决于是否有必要进行 SSR，一般来说 C端项目（比如电子商务、新闻网站等）对 SEO 和首屏加载速度有较高要求，因此使用 Next.js 进行服务端渲染；而 B端项目（如管理系统）则更注重开发效率和用户体验，通常使用 React
+  - Vue 在移动端项目中使用，主要是因为其轻量级和易于上手的特性，适合快速开发和迭代
+- **打包工具**：大部分平台使用 RSpack 作为打包工具，但移动端 Vue 项目使用 Vite
+  - RSPack 是基于 Rust 的高性能 Web 打包工具，并且兼容部分 Webpack 插件
+  - Vite 是一个现代化的前端构建工具，尤其在 Vue 项目中表现出色
+- **UI 组件/框架**：除了B端PC端使用 Ant Design Pro 外，其他均采用 Tailwind CSS
+  - Tailwind CSS 是一个实用优先的 CSS 框架，提供了丰富的样式类，适合快速构建响应式布局，适用于有 UI 设计规范的项目
+  - Ant Design Pro 是一个基于 Ant Design 的企业级 UI 组件库，对B端项目提供了丰富的组件和设计规范，适合复杂的管理系统
+  - Ant Design Pro 经过改造，在原来的基础上，去除了 umi 的依赖，仅保留 Ant Design 和 Pro Components
+- **路由及模式**：对于需要特定路由器设置的平台，分别采用了 Vue Router 与 React Router，并设定了各自的 history 或 hash 模式
+  - history 模式适用于需要干净 URL 的应用，通常用在 C端项目中
+  - hash 模式适用于需要兼容旧浏览器的应用，通常用在 B端项目中
+  - 如果需要支持 Electron 桌面应用 和 Capacitor 移动应用，则必须使用 hash 模式
+- **状态管理**：React 项目使用 Zustand，Vue项目使用Pinia
+- **代码质量工具**：支持 TypeScript，并广泛采用 ESLint 进行代码风格检查；同时部分项目还启用了 stylelint 和 HTML Validate。
+- **PWA**：持渐进式Web应用(PWA)，提供更好的用户体验和离线支持
+- **服务端渲染(SSR)**：提升 SEO 和首屏加载速度，适用于 C端 项目
+- **Electron**：专门针对B端项目提供桌面应用开发能力。
+- **Capacitor**：为移动端提供了构建跨平台原生应用的能力。
+- **测试工具**：单元测试使用 Jest，组件挂载库依据所用框架不同选择 React Testing Library 或 Vue Test Utils，E2E 测试工具均为Playwright
 
 ## 技术运用
 
