@@ -50,13 +50,13 @@ description: 架构指南和总览
   - history 模式适用于需要干净 URL 的应用，通常用在 C端项目中
   - hash 模式适用于需要兼容旧浏览器的应用，通常用在 B端项目中
     - 如果需要支持 Electron 桌面应用 和 Capacitor 移动应用，则必须使用 hash 模式
-- **状态管理**：React 项目使用 Zustand，Vue项目使用Pinia
+- **状态管理**：React 项目使用 Zustand，Vue 项目使用 Pinia
 - **代码质量工具**：支持 TypeScript，并广泛采用 ESLint 进行代码风格检查；同时部分项目还启用了 stylelint 和 HTML Validate。
 - **PWA**：持渐进式 Web 应用（PWA），提供更好的用户体验和离线支持
 - **服务端渲染(SSR)**：提升 SEO 和首屏加载速度，适用于C端项目
 - **Electron**：专门针对B端项目提供桌面应用开发能力
 - **Capacitor**：为移动端提供了构建跨平台原生应用的能力
-  - Capacitor 是一个跨平台的原生应用开发框架，支持 iOS、Android 和 Web 应用，但是其是基于 Webview 的，因此在性能和功能上可能不如原生应用，适用于项目初期阶段快速开发和迭代。如果产品周期成熟后，建议使用原生开发框架，如 React Native、Flutter 甚至原生 iOS/Android 开发
+  - Capacitor 是一个跨平台的原生应用开发框架，支持 iOS、Android 和 Web 应用，但是因为是基于 Webview 框架，因此在性能和功能上可能不如原生应用，适用于项目初期阶段快速开发和迭代。如果产品周期成熟后，建议使用原生开发框架，如 React Native、Flutter 甚至原生 iOS/Android 开发
 - **测试工具**：
   - 单元测试使用 Jest，组件挂载库依据所用框架不同选择 React Testing Library 或 Vue Test Utils
   - E2E 测试工具均为 Playwright
