@@ -69,20 +69,26 @@ description: 架构指南和总览
 
 ## 技术运用
 
-### 环境
+### 运行环境
 
-- **Node.js**：一个 JS 的运行环境，可以让 JS 在非浏览器的环境下执行
-- **pnpm**：项目相关依赖包，同时提供命令行进行关联
+- **[Node.js](https://nodejs.org/)**：JavaScript 运行时环境，支持服务端 JavaScript 执行
+- **[pnpm](https://pnpm.io/zh/)**：高效的包管理器，提供快速安装和磁盘空间节省
 
-### 基础技术
+### 核心语言
 
-- **ECMAScript 6**：简称 ES6，又称 ECMAScript 2015，后续版本随年份命名，是 JavaScript 的标准规范
-- **TypeScript**：微软出品的编程语言，需要转化为 JS 执行，为 JS 提供静态类型和强类型
+- **[ECMAScript](https://tc39.es/ecma262/)**：现代 JavaScript 标准（ES6+），提供模块化、箭头函数、Promise 等特性
+- **[TypeScript](https://www.typescriptlang.org/zh/)**：JavaScript 的超集，提供静态类型检查和更好的开发体验
 
-### 工具
+### 构建工具
 
-- **ESLint**：JS 语法检查工具，避免一些编程时的错误，同时能让团队编程风格统一
-- **Sass**：CSS 预处理器，为 CSS 提供编程能力
+- **[RSpack](https://rspack.rs/zh/)**：基于 Rust 的高性能打包工具，兼容 Webpack 生态
+- **[Vite](https://cn.vite.dev/)**：现代前端构建工具，提供极速的开发服务器和构建速度
+
+### 开发工具链
+
+- **[ESLint](https://zh-hans.eslint.org/)**：代码质量和风格检查工具，确保代码规范一致性
+- **[Sass](https://sass-lang.com/)**：CSS 预处理器，提供变量、嵌套、混入等编程特性
+- **[stylelint](https://stylelint.io/)**：CSS 代码检查工具，确保样式代码质量
 
 ### React 框架
 
