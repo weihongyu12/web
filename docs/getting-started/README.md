@@ -33,33 +33,39 @@ description: 架构指南和总览
 | 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library |
 | E2E测试         | Playwright            | Playwright            | Playwright             | Playwright            |
 
-- **C端项目**：更侧重于用户体验、易用性和个性化服务，目标是吸引并留住大量最终用户，比如电子商务、新闻资讯类应用等
-- **B端项目**：则更关注功能的全面性、系统的稳定性和数据的安全性，目的是帮助提高效率和管理水平，比如企业内部管理系统等
-  - 一般来说，B端项目的用户群体较小，但对系统的稳定性和安全性要求更高，如果不是面对客户的产品，不建议专门做 UI 设计
-- **框架**：各平台使用了不同的前端框架，如 Next.js、Vue、React
-  - 选择 Next.js 或者 Vue、React，取决于是否有必要进行 SSR，一般来说 C端项目对 SEO 和首屏加载速度有较高要求，因此使用 Next.js 进行服务端渲染；而 B端项目则更注重开发效率和用户体验，通常使用 React
-  - Vue 在移动端项目中使用，主要是因为其轻量级和易于上手的特性，适合快速开发和迭代
-- **打包工具**：大部分平台使用 RSpack 作为打包工具，但移动端 Vue 项目使用 Vite
-  - RSPack 是基于 Rust 的高性能 Web 打包工具，并且兼容部分 Webpack 插件
-  - Vite 是一个现代化的前端构建工具，尤其在 Vue 项目中表现出色
-- **UI 组件/框架**：除了B端使用 Ant Design Pro 外，其他均采用 Tailwind CSS
-  - Tailwind CSS 是一个实用优先的 CSS 框架，提供了丰富的样式类，适合快速构建响应式布局，适用于有 UI 设计规范的项目
-  - Ant Design Pro 是一个基于 Ant Design 的企业级 UI 组件库，对B端项目提供了丰富的组件和设计规范，适合复杂的管理系统
-    - Ant Design Pro 经过改造，在原来的基础上，去除了 umi 的依赖，仅保留 Ant Design 和 Pro Components
-- **路由及模式**：对于需要特定路由器设置的平台，分别采用了 Vue Router 与 React Router，并设定了各自的 history 或 hash 模式
-  - history 模式适用于需要干净 URL 的应用，通常用在 C端项目中
-  - hash 模式适用于需要兼容旧浏览器的应用，通常用在 B端项目中
-    - 如果需要支持 Electron 桌面应用 和 Capacitor 移动应用，则必须使用 hash 模式
-- **状态管理**：React 项目使用 Zustand，Vue 项目使用 Pinia
-- **代码质量工具**：支持 TypeScript，并广泛采用 ESLint 进行代码风格检查；同时部分项目还启用了 stylelint 和 HTML Validate。
-- **PWA**：持渐进式 Web 应用（PWA），提供更好的用户体验和离线支持
-- **服务端渲染(SSR)**：提升 SEO 和首屏加载速度，适用于C端项目
-- **Electron**：专门针对B端项目提供桌面应用开发能力
-- **Capacitor**：为移动端提供了构建跨平台原生应用的能力
-  - Capacitor 是一个跨平台的原生应用开发框架，支持 iOS、Android 和 Web 应用，但是因为是基于 Webview 框架，因此在性能和功能上可能不如原生应用，适用于项目初期阶段快速开发和迭代。如果产品周期成熟后，建议使用原生开发框架，如 React Native、Flutter 甚至原生 iOS/Android 开发
-- **测试工具**：
-  - 单元测试使用 Jest，组件挂载库依据所用框架不同选择 React Testing Library 或 Vue Test Utils
-  - E2E 测试工具均为 Playwright
+**核心特点**
+
+- **场景导向**：根据C端/B端不同需求特点，选择合适的框架和工具链
+- **性能优先**：C端项目普遍支持 SSR 和 PWA，注重 SEO 和用户体验
+- **开发效率**：统一采用 TypeScript、现代化打包工具（RSpack/Vite）和代码规范工具
+- **质量保障**：全面的测试覆盖（单元测试、E2E 测试）和代码检查工具链
+- **跨平台能力**：支持桌面应用（Electron）和移动应用（Capacitor）扩展
+
+**技术选型逻辑**
+
+- **框架选择**：根据 SSR 需求选择 Next.js 或传统 SPA 框架
+- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用成熟的 Ant Design Pro
+- **状态管理**：轻量化策略，React 生态使用 Zustand，Vue 生态使用 Pinia
+- **代码规范**：统一的 ESLint 配置和 stylelint 规范，确保代码质量一致性
+
+:::info C端与B端项目差异
+**C端项目（Consumer）**
+- **用户群体**：面向大量普通消费者
+- **核心诉求**：用户体验、易用性、个性化服务
+- **典型场景**：电商平台、新闻资讯、社交媒体、生活服务等
+- **技术特点**：注重UI/UX设计、SEO优化、性能体验
+
+**B端项目（Business）**
+- **用户群体**：企业内部员工或特定业务人员
+- **核心诉求**：功能完整性、系统稳定性、数据安全性
+- **典型场景**：企业管理系统、CRM、ERP、数据分析平台等
+- **技术特点**：重视功能性和可维护性，UI设计相对简洁实用
+
+**技术选型说明**
+- B端项目用户群体相对固定，对系统稳定性要求更高
+- 如非面向客户的产品，建议采用成熟的组件库而非定制UI设计
+- 本架构中的 Ant Design Pro 已优化：移除 umi 依赖，仅保留核心的 Ant Design 和 Pro Components
+:::
 
 ## 技术运用
 
