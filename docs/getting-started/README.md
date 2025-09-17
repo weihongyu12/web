@@ -10,66 +10,103 @@ description: 架构指南和总览
 
 ## 总览
 
-| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端                |
-|---------------|-----------------------|-----------------------|------------------------|-------------------------|
-| 框架            | Next.js               | Next.js               | Vue                    | React（基于Ant Design Pro） |
-| 打包工具          | RSpack                | RSpack                | Vite                   | Umi Max                 |
-| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro          |
-| 路由            | -                     | -                     | Vue Router             | Umi Router              |
-| 路由模式          | history               | history               | hash                   | hash                    |
-| 状态管理          | -                     | -                     | Pinia                  | Zustand                 |
-| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                  |
-|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript       |
-|               | next/recommended      | next/recommended      |                        |                         |
-| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap               |
-| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                       |
-| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                      |
-| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                       |
-| Electron      | ❌                     | ❌                     | ❌                      | ✔️                      |
-| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                       |
-| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                    |
-| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library   |
-| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright              |
+| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
+|---------------|-----------------------|-----------------------|------------------------|-----------------------|
+| 框架            | Next.js               | Next.js               | Vue                    | React                 |
+| 打包工具          | RSpack                | RSpack                | Vite                   | RSpack                |
+| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
+| 路由            | -                     | -                     | Vue Router             | React Router          |
+| 路由模式          | history               | history               | hash                   | hash                  |
+| 状态管理          | -                     | -                     | Pinia                  | Zustand               |
+| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                |
+|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript     |
+|               | next/recommended      | next/recommended      |                        |                       |
+| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap             |
+| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                     |
+| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
+| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                     |
+| Electron      | ❌                     | ❌                     | ❌                      | ✔️                    |
+| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                     |
+| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                  |
+| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library |
+| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright            |
 
+**核心特点**
 
-- 严格的代码检查工具，提升代码维护性：包括 ESLint、stylelint 和 HTML Validate
-- 使用 PWA 为用户提供更好的用户体验
-- 使用前端工具链为项目提供最佳构建支持
+- **场景导向**：根据C端/B端不同需求特点，选择合适的框架和工具链
+- **性能优先**：C端项目普遍支持 SSR 和 PWA，注重 SEO 和用户体验
+- **开发效率**：统一采用 TypeScript、现代化打包工具（RSpack/Vite）和代码规范工具
+- **质量保障**：全面的测试覆盖（单元测试、E2E 测试）和代码检查工具链
+- **跨平台能力**：支持桌面应用（Electron）和移动应用（Capacitor）扩展
+
+**技术选型逻辑**
+
+- **框架选择**：根据 SSR 需求选择 Next.js 或传统 SPA 框架
+- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用成熟的 Ant Design Pro
+- **状态管理**：轻量化策略，React 生态使用 Zustand，Vue 生态使用 Pinia
+- **代码规范**：统一的 ESLint 配置和 stylelint 规范，确保代码质量一致性
+
+:::info C端与B端项目差异
+**C端项目（Consumer）**
+- **用户群体**：面向大量普通消费者
+- **核心诉求**：用户体验、易用性、个性化服务
+- **典型场景**：电商平台、新闻资讯、社交媒体、生活服务等
+- **技术特点**：注重UI/UX设计、SEO优化、性能体验
+
+**B端项目（Business）**
+- **用户群体**：企业内部员工或特定业务人员
+- **核心诉求**：功能完整性、系统稳定性、数据安全性
+- **典型场景**：企业管理系统、CRM、ERP、数据分析平台等
+- **技术特点**：重视功能性和可维护性，UI设计相对简洁实用
+
+**技术选型说明**
+- B端项目用户群体相对固定，对系统稳定性要求更高
+- 如非面向客户的产品，建议采用成熟的组件库而非定制UI设计
+- 本架构中的 Ant Design Pro 已优化：移除 umi 依赖，仅保留核心的 Ant Design 和 Pro Components
+:::
 
 ## 技术运用
 
-### 环境
+### 运行环境
 
-- **Node.js**：一个 JS 的运行环境，可以让 JS 在非浏览器的环境下执行
-- **pnpm**：项目相关依赖包，同时提供命令行进行关联
+- **[Node.js](https://nodejs.org/)**：JavaScript 运行时环境，支持服务端 JavaScript 执行
+- **[pnpm](https://pnpm.io/zh/)**：高效的包管理器，提供快速安装和磁盘空间节省
 
-### 基础技术
+### 核心语言
 
-- **ECMAScript 6**：简称 ES6，又称 ECMAScript 2015，后续版本随年份命名，是 JavaScript 的标准规范
-- **TypeScript**：微软出品的编程语言，需要转化为 JS 执行，为 JS 提供静态类型和强类型
+- **[ECMAScript](https://tc39.es/ecma262/)**：现代 JavaScript 标准（ES6+），提供模块化、箭头函数、Promise 等特性
+- **[TypeScript](https://www.typescriptlang.org/zh/)**：JavaScript 的超集，提供静态类型检查和更好的开发体验
 
-### 工具
+### 构建工具
 
-- **ESLint**：JS 语法检查工具，避免一些编程时的错误，同时能让团队编程风格统一
-- **Sass**：CSS 预处理器，为 CSS 提供编程能力
+- **[RSpack](https://rspack.rs/zh/)**：基于 Rust 的高性能打包工具，兼容 Webpack 生态
+- **[Vite](https://cn.vite.dev/)**：现代前端构建工具，提供极速的开发服务器和构建速度
+
+### 开发工具链
+
+- **[ESLint](https://zh-hans.eslint.org/)**：代码质量和风格检查工具，确保代码规范一致性
+- **[Sass](https://sass-lang.com/)**：CSS 预处理器，提供变量、嵌套、混入等编程特性
+- **[stylelint](https://stylelint.io/)**：CSS 代码检查工具，确保样式代码质量
 
 ### React 框架
 
-| 特性   | 框架                                       | 说明                     |
-|------|------------------------------------------|------------------------|
-| 框架   | [React](https://zh-hans.react.dev/)      | 用于构建用户界面的 JavaScript 库 |
-| 路由   | [React Router](https://reactrouter.com/) | 为 React 应用提供声明式路由功能    |
-| 状态管理 | [Zustand](https://zustand-demo.pmnd.rs/) | 轻量级的状态管理库，API 简洁易用     |
+| 特性          | 框架                                       | 说明                     |
+|-------------|------------------------------------------|------------------------|
+| 框架          | [React](https://zh-hans.react.dev/)      | 用于构建用户界面的 JavaScript 库 |
+| 路由          | [React Router](https://reactrouter.com/) | 为 React 应用提供声明式路由功能    |
+| 状态管理        | [Zustand](https://zustand-demo.pmnd.rs/) | 轻量级的状态管理库，API 简洁易用     |
+| React Hooks | [ahooks](https://ahooks.js.org/zh-CN/)   | React Hooks 库          |
 
 ### Vue 框架
 
-| 特性   | 框架                                              | 说明                         |
-|------|-------------------------------------------------|----------------------------|
-| 框架   | [Vue](https://cn.vuejs.org/)                    |                            |
-| 路由   | [Vue Router](https://router.vuejs.org/zh/) | 为 Vue 提供页面切换功能             |
-| 状态管理 | [Pinia](https://pinia.vuejs.org/)               | 为多个 Vue 组件提供共享的状态          |
+| 特性          | 框架                                         | 说明                               |
+|-------------|--------------------------------------------|----------------------------------|
+| 框架          | [Vue](https://cn.vuejs.org/)               |                                  |
+| 路由          | [Vue Router](https://router.vuejs.org/zh/) | 为 Vue 提供页面切换功能                   |
+| 状态管理        | [Pinia](https://pinia.vuejs.org/)          | 为多个 Vue 组件提供共享的状态                |
+| Vue 组合式 API | [VueUse](https://vueuse.org/)              | Vue 组合式 API（Composition API）程序集合 |
 
 ### JS 库
 
@@ -81,9 +118,10 @@ description: 架构指南和总览
 | [crypto-js](http://github.com/brix/crypto-js)                                    | 实现 MD5、SHA1、RSA 等常用加密算法                                                            |
 | [date-fns](https://date-fns.org/)                                                | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
 | [dompurify](https://www.npmjs.com/package/dompurify)                             | 适用于 DOM 的 XSS 清理器，用于防御针对 HTML 的 XSS 攻击                                             |
+| [es-toolkit](https://es-toolkit.dev/zh_hans/)                                    | JavaScript 工具库，Lodash 的现代化替代品                                                      |
 | [js-cookie](https://github.com/js-cookie/js-cookie)                              | 浏览器cookie操作                                                                        |
 | [localforage](https://localforage.github.io/localForage/)                        | 浏览器本地存储（IndexedDB、Storage、~~WebSQL~~），常用于IndexedDB的操作                              |
-| [lodash](https://lodash.com/)                                                    | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
+| ~~[lodash](https://lodash.com/)~~                                                | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
 | [mathjs](https://mathjs.org/)                                                    | JS 数学计算函数，能有效避免 JS 数学计算中可能出现的数值精度问题                                                |
 | [nzh](http://cnwhy.github.io/nzh)                                                | 实现数值转中文大写字符功能                                                                      |
 | [print-js](http://printjs.crabbly.com/)                                          | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
