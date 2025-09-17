@@ -9,94 +9,134 @@ sidebar_position: 1
 HTML Validate 规则参考 `html-validate:recommended`，但是由于需要整理的内容非常多，在开发过程中，仍以实际的 HTML Validate 检查为准。本章内容仅供参考
 :::
 
-## 规则一览
+## HTML语法与概念
 
-### 可用规则
+与HTML语法和概念相关的规则。
 
-| 规则                                                                                      | 来源                          | 描述                                                               |
-|-----------------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------|
-| [`attr-delimiter`](https://html-validate.org/rules/attr-delimiter.html)                 | `html-validate:recommended` | 不允许属性键和值之间有空格                                                    |
-| [`attr-spacing`](https://html-validate.org/rules/attr-spacing.html)                     | `html-validate:recommended` | 属性必须用空格（通常是常规空格）分隔                                               |
-| [`close-attr`](https://html-validate.org/rules/close-attr.html)                         | `html-validate:recommended` | 不允许带有属性的结束标签                                                     |
-| [`close-order`](https://html-validate.org/rules/close-order.html)                       | `html-validate:recommended` | 禁止以错误顺序关闭的元素                                                     |
-| [`deprecated`](https://html-validate.org/rules/deprecated.html)                         | `html-validate:recommended` | 禁止使用已弃用的元素                                                       |
-| [`deprecated-rule`](https://html-validate.org/rules/deprecated-rule.html)               | `html-validate:recommended` | 禁止使用已弃用的规则                                                       |
-| [`doctype-html`](https://html-validate.org/rules/doctype-html.html)                     | `html-validate:recommended` | 使用 html5 文档类型（`<!DOCTYPE html>`）                                 |
-| [`element-name`](https://html-validate.org/rules/element-name.html)                     | `html-validate:recommended` | 禁止无效的元素名称                                                        |
-| [`meta-refresh`](https://html-validate.org/rules/meta-refresh.html)                     | `html-validate:recommended` | 元刷新（`<meta http-equiv="refresh" content="..">`）有 0 秒延迟           |
-| [`no-conditional-comment`](https://html-validate.org/rules/no-conditional-comment.html) | `html-validate:recommended` | 禁止使用 IE 条件注释                                                     |
-| [`no-deprecated-attr`](https://html-validate.org/rules/no-deprecated-attr.html)         | `html-validate:recommended` | 禁止使用已弃用的属性                                                       |
-| [`no-dup-attr`](https://html-validate.org/rules/no-dup-attr.html)                       | `html-validate:recommended` | 不允许同一元素上使用重复的属性                                                  |
-| [`no-dup-class`](https://html-validate.org/rules/no-dup-class.html)                     | `html-validate:recommended` | 不允许同一元素上使用重复的 class                                              |
-| [`no-dup-id`](https://html-validate.org/rules/no-dup-id.html)                           | `html-validate:recommended` | 不允许同一元素上使用重复的 ID                                                 |
-| [`no-raw-characters`](https://html-validate.org/rules/no-raw-characters.html)           | `html-validate:recommended` | 禁止使用未转义的特殊字符                                                     |
-| [`no-redundant-for`](https://html-validate.org/rules/no-redundant-for.html)             | `html-validate:recommended` | 禁止对 `<label>` 使用冗余的 `for` 属性                                     |
-| [`no-redundant-role`](https://html-validate.org/rules/no-redundant-role.html)           | `html-validate:recommended` | 禁止使用冗余 `role`                                                    |
-| [`prefer-button`](https://html-validate.org/rules/prefer-button.html)                   | `html-validate:recommended` | 优先使用 `<button>` 代替 `<input tpye="button">`                       |
-| [`prefer-tbody`](https://html-validate.org/rules/prefer-tbody.html)                     | `html-validate:recommended` | 优先使用 `<tbody>` 包裹 `<tr>`，在适用的情况下，它还应与 `<thead>` 和 `<tfoot>` 结合使用 |
-| [`script-type`](https://html-validate.org/rules/script-type.html)                       | `html-validate:recommended` | `<script>` 元素 `type` 属性必须是有效类型（`type` 在脚本是 JavaScript 资源时省略该属性）  |
-| [`tel-non-breaking`](https://html-validate.org/rules/tel-non-breaking.html)             | `html-validate:recommended` | 要求电话号码中的不间断字符                                                    |
-| [`unrecognized-char-ref`](https://html-validate.org/rules/unrecognized-char-ref.html)   | `html-validate:recommended` | 禁止无法识别的 HTML 实体                                                  |
-| [`valid-id`](https://html-validate.org/rules/valid-id.html)                             | `html-validate:recommended` | 要求 id 属性是有效的标识符                                                  |
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [attr-delimiter](https://html-validate.org/rules/attr-delimiter.html) | 禁止在属性键和值之间存在空格 |
+| ✔️ | [attr-spacing](https://html-validate.org/rules/attr-spacing.html) | 要求属性之间用空格分隔 |
+| ✔️ | [close-attr](https://html-validate.org/rules/close-attr.html) | 禁止结束标签包含属性 |
+| ✔️ | [close-order](https://html-validate.org/rules/close-order.html) | 要求元素以正确的顺序关闭 |
+| ✔️ | [element-name](https://html-validate.org/rules/element-name.html) | 禁止使用无效的元素名称 |
+| ✔️ | [form-dup-name](https://html-validate.org/rules/form-dup-name.html) | 要求表单控件具有唯一的名称 |
+| ✔️ | [map-dup-name](https://html-validate.org/rules/map-dup-name.html) | 要求 `<map name>` 是唯一的 |
+| ✔️ | [map-id-name](https://html-validate.org/rules/map-id-name.html) | 要求 `<map>` 元素上的 name 和 id 匹配 |
+| ✔️ | [no-dup-attr](https://html-validate.org/rules/no-dup-attr.html) | 禁止重复的属性 |
+| ✔️ | [no-dup-class](https://html-validate.org/rules/no-dup-class.html) | 禁止重复的类 |
+| ✔️ | [no-raw-characters](https://html-validate.org/rules/no-raw-characters.html) | 禁止使用未转义的特殊字符 |
+| ✔️ | [no-redundant-for](https://html-validate.org/rules/no-redundant-for.html) | 禁止使用冗余的 label for 属性 |
+| ✔️ | [script-type](https://html-validate.org/rules/script-type.html) | 要求 `<script>` 元素具有有效的类型 |
+| ✔️ | [unrecognized-char-ref](https://html-validate.org/rules/unrecognized-char-ref.html) | 禁止无法识别的字符引用 |
+| ✔️ | [valid-autocomplete](https://html-validate.org/rules/valid-autocomplete.html) | 要求 autocomplete 属性有效 |
+| ✔️ | [valid-id](https://html-validate.org/rules/valid-id.html) | 要求 `id` 是一个有效的标识符 |
 
-### 内容模型
+## 内容模型
 
-| 规则                                                                                                    | 来源                          | 描述                              |
-|-------------------------------------------------------------------------------------------------------|-----------------------------|---------------------------------|
-| [`attribute-allowed-values`](https://html-validate.org/rules/attribute-allowed-values.html)           | `html-validate:recommended` | 验证允许值的属性                        |
-| [`element-permitted-content`](https://html-validate.org/rules/element-permitted-content.html)         | `html-validate:recommended` | 验证元素内容模型，某些元素只能使用特定的子元素         |
-| [`element-permitted-occurrences`](https://html-validate.org/rules/element-permitted-occurrences.html) | `html-validate:recommended` | 验证元素内容模型，在给定的上下文中，某些元素只能使用固定的次数 |
-| [`element-permitted-order`](https://html-validate.org/rules/element-permitted-order.html)             | `html-validate:recommended` | 验证元素内容模型，某些元素具有子元素必须使用的特定顺序     |
-| [`element-required-attributes`](https://html-validate.org/rules/element-required-attributes.html)     | `html-validate:recommended` | 确保存在必需的属性                       |
-| [`element-required-content`](https://html-validate.org/rules/element-required-content.html)           | `html-validate:recommended` | 确保某些元素具有必须存在某些子元素的              |
-| [`input-attributes`](https://html-validate.org/rules/input-attributes.html)                           | `html-validate:recommended` | 验证 `<input>` 属性的使用              |
-| [`no-multiple-main`](https://html-validate.org/rules/no-multiple-main.html)                           | `html-validate:recommended` | 不允许同一文档中有多个 `<main>` 元素         |
-| [`script-element`](https://html-validate.org/rules/script-element.html)                               | `html-validate:recommended` | `<script>` 元素必须有结束标记            |
-| [`void-content`](https://html-validate.org/rules/void-content.html)                                   | `html-validate:recommended` | 禁止带有内容的 void 元素                 |
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [attribute-allowed-values](https://html-validate.org/rules/attribute-allowed-values.html) | 验证允许的属性值 |
+| ✔️ | [attribute-misuse](https://html-validate.org/rules/attribute-misuse.html) | 要求属性在正确的上下文中使用 |
+| ✔️ | [element-permitted-content](https://html-validate.org/rules/element-permitted-content.html) | 验证允许的内容 |
+| ✔️ | [element-permitted-occurrences](https://html-validate.org/rules/element-permitted-occurrences.html) | 验证允许的元素出现次数 |
+| ✔️ | [element-permitted-order](https://html-validate.org/rules/element-permitted-order.html) | 验证所需的元素顺序 |
+| ✔️ | [element-permitted-parent](https://html-validate.org/rules/element-permitted-parent.html) | 验证允许的父元素 |
+| ✔️ | [element-required-ancestor](https://html-validate.org/rules/element-required-ancestor.html) | 验证所需的祖先元素 |
+| ✔️ | [element-required-attributes](https://html-validate.org/rules/element-required-attributes.html) | 确保设置了必需的属性 |
+| ✔️ | [element-required-content](https://html-validate.org/rules/element-required-content.html) | 确保存在必需的元素 |
+| ✔️ | [input-attributes](https://html-validate.org/rules/input-attributes.html) | 验证输入属性的使用 |
+| ✔️ | [no-multiple-main](https://html-validate.org/rules/no-multiple-main.html) | 禁止多个 `<main>` |
+| ✔️ | [script-element](https://html-validate.org/rules/script-element.html) | 要求 `<script>` 有结束标签 |
+| ✔️ | [void-content](https://html-validate.org/rules/void-content.html) | 禁止空元素包含内容 |
 
-### 可访问性
+## 已弃用
 
-| 规则                                                                                            | 来源                          | 描述                                                                                                               |
-|-----------------------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------|
-| [`aria-hidden-body`](https://html-validate.org/rules/aria-hidden-body.html)                   | `html-validate:recommended` | `<body>` 元素上不使用 `aria-hidden`                                                                                    |
-| [`aria-label-misuse`](https://html-validate.org/rules/aria-label-misuse.html)                 | `html-validate:recommended` | 禁止 `aria-label` 滥用                                                                                               |
-| [`empty-heading`](https://html-validate.org/rules/empty-heading.html)                         | `html-validate:recommended` | 标题（`h1`-`h6`）必须有文字内容                                                                                             |
-| [`empty-title`](https://html-validate.org/rules/empty-title.html)                             | `html-validate:recommended` | 标题（`<title>`）必须有文字内容                                                                                             |
-| [`multiple-labeled-controls`](https://html-validate.org/rules/multiple-labeled-controls.html) | `html-validate:recommended` | 禁止 `<label>` 与多个控件关联                                                                                             |
-| [`no-autoplay`](https://html-validate.org/rules/no-autoplay.html)                             | `html-validate:recommended` | 禁止自动播放媒体元素                                                                                                       |
-| [`prefer-native-element`](https://html-validate.org/rules/prefer-native-element.html)         | `html-validate:recommended` | 优先使用原生 HTML 元素而不是 `role`                                                                                         |
-| [`text-content`](https://html-validate.org/rules/text-content.html)                           | `html-validate:recommended` | 元素必须具有有效文本（默认情况下，此规则验证 `<button>`）                                                                               |
-| [`wcag/h30`](https://html-validate.org/rules/wcag/h30.html)                                   | `html-validate:recommended` | [WCAG 2.1 H30](https://www.w3.org/WAI/WCAG21/Techniques/html/H30)：每个 `<a>` 链接都有一个描述文本目的的文本，描述可能来自纯文本或来自带有替代文本的图像 |
-| [`wcag/h32`](https://html-validate.org/rules/wcag/h32.html)                                   | `html-validate:recommended` | [WCAG 2.1 H32](https://www.w3.org/WAI/WCAG21/Techniques/html/H32)：每个 `<form>` 元素至少包含一个提交按钮，以允许用户以可预测的方式与表单进行交互   |
-| [`wcag/h36`](https://html-validate.org/rules/wcag/h36.html)                                   | `html-validate:recommended` | [WCAG 2.1 H36](https://www.w3.org/WAI/WCAG21/Techniques/html/H36)：所有用作提交按钮的图像都具有使用该 `alt` 属性的文本描述                |
-| [`wcag/h37`](https://html-validate.org/rules/wcag/h37.html)                                   | `html-validate:recommended` | [WCAG 2.1 H37](https://www.w3.org/WAI/WCAG21/Techniques/html/H37)：所有图像都有替代文本（`alt` 属性）                           |
-| [`wcag/h67`](https://html-validate.org/rules/wcag/h67.html)                                   | `html-validate:recommended` | [WCAG 2.1 H67](https://www.w3.org/WAI/WCAG21/Techniques/html/H67)：装饰图像具有空 `alt` 文本 (`alt=""`) 或不存在 `title`       |
-| [`wcag/h71`](https://html-validate.org/rules/wcag/h71.html)                                   | `html-validate:recommended` | [WCAG 2.1 H71](https://www.w3.org/WAI/WCAG21/Techniques/html/H71)：所有 `<fieldset>` 都有一个 `<legend>` 元素作为第一个子元素     |
+与使用已弃用或过时功能相关的规则。
 
-### SEO
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [deprecated](https://html-validate.org/rules/deprecated.html) | 禁止使用已弃用的元素 |
+| ✔️ | [deprecated-rule](https://html-validate.org/rules/deprecated-rule.html) | 禁止使用已弃用的规则 |
+| ✔️ | [no-conditional-comment](https://html-validate.org/rules/no-conditional-comment.html) | 禁止使用条件注释 |
+| ✔️ | [no-deprecated-attr](https://html-validate.org/rules/no-deprecated-attr.html) | 禁止使用已弃用的属性 |
 
-| 规则                                                               | 来源                          | 描述                        |
-|------------------------------------------------------------------|-----------------------------|---------------------------|
-| [`long-title`](https://html-validate.org/rules/long-title.html)  | `html-validate:recommended` | 标题（`<title>`）文字不能超过70个字符  |
+## 可访问性
 
-### 风格
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [area-alt](https://html-validate.org/rules/area-alt.html) | 要求 `<area>` 元素提供替代文本 |
+| ✔️ | [aria-hidden-body](https://html-validate.org/rules/aria-hidden-body.html) | 禁止在 `<body>` 上设置 `aria-hidden` |
+| ✔️ | [aria-label-misuse](https://html-validate.org/rules/aria-label-misuse.html) | 禁止误用 `aria-label` |
+| ✔️ | [empty-heading](https://html-validate.org/rules/empty-heading.html) | 要求标题具有文本内容 |
+| ✔️ | [empty-title](https://html-validate.org/rules/empty-title.html) | 要求 title 具有文本内容 |
+| ✔️ | [hidden-focusable](https://html-validate.org/rules/hidden-focusable.html) | 禁止对可聚焦元素使用 `aria-hidden` |
+| 📃 | [input-missing-label](https://html-validate.org/rules/input-missing-label.html) | 要求输入框有标签 |
+| ✔️ | [meta-refresh](https://html-validate.org/rules/meta-refresh.html) | 要求 meta refresh 的延迟时间为 0 秒 |
+| ✔️ | [multiple-labeled-controls](https://html-validate.org/rules/multiple-labeled-controls.html) | 禁止标签与多个控件关联 |
+| ✔️ | [no-abstract-role](https://html-validate.org/rules/no-abstract-role.html) | 禁止使用抽象的 WAI-ARIA 角色 |
+| ✔️ | [no-autoplay](https://html-validate.org/rules/no-autoplay.html) | 禁止媒体元素自动播放 |
+| ✔️ | [no-implicit-button-type](https://html-validate.org/rules/no-implicit-button-type.html) | 禁止隐式的按钮类型 |
+| ✔️ | [no-redundant-aria-label](https://html-validate.org/rules/no-redundant-aria-label.html) | 禁止 aria-label 和 label 具有相同的文本内容 |
+| ✔️ | [no-redundant-role](https://html-validate.org/rules/no-redundant-role.html) | 禁止使用冗余的角色 |
+| ✔️ | [prefer-native-element](https://html-validate.org/rules/prefer-native-element.html) | 倾向于使用原生 HTML 元素而不是角色 |
+| ✔️ | [tel-non-breaking](https://html-validate.org/rules/tel-non-breaking.html) | 要求电话号码中使用非换行字符 |
+| ✔️ | [text-content](https://html-validate.org/rules/text-content.html) | 要求元素具有有效的文本内容 |
+| ✔️ | [unique-landmark](https://html-validate.org/rules/unique-landmark.html) | 要求地标具有唯一的名称 |
+| ✔️ | [wcag/h30](https://html-validate.org/rules/wcag/h30.html) | WCAG H30: 提供链接文本 |
+| ✔️ | [wcag/h32](https://html-validate.org/rules/wcag/h32.html) | WCAG H32: 提供提交按钮 |
+| ✔️ | [wcag/h36](https://html-validate.org/rules/wcag/h36.html) | WCAG H36: 要求用作提交按钮的图像提供替代文本 |
+| ✔️ | [wcag/h37](https://html-validate.org/rules/wcag/h37.html) | WCAG H37: 在 img 元素上使用 alt 属性 |
+| ✔️ | [wcag/h63](https://html-validate.org/rules/wcag/h63.html) | WCAG H63: 使用 scope 属性关联表头单元格和数据单元格 |
+| ✔️ | [wcag/h67](https://html-validate.org/rules/wcag/h67.html) | WCAG H67: 在 img 元素上使用空 alt 文本且无 title 属性 |
+| ✔️ | [wcag/h71](https://html-validate.org/rules/wcag/h71.html) | WCAG H71: 为表单控件组提供描述 |
 
-| 规则                                                                                        | 来源                          | 描述                |
-|-------------------------------------------------------------------------------------------|-----------------------------|-------------------|
-| [`attr-case`](https://html-validate.org/rules/attr-case.html)                             | `html-validate:recommended` | 属性名使用小写           |
-| [`attr-quotes`](https://html-validate.org/rules/attr-quotes.html)                         | `html-validate:recommended` | 属性引号使用双引号         |
-| [`attribute-boolean-style`](https://html-validate.org/rules/attribute-boolean-style.html) | `html-validate:recommended` | 布尔属性忽略属性值         |
-| [`attribute-empty-style`](https://html-validate.org/rules/attribute-empty-style.html)     | `html-validate:recommended` | 空属性省略空字符串         |
-| [`doctype-style`](https://html-validate.org/rules/doctype-style.html)                     | `html-validate:recommended` | 要求 DOCTYPE 使用大写   |
-| [`element-case`](https://html-validate.org/rules/element-case.html)                       | `html-validate:recommended` | 元素名称使用小写          |
-| [`no-implicit-close`](https://html-validate.org/rules/no-implicit-close.html)             | `html-validate:recommended` | 显式关闭元素            |
-| [`no-inline-style`](https://html-validate.org/rules/no-inline-style.html)                 | `html-validate:recommended` | 禁止内联样式            |
-| [`no-self-closing`](https://html-validate.org/rules/no-self-closing.html)                 | `html-validate:recommended` | 禁止自闭合元素           |
-| [`no-trailing-whitespace`](https://html-validate.org/rules/no-trailing-whitespace.html)   | `html-validate:recommended` | 不允许在行尾出现尾随空格      |
-| [`void-style`](https://html-validate.org/rules/void-style.html)                           | `html-validate:recommended` | 省略自闭标签来关闭 void 元素 |
+## 安全
 
-### 文档
+|   | 规则 | 描述 |
+|---|---|---|
+| 📃 | [require-sri](https://html-validate.org/rules/require-sri.html) | 要求资源具有 SRI (子资源完整性) |
 
-| 规则                                                                 | 来源                          | 描述                |
-|--------------------------------------------------------------------|-----------------------------|-------------------|
-| [`no-utf8-bom`](https://html-validate.org/rules/no-utf8-bom.html)  | `html-validate:recommended` | 禁止文档具有 UTF-8 BOM  |
+## SEO
+
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [long-title](https://html-validate.org/rules/long-title.html) | 要求 title 文本不能过长 |
+
+## 风格
+
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [attr-case](https://html-validate.org/rules/attr-case.html) | 要求属性名称使用特定的大小写 |
+| ✔️ | [attr-quotes](https://html-validate.org/rules/attr-quotes.html) | 要求属性使用引号 |
+| ✔️ | [attribute-boolean-style](https://html-validate.org/rules/attribute-boolean-style.html) | 要求布尔属性使用特定样式 |
+| ✔️ | [attribute-empty-style](https://html-validate.org/rules/attribute-empty-style.html) | 要求空属性使用特定样式 |
+| ✔️ | [doctype-style](https://html-validate.org/rules/doctype-style.html) | 要求 DOCTYPE 使用特定的大小写 |
+| ✔️ | [element-case](https://html-validate.org/rules/element-case.html) | 要求元素名称使用特定的大小写 |
+| ✔️ | [no-implicit-close](https://html-validate.org/rules/no-implicit-close.html) | 要求具有可选结束标签的元素被显式关闭 |
+| ✔️ | [no-implicit-input-type](https://html-validate.org/rules/no-implicit-input-type.html) | 禁止隐式的输入类型 |
+| ✔️ | [no-inline-style](https://html-validate.org/rules/no-inline-style.html) | 禁止内联样式 |
+| ✔️ | [no-self-closing](https://html-validate.org/rules/no-self-closing.html) | 禁止自闭合元素 |
+| ✔️ | [no-trailing-whitespace](https://html-validate.org/rules/no-trailing-whitespace.html) | 禁止尾部空白 |
+| ✔️ | [prefer-button](https://html-validate.org/rules/prefer-button.html) | 倾向于使用 `<button>` 而不是 `<input>` 作为按钮 |
+| ✔️ | [prefer-tbody](https://html-validate.org/rules/prefer-tbody.html) | 倾向于将 `<tr>` 包裹在 `<tbody>` 内 |
+| ✔️ | [void-style](https://html-validate.org/rules/void-style.html) | 要求空元素使用特定的闭合样式 |
+
+## 文档
+
+这些规则用于完整的文档。
+
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [doctype-html](https://html-validate.org/rules/doctype-html.html) | 要求使用 "html" 文档类型 |
+| 📃 | [heading-level](https://html-validate.org/rules/heading-level.html) | 要求标题从 h1 开始并逐级递增 |
+| 📃 | [missing-doctype](https://html-validate.org/rules/missing-doctype.html) | 要求文档具有文档类型 |
+| ✔️ | [no-dup-id](https://html-validate.org/rules/no-dup-id.html) | 禁止重复的 ID |
+| 📃 | [no-missing-references](https://html-validate.org/rules/no-missing-references.html) | 要求所有元素引用都存在 |
+| ✔️ | [no-utf8-bom](https://html-validate.org/rules/no-utf8-bom.html) | 禁止文档包含 UTF-8 BOM |
+
+## 未分类
+
+|   | 规则 | 描述 |
+|---|---|---|
+| ✔️ | [no-unused-disable](https://html-validate.org/rules/no-unused-disable.html) | 禁止未使用的禁用指令 |

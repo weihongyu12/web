@@ -61,9 +61,9 @@ CSS 规范基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织�
 参见 [Airbnb CSS/Sass 风格指南](https://github.com/airbnb/css) 和 [Airbnb CSS-in-JS 风格指南](https://airbnb.io/javascript/css-in-javascript/)
 :::
 
-### Sass
+### SCSS
 
-Sass 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践：
+SCSS 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践：
 
 - 合理组织变量、Mixin 和函数
 - 避免深层次的选择器嵌套（不超过 3 层）
@@ -72,7 +72,7 @@ Sass 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践�
 - 采用一致的变量命名方式（kebab-case）
 - 避免在 Mixin 中生成大量重复代码
 
-[查看 Sass 规范详情](./sass/)
+[查看 SCSS 规范详情](./scss/)
 
 ### JavaScript
 
