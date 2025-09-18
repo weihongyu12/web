@@ -4,6 +4,16 @@ sidebar_position: 3
 
 # SCSS 规范
 
+```js
+// stylelint.config.js
+
+module.exports = {
+  extends: [
+    'stylelint-config-twbs-bootstrap',
+  ],
+};
+```
+
 :::warning
 stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整理的内容非常多，在开发过程中，仍以实际的 stylelint 检查为准。本章内容仅供参考
 :::
@@ -66,3 +76,20 @@ SCSS 的 stylelint 规则继承于 [CSS 规则](/docs/specification/code/css)
 | stylelint-config-twbs-bootstrap | [scss/media-feature-value-dollar-variable](https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/media-feature-value-dollar-variable/README.md) | `null` | 媒体特征值使用美元变量 |
 | stylelint-config-twbs-bootstrap | [scss/no-global-function-names](https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/no-global-function-names/README.md) | `null` | 禁止全局函数名 |
 | stylelint-config-twbs-bootstrap | [scss/selector-no-redundant-nesting-selector](https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/selector-no-redundant-nesting-selector/README.md) | `true` | 禁止冗余的嵌套选择器 |
+
+## Vue 专属规则
+
+```js
+// stylelint.config.js
+
+module.exports = {
+  extends: [
+    'stylelint-config-recommended-vue/scss',
+  ],
+};
+```
+
+| 来源 | 规则名称 | 配置值 | 描述 |
+|---|---|---|---|
+| stylelint-config-recommended-vue | [selector-pseudo-class-no-unknown](https://stylelint.io/user-guide/rules/selector-pseudo-class-no-unknown) | `[true, { ignorePseudoClasses: ["deep", "global", "slotted"] }]` | 禁止未知的伪类选择器，但忽略 Vue 特定的伪类（如 `deep`、`global`、`slotted`） |
+| stylelint-config-recommended-vue | [selector-pseudo-element-no-unknown](https://stylelint.io/user-guide/rules/selector-pseudo-element-no-unknown) | `[true, { ignorePseudoElements: ["v-deep", "v-global", "v-slotted"] }]` | 禁止未知的伪元素选择器，但忽略 Vue 特定的伪元素（如 `v-deep`、`v-global`、`v-slotted`） |

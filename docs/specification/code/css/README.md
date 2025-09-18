@@ -4,6 +4,16 @@ sidebar_position: 2
 
 # CSS 规范
 
+```js
+// stylelint.config.js
+
+module.exports = {
+  extends: [
+    'stylelint-config-twbs-bootstrap',
+  ],
+};
+```
+
 :::warning
 stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整理的内容非常多，在开发过程中，仍以实际的 stylelint 检查为准。本章内容仅供参考
 :::
@@ -374,12 +384,10 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`tab-size`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/tab-size)
 - [`white-space`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/white-space)
 - [`vertical-align`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/vertical-align)
-
 - [`list-style`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/list-style)
 - [`list-style-position`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/list-style-position)
 - [`list-style-type`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/list-style-type)
 - [`list-style-image`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/list-style-image)
-
 - [`src`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/src)
 - [`font-display`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-display)
 - [`unicode-range`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/unicode-range)
@@ -400,20 +408,17 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`caret-color`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/caret-color)
 - [`visibility`](https://developer.mozilla.org/zh-CN/docs/Web/visibility)
 - [`zoom`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/zoom)
-
 - [`table-layout`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/table-layout)
 - [`empty-cells`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/empty-cells)
 - [`caption-side`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/caption-side)
 - [`border-spacing`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-spacing)
 - [`border-collapse`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-collapse)
-
 - [`content`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/content)
 - [`quotes`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/quotes)
 - [`counter-res`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/counter-reset)
 - [`counter-set`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/counter-set)
 - [`counter-increment`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/counter-increment)
 - [`resize`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/resize)
-
 - [`scroll-behavior`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-behavior)
 - [`scroll-snap-type`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-snap-type)
 - [`scroll-snap-align`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-snap-align)
@@ -440,11 +445,9 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`scroll-margin-right`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-margin-right)
 - [`scroll-margin-bottom`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-margin-bottom)
 - [`scroll-margin-left`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-margin-left)
-
 - [`scrollbar-color`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scrollbar-color)
 - [`scrollbar-gutter`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scrollbar-gutter)
 - [`scrollbar-width`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scrollbar-width)
-
 - [`user-select`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/user-select)
 - `-webkit-user-select`
 - [`nav-index`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/nav-index)
@@ -454,13 +457,13 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`nav-left`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/nav-left)
 
 ### 图像、背景和边框
+
 - [`object-fit`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit)
 - [`object-position`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-position)
 - ~~`-ms-interpolation-mode`~~
 - [`image-orientation`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/image-orientation)
 - [`image-rendering`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/image-rendering)
 - [`image-resolution`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/image-resolution)
-
 - [`background`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/background)
 - [`background-color`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/background-color)
 - [`background-image`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/background-image)
@@ -527,7 +530,7 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`border-bottom-right-radius`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-bottom-right-radius)
 - [`border-bottom-left-radius`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-bottom-left-radius)
 - [`border-image`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image)
-- [`border-image-source](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-source)
+- [`border-image-source`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-source)
 - [`border-image-slice`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-slice)
 - [`border-image-width`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-width)
 - [`border-image-outset`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-outset)
@@ -570,7 +573,6 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`text-anchor`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/text-anchor)
 - [`word-spacing`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/word-spacing)
 - [`writing-mode`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/writing-mode)
-
 - [`fill`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/fill)
 - [`fill-opacity`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/fill-opacity)
 - [`fill-rule`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/fill-rule)
@@ -582,7 +584,6 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`stroke-miterlimit`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/stroke-miterlimit)
 - [`stroke-opacity`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/stroke-opacity)
 - [`stroke-width`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/stroke-width)
-
 - [`color-interpolation`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/color-interpolation)
 - [`color-interpolation-filters`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attributecolor-interpolation-filters)
 - [`color-profile`](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/color-profile)
@@ -630,3 +631,22 @@ stylelint 规则参考 `stylelint-config-twbs-bootstrap`，但是由于需要整
 - [`break-after`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/break-after)
 - [`orphans`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/orphans)
 - [`widows`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/widows)
+
+## Vue 专属规则
+
+```js
+// stylelint.config.js
+
+module.exports = {
+  extends: [
+    'stylelint-config-recommended-vue',
+  ],
+};
+```
+
+| 来源 | 规则名称 | 配置值 | 描述 |
+|---|---|---|---|
+| stylelint-config-recommended-vue | [selector-pseudo-class-no-unknown](https://stylelint.io/user-guide/rules/selector-pseudo-class-no-unknown) | `[true, { ignorePseudoClasses: ["deep", "global", "slotted"] }]` | 禁止未知的伪类选择器，但忽略 Vue 特定的伪类（如 `deep`、`global`、`slotted`） |
+| stylelint-config-recommended-vue | [selector-pseudo-element-no-unknown](https://stylelint.io/user-guide/rules/selector-pseudo-element-no-unknown) | `[true, { ignorePseudoElements: ["v-deep", "v-global", "v-slotted"] }]` | 禁止未知的伪元素选择器，但忽略 Vue 特定的伪元素（如 `v-deep`、`v-global`、`v-slotted`） |
+| stylelint-config-recommended-vue | [declaration-property-value-no-unknown](https://stylelint.io/user-guide/rules/declaration-property-value-no-unknown) | `[true, { ignoreProperties: { "/.*/": "/v-bind\\(.+\\)/" } }]` | 禁止未知的声明属性值，但忽略包含 `v-bind` 表达式的值 |
+| stylelint-config-recommended-vue | [function-no-unknown](https://stylelint.io/user-guide/rules/function-no-unknown) | `[true, { ignoreFunctions: ["v-bind"] }]` | 禁止未知的 CSS 函数，但忽略 Vue 的 `v-bind` 函数 |
