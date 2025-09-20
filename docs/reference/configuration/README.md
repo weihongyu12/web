@@ -1061,8 +1061,17 @@ limit_req_log_level warn;
 ```js
 // .eslintrc.js
 
-// $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
+const airbnbReactRules = require('eslint-config-airbnb/rules/react');
+
 module.exports = {
+  parserOptions: {
+    project: [
+      './tsconfig.json',
+      './tsconfig.node.json',
+      './tsconfig.test.json',
+    ],
+  },
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb/hooks',
@@ -1077,6 +1086,48 @@ module.exports = {
     'plugin:promise/recommended',
     'plugin:jsdoc/recommended-typescript',
     'plugin:eslint-comments/recommended',
+  ],
+  rules: {
+    // React 17+ 不用再引入 React
+    'react/react-in-jsx-scope': 'off',
+    'react/jsx-uses-react': 'off',
+    // 常见的缩写是众所周知且易于阅读的
+    'unicorn/prevent-abbreviations': 'off',
+    // Airbnb 更喜欢使用 forEach
+    'unicorn/no-array-for-each': 'off',
+  },
+  overrides: [
+    {
+      files: '*.tsx',
+      rules: {
+        'react/require-default-props': [airbnbReactRules.rules['react/require-default-props'][0], {
+          ...airbnbReactRules.rules['react/require-default-props'][1],
+          functions: 'defaultArguments',
+        }],
+      },
+    },
+    // $ pnpm add -D eslint-plugin-jest eslint-plugin-testing-library
+    {
+      files: [
+        './tests/unit/**/*.{spec,test}.{js,jsx,ts,tsx}',
+        './src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+        './src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+      ],
+      extends: [
+        'plugin:jest/recommended',
+        'plugin:jest/style',
+        'plugin:testing-library/react',
+      ]
+    },
+    // $ pnpm add -D eslint-plugin-playwright
+    {
+      files: [
+        './tests/e2e/**/*.{js,ts}',
+      ],
+      extends: [
+        'plugin:playwright/recommended',
+      ]
+    },
   ],
 };
 ```

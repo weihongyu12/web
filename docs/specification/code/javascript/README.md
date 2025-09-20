@@ -679,7 +679,7 @@ module.exports = {
 
 ## ESLint 注释
 
-[`eslint-plugin-eslint-comments`](https://github.com/mysticatea/eslint-plugin-eslint-comments) 用于规范代码中ESLint注释的使用，防止不必要的禁用规则注释，确保规则禁用的原因清晰。
+[`eslint-plugin-eslint-comments`](https://github.com/mysticatea/eslint-plugin-eslint-comments) 用于规范代码中 ESLint 注释（例如 `/* eslint-disable */`）的使用，防止不必要的禁用规则注释，确保规则禁用的原因清晰。
 
 ```js
 // .eslintrc.js
