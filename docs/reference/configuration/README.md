@@ -1061,14 +1061,22 @@ limit_req_log_level warn;
 ```js
 // .eslintrc.js
 
+// $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
 module.exports = {
   extends: [
     'airbnb',
     'airbnb/hooks',
     'airbnb-typescript',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:no-unsanitized/recommended-legacy',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:react-perf/recommended',
+    'plugin:@tanstack/query/recommended',
+    // 以下为实验性功能
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    'plugin:unicorn/recommended',
+    'plugin:promise/recommended',
+    'plugin:jsdoc/recommended-typescript',
+    'plugin:eslint-comments/recommended',
   ],
 };
 ```
@@ -1077,15 +1085,23 @@ module.exports = {
 ```js
 // .eslintrc.js
 
+// $ pnpm add -D eslint-plugin-next eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
 module.exports = {
   extends: [
     'airbnb',
     'airbnb/hooks',
     'airbnb-typescript',
     'plugin:@next/next/recommended',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:no-unsanitized/recommended-legacy',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:react-perf/recommended',
+    'plugin:@tanstack/query/recommended',
+    // 以下为实验性功能
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    'plugin:unicorn/recommended',
+    'plugin:promise/recommended',
+    'plugin:jsdoc/recommended-typescript',
+    'plugin:eslint-comments/recommended',
   ],
 };
 ```

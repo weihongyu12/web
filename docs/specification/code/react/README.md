@@ -72,6 +72,8 @@ module.exports = {
 
 ### React Hooks
 
+专为 React Hooks 设计的 Airbnb 规则集，用于确保 Hooks 的正确使用，例如依赖项的完整性检查。
+
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |----------|-------|----------|------|
 | [react-hooks/rules-of-hooks](https://github.com/facebook/react/blob/c11015ff4f610ac2924d1fc6d569a17657a404fd/packages/eslint-plugin-react-hooks/src/RulesOfHooks.js) | error | - | 确保 Hooks 在函数组件或自定义 Hook 的最顶层调用，禁止在循环、条件或嵌套函数中使用。 |
