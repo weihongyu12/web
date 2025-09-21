@@ -1100,34 +1100,36 @@ module.exports = {
     {
       files: '*.tsx',
       rules: {
+        // 优化 .tsx 文件处理 props 默认值的方式
+        // 'react/require-default-props': ['error', { forbidDefaultForRequired: true, functions: 'defaultArguments' }]
         'react/require-default-props': [airbnbReactRules.rules['react/require-default-props'][0], {
           ...airbnbReactRules.rules['react/require-default-props'][1],
           functions: 'defaultArguments',
         }],
       },
     },
-    // $ pnpm add -D eslint-plugin-jest eslint-plugin-testing-library
-    {
-      files: [
-        './tests/unit/**/*.{spec,test}.{js,jsx,ts,tsx}',
-        './src/**/__tests__/**/*.{js,jsx,ts,tsx}',
-        './src/**/*.{spec,test}.{js,jsx,ts,tsx}',
-      ],
-      extends: [
-        'plugin:jest/recommended',
-        'plugin:jest/style',
-        'plugin:testing-library/react',
-      ]
-    },
-    // $ pnpm add -D eslint-plugin-playwright
-    {
-      files: [
-        './tests/e2e/**/*.{js,ts}',
-      ],
-      extends: [
-        'plugin:playwright/recommended',
-      ]
-    },
+  ],
+};
+```
+  </TabItem>
+  <TabItem value="jest" label="Jest">
+```js
+module.exports = {
+  // $ pnpm add -D eslint-plugin-jest eslint-plugin-testing-library
+  extends: [
+    'plugin:jest/recommended',
+    'plugin:jest/style',
+    'plugin:testing-library/react',
+  ],
+};
+```
+  </TabItem>
+  <TabItem value="playwright" label="Playwright">
+```js
+module.exports = {
+  // $ pnpm add -D eslint-plugin-playwright
+  extends: [
+    'plugin:playwright/recommended',
   ],
 };
 ```
