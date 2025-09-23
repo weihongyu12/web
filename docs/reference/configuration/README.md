@@ -1086,6 +1086,7 @@ module.exports = {
     // 以下为实验性功能
     'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:unicorn/recommended',
+    'plugin:tailwindcss/recommended',
     'plugin:promise/recommended',
     'plugin:jsdoc/recommended-typescript',
     'plugin:eslint-comments/recommended',
@@ -1126,6 +1127,7 @@ module.exports = {
     '@vue/eslint-config-airbnb-with-typescript',
     // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
     'plugin:no-unsanitized/recommended-legacy',
+    'plugin:tailwindcss/recommended',
   ],
 };
 ```
@@ -1166,6 +1168,13 @@ module.exports = {
 
 :::tip
 [https://stylelint.io/user-guide/configure](https://stylelint.io/user-guide/configure)
+:::
+
+:::tip
+优先使用以下方案，减少 CSS 代码的编写：
+
+- **原子化 CSS**：如Tailwind CSS，通过 utility 类直接在 HTML 中编写样式，减少了自定义 CSS 的需求。
+- **UI 组件库**：主流的 UI 组件库（如 Ant Design、Material-UI）通常已经内置了良好的组件化和样式隔离方案，开发者直接使用即可。
 :::
 
 <Tabs>
