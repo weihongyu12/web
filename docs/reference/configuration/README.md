@@ -1057,13 +1057,14 @@ limit_req_log_level warn;
 :::
 
 <Tabs>
-  <TabItem value="react" label="React" default>
+  <TabItem value="react" label="React/Next.js" default>
 ```js
 // .eslintrc.js
 
 const airbnbReactRules = require('eslint-config-airbnb/rules/react');
 
 module.exports = {
+  root: true,
   parserOptions: {
     project: [
       './tsconfig.json',
@@ -1076,6 +1077,8 @@ module.exports = {
     'airbnb',
     'airbnb/hooks',
     'airbnb-typescript',
+    // 仅 Next.js 项目需要引入
+    // 'plugin:@next/next/recommended',
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:react-perf/recommended',
@@ -1112,63 +1115,47 @@ module.exports = {
 };
 ```
   </TabItem>
+  <TabItem value="vue" label="Vue">
+```js
+// .eslintrc.js
+
+module.exports = {
+  root: true,
+  extends: [
+    'plugin:vue/recommended',
+    '@vue/eslint-config-airbnb-with-typescript',
+    // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
+    'plugin:no-unsanitized/recommended-legacy',
+  ],
+};
+```
+  </TabItem>
   <TabItem value="jest" label="Jest">
 ```js
+// .eslintrc.js
+// 继承于主项目规则，仅用于 Jest 单元测试
+
 module.exports = {
   // $ pnpm add -D eslint-plugin-jest eslint-plugin-testing-library
   extends: [
     'plugin:jest/recommended',
     'plugin:jest/style',
+    // 根据项目框架，选择 React/Vue
     'plugin:testing-library/react',
+    // 'plugin:testing-library/vue',
   ],
 };
 ```
   </TabItem>
   <TabItem value="playwright" label="Playwright">
 ```js
+// .eslintrc.js
+// 继承于主项目规则，仅用于 Playwright E2E 测试
+
 module.exports = {
   // $ pnpm add -D eslint-plugin-playwright
   extends: [
     'plugin:playwright/recommended',
-  ],
-};
-```
-  </TabItem>
-  <TabItem value="next" label="Next.js">
-```js
-// .eslintrc.js
-
-// $ pnpm add -D eslint-plugin-next eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
-module.exports = {
-  extends: [
-    'airbnb',
-    'airbnb/hooks',
-    'airbnb-typescript',
-    'plugin:@next/next/recommended',
-    'plugin:no-unsanitized/recommended-legacy',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:react-perf/recommended',
-    'plugin:@tanstack/query/recommended',
-    // 以下为实验性功能
-    'plugin:@typescript-eslint/stylistic-type-checked',
-    'plugin:unicorn/recommended',
-    'plugin:promise/recommended',
-    'plugin:jsdoc/recommended-typescript',
-    'plugin:eslint-comments/recommended',
-  ],
-};
-```
-  </TabItem>
-  <TabItem value="vue" label="Vue">
-```js
-// .eslintrc.js
-
-module.exports = {
-  extends: [
-    '@vue/airbnb',
-    '@vue/eslint-config-airbnb-with-typescript',
-    // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
-    'plugin:no-unsanitized/recommended-legacy',
   ],
 };
 ```
