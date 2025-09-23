@@ -8,6 +8,10 @@ sidebar_position: 5
 
 Airbnb 是 ESLint 中最流行的规则集之一。由 Airbnb 团队维护，被广泛认可和使用。Airbnb 规则以其严苛著称，它强制要求代码风格、变量命名、函数定义等各个方面的高度一致性，是许多项目的基石和起点。
 
+:::tip
+参看 [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/)
+:::
+
 ```js
 // .eslintrc.js
 

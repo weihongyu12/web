@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # TypeScript 规范
 
-[eslint-config-airbnb-typescript](https://github.com/iamturns/eslint-config-airbnb-typescript) 是一个针对 TypeScript 的 Airbnb 风格扩展，它允许在 TypeScript 项目中使用 Airbnb 的规则。它通常需要与 [@typescript-eslint/parser](https://typescript-eslint.io/packages/parser/) 和 [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/) 一起使用。
+[`eslint-config-airbnb-typescript`](https://github.com/iamturns/eslint-config-airbnb-typescript) 是一个针对 TypeScript 的 Airbnb 风格扩展，它允许在 TypeScript 项目中使用 Airbnb 的规则。它通常需要与 [@typescript-eslint/parser](https://typescript-eslint.io/packages/parser/) 和 [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/) 一起使用。
 
 ```js
 // .eslintrc.js

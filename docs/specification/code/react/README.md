@@ -19,6 +19,10 @@ module.exports = {
 
 ## React 规则
 
+:::tip
+参看 [Airbnb React/JSX Style Guide](https://airbnb.io/javascript/react/)
+:::
+
 :::warning
 - 截止至目前，`eslint-config-airbnb` 仍不支持 ESLint 9.x 版本，使用时请注意。使用时请使用 ESLint 8.x 版本，耐心等待 `eslint-config-airbnb` 升级。
 - 由于 `eslint-config-airbnb` 项目的一些管理问题，导致其更新比较缓慢，后续需要持续关注项目情况。部分规则可能不适用于现在项目的实际情况，请根据实际情况进行覆盖。

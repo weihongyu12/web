@@ -4,6 +4,8 @@ sidebar_position: 4
 
 # Tailwind CSS 规范
 
+[`eslint-plugin-tailwindcss`](https://github.com/francoismassart/eslint-plugin-tailwindcss) 旨在强制执行使用 Tailwind CSS 时的最佳实践和代码一致性。它的唯一目的就是通过 ESLint 来自动化 Tailwind CSS 的最佳实践，比如按照 Tailwind CSS 的官方排序来重新排列你的类，确保你的 CSS 类始终保持有序、高效和无错误，从而提高项目的可维护性。
+
 ```js
 // .eslintrc.js
 
