@@ -1168,6 +1168,55 @@ module.exports = {
 [https://stylelint.io/user-guide/configure](https://stylelint.io/user-guide/configure)
 :::
 
+<Tabs>
+  <TabItem value="react" label="React/Next.js" default>
+:::warning
+关于 CSS-in-JS 仍在整理中
+:::
+
+
+```js
+// stylelint.config.js
+
+// $ npm install stylelint stylelint-config-twbs-bootstrap --save-dev
+module.exports = {
+  extends: [
+    'stylelint-config-twbs-bootstrap',
+  ],
+  rules: {
+    // 允许在 CSS-in-JS 中使用 JS 变量或主题属性 (通常为 camelCase)
+    'value-keyword-case': null,
+    'function-name-case': null,
+    'selector-class-pattern': null, // 在 CSS-in-JS 中不适用
+    'selector-id-pattern': null, // 在 CSS-in-JS 中不适用
+  },
+  overrides: [
+    {
+      files: ['**/*.{js,jsx,ts,tsx}'],
+      // 使用可以从 JS/TS 文件中提取样式的自定义语法
+      customSyntax: 'postcss-styled-syntax',
+      // 针对 CSS-in-JS 的特定规则
+      rules: {
+        'no-empty-source': null, // 在 styled-components 中常见空样式块
+        'property-no-unknown': [ // 允许组件 props 作为 CSS 属性
+          true,
+          {
+            ignoreProperties: ['composes'],
+          }
+        ],
+        'selector-type-no-unknown': [ // 允许 styled-components/emotion 的组件作为选择器
+          true,
+          {
+            ignore: ['custom-elements', 'default-namespace'],
+          },
+        ],
+      },
+    },
+  ],
+};
+```
+  </TabItem>
+  <TabItem value="vue" label="Vue" default>
 ```js
 // stylelint.config.js
 
@@ -1186,36 +1235,8 @@ module.exports = {
   ],
 };
 ```
-
-```js
-// vue.config.js
-
-const { defineConfig } = require('@vue/cli-service');
-// $ pnpm install stylelint-webpack-plugin --save-dev
-const StylelintPlugin = require('stylelint-webpack-plugin');
-
-module.exports = defineConfig({
-  configureWebpack: (config) => {
-    const basePlugins = [
-      new StylelintPlugin({
-        extensions: ['css', 'scss', 'sass', 'vue'],
-      }),
-    ];
-    let productionPlugins = [];
-
-    if (process.env.NODE_ENV === 'production') {
-      // ...
-    }
-
-    return {
-      plugins: [
-        ...basePlugins,
-        ...productionPlugins,
-      ],
-    };
-  },
-});
-```
+  </TabItem>
+</Tabs>
 
 ## browserslist
 
