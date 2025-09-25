@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Testing Library 规范
+# Testing Library 规则
 
 [`eslint-plugin-testing-library`](https://github.com/testing-library/eslint-plugin-testing-library) 插件专注于 React/Vue 组件的测试，特别是当你在使用 Testing Library 时。它会强制执行一些最佳实践，编写出更符合用户行为、更可维护的 React/Vue 测试。
 

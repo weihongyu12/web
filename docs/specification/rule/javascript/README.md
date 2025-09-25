@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# JavaScript 规范
+# JavaScript 规则
 
 ## Airbnb
 

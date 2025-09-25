@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# SCSS 规范
+# SCSS 规则
 
 ```js
 // stylelint.config.js

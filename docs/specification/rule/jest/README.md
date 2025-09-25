@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Jest 规范
+# Jest 规则
 
 [`eslint-plugin-jest`](https://github.com/jest-community/eslint-plugin-jest) 针对 Jest 测试框架的推荐规则，用于确保测试文件的语法和最佳实践符合 Jest 的要求，例如检查测试用例的命名、断言的使用等。
 

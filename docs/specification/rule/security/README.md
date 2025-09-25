@@ -2,7 +2,7 @@
 sidebar_position: 8
 ---
 
-# 安全规范
+# 安全规则
 
 ## no-unsanitized
 
@@ -20,8 +20,8 @@ module.exports = {
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |----------|----------|----------|------|
-| [`no-unsanitized/method`](https://github.com/mozilla/eslint-plugin-no-unsanitized/blob/main/docs/rules/method.md) | error | - | 检查 JavaScript 中不安全的 DOM 方法调用（如 `insertAdjacentHTML`），防止未经消毒的内容被插入页面，以避免 XSS 攻击 |
-| [`no-unsanitized/property`](https://github.com/mozilla/eslint-plugin-no-unsanitized/blob/main/docs/rules/property.md) | error | - | 检查 JavaScript 中不安全的 DOM 属性赋值（如 `innerHTML` 和 `outerHTML`），防止未经消毒的内容被插入页面，以避免 XSS 攻击 |
+| [no-unsanitized/method](https://github.com/mozilla/eslint-plugin-no-unsanitized/blob/main/docs/rules/method.md) | error | - | 检查 JavaScript 中不安全的 DOM 方法调用（如 `insertAdjacentHTML`），防止未经消毒的内容被插入页面，以避免 XSS 攻击 |
+| [no-unsanitized/property](https://github.com/mozilla/eslint-plugin-no-unsanitized/blob/main/docs/rules/property.md) | error | - | 检查 JavaScript 中不安全的 DOM 属性赋值（如 `innerHTML` 和 `outerHTML`），防止未经消毒的内容被插入页面，以避免 XSS 攻击 |
 
 ## RisXSS
 
@@ -43,6 +43,6 @@ module.exports = {
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |----------|----------|----------|------|
-| [`risxss/catch-potential-xss-react`](https://github.com/theodo/RisXSS/blob/master/docs/rules/catch-potential-xss-react.md) | error | - | 用于检测 React 应用中潜在的 XSS 风险，例如对 `dangerouslySetInnerHTML` 的不安全使用。 |
-| [`risxss/catch-potential-xss-vue`](https://github.com/theodo/RisXSS/blob/master/docs/rules/catch-potential-xss-vue.md) | error | - | 用于检测 Vue 应用中潜在的 XSS 风险，例如对 `v-html` 指令的不安全使用。 |
+| [risxss/catch-potential-xss-react](https://github.com/theodo/RisXSS/blob/master/docs/rules/catch-potential-xss-react.md) | error | - | 用于检测 React 应用中潜在的 XSS 风险，例如对 `dangerouslySetInnerHTML` 的不安全使用。 |
+| [risxss/catch-potential-xss-vue](https://github.com/theodo/RisXSS/blob/master/docs/rules/catch-potential-xss-vue.md) | error | - | 用于检测 Vue 应用中潜在的 XSS 风险，例如对 `v-html` 指令的不安全使用。 |
 

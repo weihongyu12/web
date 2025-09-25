@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# React 规范
+# React 规则
 
 ```js
 // .eslintrc.js

@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# CSS 规范
+# CSS 规则
 
 :::tip
 优先使用以下方案，减少 CSS 代码的编写：

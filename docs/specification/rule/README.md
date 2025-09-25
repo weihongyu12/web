@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# 代码规范
+# 代码规则
 
-本文档集合定义了项目中所有编程语言和框架的代码规范，旨在保证代码质量、提高团队协作效率、降低维护成本。每个开发者都应当熟悉并遵循这些规范。
+本文档集合定义了项目中所有编程语言和框架的代码规则，旨在保证代码质量、提高团队协作效率、降低维护成本。每个开发者都应当熟悉并遵循这些规则。
 
 ## 通用原则
 
@@ -18,7 +18,7 @@ sidebar_position: 1
 
 ## 规范执行工具
 
-项目使用多种工具自动执行规范检查：
+项目使用多种工具自动执行规则检查：
 
 - **[ESLint](https://eslint.org/)** - JavaScript/TypeScript 代码检查
 - **[Stylelint](https://stylelint.io/)** - CSS/Sass 代码检查
@@ -28,13 +28,13 @@ sidebar_position: 1
 
 每个规范文档中都详细说明了相关工具配置和使用方法。
 
-## 规范概览
+## 规则概览
 
-以下是各类技术栈的规范文档：
+以下是各类技术栈的规则文档：
 
 ### HTML
 
-HTML 规范专注于标签语义化和优化 DOM 结构，确保页面代码的可读性和可访问性：
+HTML 规则专注于标签语义化和优化 DOM 结构，确保页面代码的可读性和可访问性：
 
 - 强调语义化标签使用（如 `<article>`, `<section>`, `<nav>` 等）
 - 减少不必要的 DOM 层级，优化页面性能
@@ -42,11 +42,11 @@ HTML 规范专注于标签语义化和优化 DOM 结构，确保页面代码的�
 - 确保正确的元素嵌套关系和属性使用
 - 标签闭合和属性格式的一致性
 
-[查看 HTML 规范详情](./html/)
+[查看 HTML 规则详情](./html/)
 
 ### CSS
 
-CSS 规范基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织和性能优化：
+CSS 规则基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织和性能优化：
 
 - 使用 CSS 命名规范（如 BEM 或 OOCSS）
 - 避免过度特定的选择器，减少选择器嵌套
@@ -55,7 +55,7 @@ CSS 规范基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织�
 - 采用简写属性提高代码简洁性
 - 遵循移动优先的响应式设计原则
 
-[查看 CSS 规范详情](./css/)
+[查看 CSS 规则详情](./css/)
 
 :::tip
 参见 [Airbnb CSS/Sass 风格指南](https://github.com/airbnb/css) 和 [Airbnb CSS-in-JS 风格指南](https://airbnb.io/javascript/css-in-javascript/)
@@ -63,7 +63,7 @@ CSS 规范基于 `stylelint-config-twbs-bootstrap` 配置，注重代码组织�
 
 ### SCSS
 
-SCSS 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践：
+SCSS 规则继承自 CSS 规则，并扩展了预处理器特有的最佳实践：
 
 - 合理组织变量、Mixin 和函数
 - 避免深层次的选择器嵌套（不超过 3 层）
@@ -72,11 +72,11 @@ SCSS 规范继承自 CSS 规范，并扩展了预处理器特有的最佳实践�
 - 采用一致的变量命名方式（kebab-case）
 - 避免在 Mixin 中生成大量重复代码
 
-[查看 SCSS 规范详情](./scss/)
+[查看 SCSS 规则详情](./scss/)
 
 ### JavaScript
 
-JavaScript 规范采用 `eslint-config-airbnb-base` 作为基础配置，强调现代 JS 特性和最佳实践：
+JavaScript 规则采用 `eslint-config-airbnb-base` 作为基础配置，强调现代 JS 特性和最佳实践：
 
 - 优先使用 ES6+ 语法特性（箭头函数、解构、模板字符串等）
 - 避免副作用，倾向于函数式编程理念
@@ -85,7 +85,7 @@ JavaScript 规范采用 `eslint-config-airbnb-base` 作为基础配置，强调�
 - 一致的代码格式化（缩进、空格、分号等）
 - 模块化设计，明确的导入/导出规则
 
-[查看 JavaScript 规范详情](./javascript/)
+[查看 JavaScript 规则详情](./javascript/)
 
 :::tip
 参见 [Airbnb JavaScript 风格指南](https://airbnb.io/javascript/)
@@ -93,7 +93,7 @@ JavaScript 规范采用 `eslint-config-airbnb-base` 作为基础配置，强调�
 
 ### TypeScript
 
-TypeScript 规范基于 `eslint-config-airbnb-typescript`，聚焦于类型安全和 TS 特性正确使用：
+TypeScript 规则基于 `eslint-config-airbnb-typescript`，聚焦于类型安全和 TS 特性正确使用：
 
 - 严格的类型检查（启用 `strict` 模式）
 - 合理使用接口（Interface）和类型别名（Type）
@@ -103,11 +103,11 @@ TypeScript 规范基于 `eslint-config-airbnb-typescript`，聚焦于类型安�
 - 正确处理 null 和 undefined 值
 - 适当使用高级类型（联合类型、交叉类型、映射类型等）
 
-[查看 TypeScript 规范详情](./typescript/)
+[查看 TypeScript 规则详情](./typescript/)
 
 ### React
 
-React 规范基于 `eslint-config-airbnb` 和 React 团队推荐实践，关注组件设计和性能：
+React 规则基于 `eslint-config-airbnb` 和 React 团队推荐实践，关注组件设计和性能：
 
 - 函数组件和 Hooks 优先
 - 组件职责单一，提倡组合而非继承
@@ -122,11 +122,11 @@ React 规范基于 `eslint-config-airbnb` 和 React 团队推荐实践，关注�
 参见 [Airbnb React 风格指南](https://airbnb.io/javascript/react/)
 :::
 
-[查看 React 规范详情](./react/)
+[查看 React 规则详情](./react/)
 
 ### Vue
 
-Vue 规范采用 Vue 官方推荐的最佳实践，适配 Vue 3 的新特性：
+Vue 规则采用 Vue 官方推荐的最佳实践，适配 Vue 3 的新特性：
 
 - 组合式 API 与选项式 API 的使用场景区分
 - 单文件组件（SFC）的格式规范
@@ -137,7 +137,7 @@ Vue 规范采用 Vue 官方推荐的最佳实践，适配 Vue 3 的新特性：
 - Vue Router 和 Pinia/Vuex 的集成规范
 - 可测试性设计考量
 
-[查看 Vue 规范详情](./vue/)
+[查看 Vue 规则详情](./vue/)
 
 :::tip
 参见 [Vue 风格指南](https://vuejs.org/style-guide/)
@@ -145,7 +145,7 @@ Vue 规范采用 Vue 官方推荐的最佳实践，适配 Vue 3 的新特性：
 
 ### Next.js
 
-Next.js 规范聚焦于服务端渲染和性能优化的最佳实践：
+Next.js 规则聚焦于服务端渲染和性能优化的最佳实践：
 
 - 页面路由和布局组织方式
 - 数据获取策略（SSR、SSG、ISR、CSR）
@@ -156,11 +156,11 @@ Next.js 规范聚焦于服务端渲染和性能优化的最佳实践：
 - 合理使用 Next.js 特有组件（如 Image, Link, Script）
 - SEO 和性能优化策略
 
-[查看 Next.js 规范详情](./nextjs/)
+[查看 Next.js 规则详情](./nextjs/)
 
 ### Jest
 
-Jest 测试规范定义了单元测试和集成测试的编写准则：
+Jest 测试规则定义了单元测试和集成测试的编写准则：
 
 - 测试文件组织和命名约定
 - 测试套件和用例的结构设计
@@ -171,11 +171,11 @@ Jest 测试规范定义了单元测试和集成测试的编写准则：
 - 持续集成中的测试策略
 - 测试驱动开发（TDD）的实践指南
 
-[查看 Jest 规范详情](./jest/)
+[查看 Jest 规则详情](./jest/)
 
 ### Testing Library
 
-Testing Library 规范定义了基于用户行为的测试编写准则，适用于 React 和 Vue 等框架：
+Testing Library 规则定义了基于用户行为的测试编写准则，适用于 React 和 Vue 等框架：
 
 - 优先使用用户可见的查询方式（getByRole、getByText 等）
 - 异步操作的正确处理（await async queries/events）
@@ -186,11 +186,11 @@ Testing Library 规范定义了基于用户行为的测试编写准则，适用�
 - 测试清理和隔离机制
 - 调试工具的正确使用
 
-[查看 Testing Library 规范详情](./testing-library/)
+[查看 Testing Library 规则详情](./testing-library/)
 
 ### Playwright
 
-Playwright 端到端测试规范定义了 E2E 测试的编写和组织方式：
+Playwright 端到端测试规则定义了 E2E 测试的编写和组织方式：
 
 - 页面对象模式的实现
 - 测试环境和浏览器配置
@@ -201,4 +201,4 @@ Playwright 端到端测试规范定义了 E2E 测试的编写和组织方式：
 - 并行测试执行策略
 - 测试报告和失败分析方法
 
-[查看 Playwright 规范详情](./playwright/)
+[查看 Playwright 规则详情](./playwright/)

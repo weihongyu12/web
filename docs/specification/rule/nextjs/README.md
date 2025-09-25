@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Next.js 规范
+# Next.js 规则
 
 [`@next/eslint-plugin-next`](https://nextjs.org/docs/app/api-reference/config/eslint) 是针对 Next.js 框架的官方推荐规则集。它会检查 Next.js 项目中的常见错误和最佳实践，例如确保 `next/image` 组件的正确使用，或者 `Link` 组件的 `href` 属性格式正确等，有助于编写符合 Next.js 规范的代码。
 

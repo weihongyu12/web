@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Vue 规范
+# Vue 规则
 
 [`eslint-plugin-vue`](https://eslint.vuejs.org/) 是 Vue 官方推荐的规则集。它专注于 Vue 单文件组件（`.vue`文件）的特定规则，来确保Vue组件的正确性和最佳实践。
 

@@ -2,7 +2,7 @@
 sidebar_position: 7
 ---
 
-# Playwright 规范
+# Playwright 规则
 
 [`eslint-plugin-playwright`](https://github.com/mskelton/eslint-plugin-playwright) 插件是为使用Playwright进行 E2E 测试的项目而设计的。它提供了 Playwright 官方推荐的规则，确保 Playwright 测试代码符合最佳实践，从而提高测试的可靠性和可读性。
 
