@@ -1072,7 +1072,7 @@ module.exports = {
       './tsconfig.test.json',
     ],
   },
-  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-jsdoc eslint-plugin-eslint-comments
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb/hooks',
@@ -1088,6 +1088,7 @@ module.exports = {
     'plugin:unicorn/recommended',
     'plugin:tailwindcss/recommended',
     'plugin:promise/recommended',
+    'plugin:regexp/recommended',
     'plugin:jsdoc/recommended-typescript',
     'plugin:eslint-comments/recommended',
   ],

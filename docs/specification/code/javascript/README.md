@@ -597,6 +597,91 @@ module.exports = {
 | [promise/no-return-in-finally](https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/no-return-in-finally.md) | off | - | 禁止在 `Promise.prototype.finally()` 方法中返回值，因为 `finally` 处理程序中的返回值会被忽略，不会影响 Promise 的最终状态 |
 | [promise/valid-params](https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/valid-params.md) | off | - | 确保 `Promise` 的静态方法（如 `all`, `race`, `allSettled`, `any` ）接收的参数是有效的（例如，是一个可迭代对象） |
 
+## RegExp
+
+[`eslint-plugin-regexp`](https://github.com/ota-meshi/eslint-plugin-regexp) 旨在帮助你编写更安全、更高效的正则表达式。它会检查正则表达式中的常见问题。
+
+```js
+// .eslintrc.js
+
+module.exports = {
+  extends: [
+    'plugin:regexp/recommended',
+  ],
+};
+```
+
+:::danger
+这是一个实验性功能，请谨慎使用！部分规则和 Airbnb 规则有冲突，目前仍在整理中。如遇规则冲突，请以**Airbnb 规则**为准。
+:::
+
+| 规则名称 | 错误级别 | 配置选项 | 描述 |
+|--------|----------|----------|------|
+| [no-control-regex](https://eslint.org/docs/rules/no-control-regex) | error | - | 禁止在正则表达式中使用控制字符相关的语法（如`\x08`），因为这些字符很少使用，很可能是错误 |
+| [no-misleading-character-class](https://eslint.org/docs/rules/no-misleading-character-class) | error | - | 禁止在字符类中出现可能引起误解的字符，例如在 `[âœ]` 中，`âœ` 可能被误解为单个字符而非`[â, œ]`。该规则会检查此类问题并提供建议 |
+| [no-regex-spaces](https://eslint.org/docs/rules/no-regex-spaces) | error | - | 禁止在正则表达式字面量中使用多个空格，以提高可读性。建议使用明确的量词，如 `{3}`，来替代连续的空格 |
+| [prefer-regex-literals](https://eslint.org/docs/rules/prefer-regex-literals) | error | - | 建议使用正则表达式字面量（如 `/abc/`）而非 `RegExp` 构造函数，除非需要动态构建模式，以使代码更简洁 |
+| [regexp/confusing-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/confusing-quantifier.md) | warn | - | 检测可能造成混淆的量词使用 |
+| [regexp/control-character-escape](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/control-character-escape.md) | error | - | 检查控制字符转义的使用 |
+| [regexp/match-any](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/match-any.md) | error | - | 确保匹配任意字符的表达式（如 `.` 或 `[^]`）使用得当 |
+| [regexp/negation](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/negation.md) | error | - | 检查字符类否定的使用 |
+| [regexp/no-contradiction-with-assertion](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-contradiction-with-assertion.md) | error | - | 检测与断言矛盾的表达式 |
+| [regexp/no-dupe-characters-character-class](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-dupe-characters-character-class.md) | error | - | 禁止字符类中出现重复的字符 |
+| [regexp/no-dupe-disjunctions](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-dupe-disjunctions.md) | error | - | 禁止在析取（或操作）中出现重复的子表达式 |
+| [regexp/no-empty-alternative](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-alternative.md) | warn | - | 警告存在空的选项 |
+| [regexp/no-empty-capturing-group](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-capturing-group.md) | error | - | 禁止空的捕获组 |
+| [regexp/no-empty-character-class](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-character-class.md) | error | - | 禁止空的字符类 |
+| [regexp/no-empty-group](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-group.md) | error | - | 禁止空的组 |
+| [regexp/no-empty-lookarounds-assertion](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-lookarounds-assertion.md) | error | - | 禁止空的环视断言 |
+| [regexp/no-empty-string-literal](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-empty-string-literal.md) | error | - | 禁止空字符串字面量 |
+| [regexp/no-escape-backspace](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-escape-backspace.md) | error | - | 检查不必要的反斜杠转义退格符 |
+| [regexp/no-extra-lookaround-assertions](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-extra-lookaround-assertions.md) | error | - | 检测多余的环视断言 |
+| [regexp/no-invalid-regexp](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-invalid-regexp.md) | error | - | 禁止无效的正则表达式模式 |
+| [regexp/no-invisible-character](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-invisible-character.md) | error | - | 禁止不可见字符 |
+| [regexp/no-lazy-ends](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-lazy-ends.md) | warn | - | 警告在字符串末尾使用惰性量词，这通常是低效的 |
+| [regexp/no-legacy-features](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-legacy-features.md) | error | - | 禁止使用已被新语法替代的旧式正则表达式特性 |
+| [regexp/no-misleading-capturing-group](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-misleading-capturing-group.md) | error | - | 检测可能引起误解的捕获组 |
+| [regexp/no-misleading-unicode-character](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-misleading-unicode-character.md) | error | - | 禁止使用可能引起误解的Unicode字符 |
+| [regexp/no-missing-g-flag](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-missing-g-flag.md) | error | - | 在需要全局匹配时，检查是否缺失了 `g` 标志 |
+| [regexp/no-non-standard-flag](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-non-standard-flag.md) | error | - | 禁止使用非标准的正则表达式标志 |
+| [regexp/no-obscure-range](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-obscure-range.md) | error | - | 检测晦涩难懂的字符范围 |
+| [regexp/no-optional-assertion](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-optional-assertion.md) | error | - | 禁止可选的断言 |
+| [regexp/no-potentially-useless-backreference](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-potentially-useless-backreference.md) | warn | - | 警告可能无用的反向引用 |
+| [regexp/no-super-linear-backtracking](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-super-linear-backtracking.md) | error | - | 检测可能导致超线性回溯的模式，这会引起严重的性能问题（ReDoS攻击） |
+| [regexp/no-trivially-nested-assertion](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-trivially-nested-assertion.md) | error | - | 禁止浅层嵌套的断言 |
+| [regexp/no-trivially-nested-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-trivially-nested-quantifier.md) | error | - | 禁止浅层嵌套的量词 |
+| [regexp/no-unused-capturing-group](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-unused-capturing-group.md) | error | - | 检测未被使用的捕获组，建议改为非捕获组 `(?:...)` |
+| [regexp/no-useless-backreference](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-backreference.md) | error | - | 禁止无用的反向引用 |
+| [regexp/no-zero-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-zero-quantifier.md) | error | - | 禁止最大匹配次数为0的量词（如 `a{0}`），因为它们不会匹配任何内容 |
+| [regexp/no-useless-assertions](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-assertions.md) | error | - | 禁止无用的断言 |
+| [regexp/no-useless-character-class](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-character-class.md) | error | - | 禁止不必要的字符类，例如当类中只有一个字符时 `[a]` |
+| [regexp/no-useless-dollar-replacements](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-dollar-replacements.md) | error | - | 禁止在替换字符串中使用无用的 `$` 替换 |
+| [regexp/no-useless-escape](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-escape.md) | error | - | 禁止不必要的转义 |
+| [regexp/no-useless-flag](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-flag.md) | warn | - | 警告无用的正则表达式标志 |
+| [regexp/no-useless-lazy](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-lazy.md) | error | - | 禁止在不需要贪婪或惰性匹配的量词上使用惰性量词（`?`） |
+| [regexp/no-useless-non-capturing-group](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-non-capturing-group.md) | error | - | 禁止无用的非捕获组 `(?:...)` |
+| [regexp/no-useless-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-quantifier.md) | error | - | 禁止无用的量词 |
+| [regexp/no-useless-range](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-range.md) | error | - | 禁止无用的范围量词 |
+| [regexp/no-useless-set-operand](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-set-operand.md) | error | - | 禁止在集合操作中使用无用的操作数 |
+| [regexp/no-useless-string-literal](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-string-literal.md) | error | - | 禁止无用的字符串字面量 |
+| [regexp/no-useless-two-nums-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/no-useless-two-nums-quantifier.md) | error | - | 禁止使用两个数字表示的无用量词（如 `a{1,1}`），建议简化为 `a{1}` |
+| [regexp/optimal-lookaround-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/optimal-lookaround-quantifier.md) | warn | - | 建议优化环视断言中的量词使用 |
+| [regexp/optimal-quantifier-concatenation](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/optimal-quantifier-concatenation.md) | error | - | 优化量词的连接方式 |
+| [regexp/prefer-character-class](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-character-class.md) | error | - | 建议使用字符类而非析取 |
+| [regexp/prefer-d](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-d.md) | error | - | 建议使用 `\d` 来匹配数字 |
+| [regexp/prefer-plus-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-plus-quantifier.md) | error | - | 建议使用 `+` 量词而非 `{1,}` |
+| [regexp/prefer-predefined-assertion](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-predefined-assertion.md) | error | - | 建议使用预定义的断言（如 `\b`）而非等效的复杂表达式 |
+| [regexp/prefer-question-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-question-quantifier.md) | error | - | 建议使用 `?` 量词而非 `{0,1}` |
+| [regexp/prefer-range](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-range.md) | error | - | 建议使用范围表示法（如 `[0-9]`） |
+| [regexp/prefer-set-operation](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-set-operation.md) | error | - | 建议使用集合操作来简化字符类 |
+| [regexp/prefer-star-quantifier](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-star-quantifier.md) | error | - | 建议使用 `*` 量词而非 `{0,}` |
+| [regexp/prefer-unicode-codepoint-escapes](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-unicode-codepoint-escapes.md) | error | - | 建议优先使用Unicode码点转义（如 `\u{1F600}`） |
+| [regexp/prefer-w](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/prefer-w.md) | error | - | 建议使用 `\w` 来匹配单词字符 |
+| [regexp/simplify-set-operations](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/simplify-set-operations.md) | error | - | 简化字符类中的集合操作 |
+| [regexp/sort-flags](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/sort-flags.md) | error | - | 要求对正则表达式的标志进行排序，以保持一致性 |
+| [regexp/use-ignore-case](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/use-ignore-case.md) | error | - | 在忽略大小写匹配时，建议使用 `i` 标志 |
+| [regexp/strict](https://github.com/ota-meshi/eslint-plugin-regexp/blob/master/docs/rules/strict.md) | `error` | - | 这是一个预设规则，旨在执行严格的检查 |
+
 ## JSDoc
 
 [`eslint-plugin-jsdoc`](https://github.com/gajus/eslint-plugin-jsdoc) 是针对 JSDoc 注释的规则集，专门为 JavaScript/TypeScript 设计。它强制要求函数、类等代码结构有清晰的文档注释，并检查注释的格式和类型信息是否与代码一致，从而提高代码的可维护性和文档化水平。
