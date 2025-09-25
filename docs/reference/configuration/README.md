@@ -1072,7 +1072,7 @@ module.exports = {
       './tsconfig.test.json',
     ],
   },
-  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc eslint-plugin-eslint-comments
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb/hooks',
@@ -1092,6 +1092,9 @@ module.exports = {
     'plugin:jsdoc/recommended-typescript',
     'plugin:eslint-comments/recommended',
   ],
+  plugin: [
+    'risxss',
+  ],
   rules: {
     // React 17+ 不用再引入 React
     'react/react-in-jsx-scope': 'off',
@@ -1100,6 +1103,12 @@ module.exports = {
     'unicorn/prevent-abbreviations': 'off',
     // Airbnb 更喜欢使用 forEach
     'unicorn/no-array-for-each': 'off',
+    // null 在项目中是常见场景
+    'unicorn/no-null': 'off',
+    // airbnb风格指南要求"基本文件名应该完全匹配其默认导出的名称"
+    'unicorn/filename-case': 'off',
+    // RisXSS 规则，预防 XSS 攻击
+    'risxss/catch-potential-xss-react': 'error',
   },
   overrides: [
     {
@@ -1130,6 +1139,13 @@ module.exports = {
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:tailwindcss/recommended',
   ],
+  plugin: [
+    'risxss',
+  ],
+  rules: {
+    // RisXSS 规则，预防 XSS 攻击
+    'risxss/catch-potential-xss-vue': 'error',
+  },
 };
 ```
   </TabItem>
