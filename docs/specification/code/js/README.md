@@ -74,7 +74,7 @@ let name = undefined;
 :::tip 建议 👍
 ```ts
 const str = 'hello';
-const num = 123;
+const num = 118;
 const bool = true;
 ```
 :::
@@ -82,7 +82,7 @@ const bool = true;
 :::danger 不建议 👎
 ```ts
 const str = new String('hello');
-const num = new Number(123);
+const num = new Number(118);
 const bool = new Boolean(true);
 ```
 :::
@@ -104,7 +104,7 @@ const config = {
 ```ts
 let data: any; // 危险！
 data = 'string';
-data = 123;
+data = 118;
 ```
 :::
 
@@ -644,7 +644,10 @@ const greet = function(name: string) {
 
 16.4 在文件顶部使用注释来解释文件用途。
 
-16.5 为所有公共的、非显而易见的函数、方法和类编写 JSDoc 注释。
+
+## 17. JSDoc
+
+17.1 为所有可导出的函数、类和方法编写 JSDoc 注释。
 
 :::tip 建议 👍
 ```ts
@@ -653,26 +656,106 @@ const greet = function(name: string) {
  * @param name - 用户的名字。
  * @param age - 用户的年龄。
  * @returns 返回格式化的问候字符串。
-*/
+ */
 function createGreeting(name: string, age: number): string {
   return `Hello ${name}, you are ${age} years old.`;
 }
 ```
 :::
 
-16.6 JSDoc 中的类型应与 TypeScript 类型保持一致。由于 TypeScript 已提供类型信息，可省略 JSDoc 中的 @type 标签，除非需要更复杂的说明。
+17.2 JSDoc 注释必须包含对参数 (`@param`) 和返回值 (`@returns`) 的描述和类型。
 
-## 17. 类型转换 (Type Casting & Coercion)
+:::tip 建议 👍
+```js
+/**
+  * Greets a user.
+  * @param name The name of the user.
+  * @returns A greeting message.
+  */
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+:::
+    
+17.3 在 TypeScript 项目中，避免在 JSDoc 中重复声明类型，因为类型已经由代码本身定义。
 
-17.1 避免隐式类型转换。
+:::tip 建议 👍
+```ts
+/**
+ * Greets a user.
+ * @param name The name of the user.
+ * @returns A greeting message.
+ */
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+:::
 
-17.2 在语句开头使用 `parseInt` 时，总是指定基数。
+:::danger 不建议 👎
+```ts
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function greet(name: string): string { // 类型重复
+  return `Hello, ${name}!`;
+}
+```
+:::
 
-17.3 优先使用 `Number.isNaN` 而不是全局的 `isNaN`。
+17.4 确保 JSDoc 标签 (`@param`, `@returns` 等) 书写正确且对齐。
 
-17.4 优先使用 `Number.isFinite` 而不是全局的 `isFinite`。
+## 18. ESLint 注释 (ESLint Comments)
 
-17.5 TypeScript 中，使用 `as` 进行类型断言。
+18.1 当需要禁用某条 ESLint 规则时，必须指定要禁用的具体规则名称。
+
+:::tip 建议 👍
+```ts
+// eslint-disable-next-line no-console
+console.log('Special log for debugging');
+```
+:::
+
+:::danger 不建议 👎
+```ts
+// eslint-disable-next-line
+console.log('Which rule is disabled?');
+```
+:::
+
+18.2 在禁用规则时，应提供明确的注释说明原因。
+
+:::tip 建议 👍
+```ts
+// eslint-disable-next-line no-param-reassign -- This is a legacy API that requires parameter mutation.
+acc.total += item.value;
+```
+:::
+
+:::danger 不建议 👎
+```ts
+// eslint-disable-next-line no-param-reassign
+acc.total += item.value;
+```
+:::
+
+18.3 仅在必要的最小范围内禁用规则，优先使用 `eslint-disable-next-line`。
+
+18.4 避免提交包含未使用 `eslint-disable` 注释的代码。
+
+## 19. 类型转换 (Type Casting & Coercion)
+
+19.1 避免隐式类型转换。
+
+19.2 在语句开头使用 `parseInt` 时，总是指定基数。
+
+19.3 优先使用 `Number.isNaN` 而不是全局的 `isNaN`。
+
+19.4 优先使用 `Number.isFinite` 而不是全局的 `isFinite`。
+
+19.5 TypeScript 中，使用 `as` 进行类型断言。
 
 :::tip 建议 👍
 ```ts
@@ -681,37 +764,37 @@ const len = (value as string).length;
 ```
 :::
 
-## 18. 命名规范 (Naming Conventions)
+## 20. 命名规范 (Naming Conventions)
 
-18.1 变量、函数名使用小驼峰命名法 (camelCase)。
+20.1 变量、函数名使用小驼峰命名法 (camelCase)。
 
-18.2 类、接口、类型别名、枚举使用大驼峰命名法 (PascalCase)。
+20.2 类、接口、类型别名、枚举使用大驼峰命名法 (PascalCase)。
 
-18.3 常量使用全大写蛇形命名法 (UPPER_CASE_SNAKE_CASE)。
+20.3 常量使用全大写蛇形命名法 (UPPER_CASE_SNAKE_CASE)。
 
-18.4 不要使用前导或后导下划线。
+20.4 不要使用前导或后导下划线。
 
-18.5 文件名使用小驼峰命名法或 kebab-case。
+20.5 文件名使用小驼峰命名法或 kebab-case。
 
-## 19. 存取器 (Accessors)
+## 21. 存取器 (Accessors)
 
-19.1 如果需要，请为属性提供 `get` 和 `set` 存取器。
+21.1 如果需要，请为属性提供 `get` 和 `set` 存取器。
 
-19.2 `getter` 必须有返回值。
+21.2 `getter` 必须有返回值。
 
-19.3 `setter` 不能有返回值。
+21.3 `setter` 不能有返回值。
 
-## 20. Promise 与异步编程 (Promises & Async Programming)
+## 22. Promise 与异步编程 (Promises & Async Programming)
 
-20.1 优先使用 `async/await` 语法处理异步操作。
+22.1 优先使用 `async/await` 语法处理异步操作。
 
-20.2 `Promise` 的 `reject` 原因应该是一个 `Error` 对象。
+22.2 `Promise` 的 `reject` 原因应该是一个 `Error` 对象。
 
-20.3 确保 `Promise` 链中总是有 `.catch()` 或在 `async` 函数中使用 `try...catch`。
+22.3 确保 `Promise` 链中总是有 `.catch()` 或在 `async` 函数中使用 `try...catch`。
 
-20.4 避免在 `finally` 块中使用 `return`, `throw`, `break` 或 `continue`。
+22.4 避免在 `finally` 块中使用 `return`, `throw`, `break` 或 `continue`。
 
-20.5 避免不必要的 `await`。
+22.5 避免不必要的 `await`。
 
 :::tip 建议 👍
 ```ts
@@ -729,31 +812,31 @@ async function fetchData() {
 ```
 :::
 
-20.6 避免在循环中 `await`。如果需要并行处理，使用 `Promise.all`。
+22.6 避免在循环中 `await`。如果需要并行处理，使用 `Promise.all`。
 
-20.7 避免 `Promise` 的嵌套。
+22.7 避免 `Promise` 的嵌套。
 
-## 21. 正则表达式 (Regular Expressions)
+## 23. 正则表达式 (Regular Expressions)
 
-21.1 优先使用正则表达式字面量，而不是 `new RegExp()`。
+23.1 优先使用正则表达式字面量，而不是 `new RegExp()`。
 
-21.2 避免在正则表达式中使用不必要的转义。
+23.2 避免在正则表达式中使用不必要的转义。
 
-21.3 避免在正则表达式中出现控制字符。
+23.3 避免在正则表达式中出现控制字符。
 
-21.4 避免使用可能导致灾难性回溯的复杂正则表达式。
+23.4 避免使用可能导致灾难性回溯的复杂正则表达式。
 
-21.5 对所有非简单正则添加 `g` 标志，防止死循环。
+23.5 对所有非简单正则添加 `g` 标志，防止死循环。
 
-## 22. 安全性 (Security)
+## 24. 安全性 (Security)
 
-22.1 绝对禁止使用 `eval()` 和 `new Function()`。
+24.1 绝对禁止使用 `eval()` 和 `new Function()`。
 
-22.2 避免使用 `javascript: URL`。
+24.2 避免使用 `javascript: URL`。
 
-22.3 警惕 `setTimeout` 和 `setInterval` 中的字符串参数，它们等同于 `eval`。
+24.3 警惕 `setTimeout` 和 `setInterval` 中的字符串参数，它们等同于 `eval`。
 
-22.4 在将用户输入的内容插入到 DOM 之前，必须进行清理或转义，以防止 XSS 攻击。禁止直接使用 `innerHTML`, `outerHTML` 等属性来插入未经验证的内容。
+24.4 在将用户输入的内容插入到 DOM 之前，必须进行清理或转义，以防止 XSS 攻击。禁止直接使用 `innerHTML`, `outerHTML` 等属性来插入未经验证的内容。
 
 :::danger 不建议 👎
 ```ts
@@ -765,41 +848,3 @@ if (element) {
 }
 ```
 :::
-
-## 23. ESLint 注释 (ESLint Comments)
-
- 23.1 当需要禁用某条 ESLint 规则时，必须指定要禁用的具体规则名称。
-
-:::tip 建议 👍
-```ts
-// eslint-disable-next-line no-console
-console.log('Special log for debugging');
-```
-:::
-
-:::danger 不建议 👎
-```ts
-// eslint-disable-next-line
-console.log('Which rule is disabled?');
-```
-:::
-
- 23.2 在禁用规则时，应提供明确的注释说明原因。
-
-:::tip 建议 👍
-```ts
-// eslint-disable-next-line no-param-reassign -- This is a legacy API that requires parameter mutation.
-acc.total += item.value;
-```
-:::
-
-:::danger 不建议 👎
-```ts
-// eslint-disable-next-line no-param-reassign
-acc.total += item.value;
-```
-:::
-
- 23.3 仅在必要的最小范围内禁用规则，优先使用 `eslint-disable-next-line`。
-
- 23.4 避免提交包含未使用 `eslint-disable` 注释的代码。
