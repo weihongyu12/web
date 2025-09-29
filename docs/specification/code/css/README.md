@@ -1,630 +1,943 @@
----
-sidebar_position: 2
----
+# CSS 开发规范
 
-# CSS 规范
+import TOCInline from '@theme/TOCInline';
 
-## 总体原则
+本规范旨在统一团队的CSS代码风格，提高代码的可读性、可维护性，并减少潜在的错误。所有 CSS 和 SCSS 代码都应遵循此规范。
 
-### 样式技术优先级
-1. **优先使用 UI 组件库** - 使用团队统一的组件库（如 Ant Design、Element Plus 等）
-2. **其次使用 Tailwind CSS** - 利用原子化CSS类快速构建界面和微调样式
-3. **再次使用原生 CSS/SCSS** - 处理组件库和Tailwind无法覆盖的场景，需要复杂逻辑、嵌套或主题系统时使用
+<TOCInline toc={toc} />
 
-### 代码质量要求
-- 保持代码简洁、可读、可维护
-- 避免冗余和重复代码
-- 优先使用现代CSS语法和最佳实践
-- 确保跨浏览器兼容性
+```mermaid
+flowchart TD
+A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
-## 一、UI 组件库使用规范
-
-### 1.1 组件选择原则
-优先使用团队统一的UI组件库，确保界面一致性和开发效率。
-
-**正例：**
-```jsx
-// 使用组件库的按钮
-import { Button } from '@/components/ui/button'
-
-<Button variant="primary" size="lg" className="mt-4">
-  提交表单
-</Button>
+    B -- 是 --> C[引入 UI 组件库]
+    B -- 否 --> D[直接定制化开发]
+    
+    C --> E{定制化需求高吗?}
+    
+    E -- 高 --> F[引入 Tailwind CSS<br>作为主要样式工具]
+    E -- 低 --> G[使用纯 CSS/Sass<br>进行少量覆盖]
+    
+    D --> H[以 Tailwind CSS 为主<br>自建组件系统]
+    
+    F --> I{遇到复杂动画或<br>边缘问题?}
+    G --> I
+    H --> I
+    
+    I -- 是 --> J[使用纯 CSS/Sass解决]
+    I -- 否 --> K[完成]
+    
+    J --> K
 ```
 
-**反例：**
-```jsx
-// 从零开始自定义按钮
-<button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-  提交表单
+## 1. Tailwind CSS
+
+### 1.1 Classname 顺序
+
+为了保持代码的可读性和一致性，所有 classname 必须遵循一个固定的、合乎逻辑的顺序。推荐的顺序是先布局、再盒模型、然后是排版和视觉效果。
+
+
+:::tip 建议 👍 classes有组织、有顺序
+```html
+<button class="flex items-center justify-center w-full p-4 font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+  Click me
 </button>
 ```
+:::
 
-### 1.2 组件库样式扩展
-当组件库样式不满足需求时，优先使用组件库提供的定制方式（如className、style属性），再考虑Tailwind CSS微调。
-
-**正例：**
-```jsx
-// 使用组件库的扩展方式
-<Card className="shadow-lg border-2 border-blue-200">
-  <CardContent className="p-6">
-    Content
-  </CardContent>
-</Card>
-```
-
-### 1.3 避免破坏组件库默认行为
-不要覆盖组件库的核心样式，避免影响组件的交互和可访问性。
-
-**正例：**
-```jsx
-<Button className="w-full">  {/* 只修改宽度 */}
-  Full Width Button
-</Button>
-```
-
-**反例：**
-```jsx
-<Button className="!bg-red-500 !border-none !p-0">  {/* 破坏了按钮的默认样式 */}
-  Broken Button
-</Button>
-```
-
-## 二、Tailwind CSS 规范
-
-### 2.1 类名顺序
-按照功能分组排列类名，建议顺序：
-1. 布局 (position, display, flex, grid)
-2. 盒模型 (width, height, padding, margin)
-3. 外观 (color, background, border)
-4. 交互 (hover, focus, active)
-
-**正例：**
+:::danger 不建议 👎 classes顺序混乱
 ```html
-<div class="flex items-center justify-center w-full h-64 p-4 bg-blue-500 border-2 border-gray-300 rounded-lg hover:bg-blue-600 focus:outline-none">
-  Content
-</div>
+<button class="text-white justify-center w-full hover:bg-blue-600 items-center bg-blue-500 flex font-bold rounded-lg p-4">
+  Click me
+</button>
 ```
+:::
 
-**反例：**
+### 1.2 使用简写形式
+
+当 Tailwind 提供简写形式的 class 时，应当优先使用简写。这有助于减少 HTML 文件的大小和复杂性。
+
+:::tip 建议 👍 使用 mx-4 代替 ml-4 和 mr-4
 ```html
-<div class="hover:bg-blue-600 bg-blue-500 p-4 flex w-full border-2 items-center h-64 rounded-lg justify-center border-gray-300 focus:outline-none">
-  Content
-</div>
+<div class="mx-4">...</div>
 ```
+:::
 
-### 2.2 在组件库基础上使用
-优先使用设计系统中的预定义值，仅在必要时使用任意值。
-
-**正例：**
+:::danger 不建议 👎 分别使用 margin-left 和 margin-right
 ```html
-<div class="w-64 h-32 p-4 text-lg">Content</div>
+<div class="ml-4 mr-4">...</div>
 ```
+:::
 
-**反例：**
+### 1.3 禁止使用自定义 Classname
+
+为了贯彻 "Utility-First" 的原则，应避免在组件中添加自定义的、语义化的 classname。所有样式都应通过组合原子化的 utility class 来实现。如果需要复用，应通过组件化或 `@apply` 指令来解决。
+
+:::tip 建议 👍 完全使用 utility classes
 ```html
-<div class="w-[256px] h-[128px] p-[16px] text-[18px]">Content</div>
+<div class="flex items-center p-4 bg-gray-100 rounded-lg">...</div>
 ```
+:::
 
-### 2.4 避免自定义类名冲突
-使用Tailwind类时，避免创建与内置类名冲突的自定义类名。
-
-**正例：**
+:::danger 不建议 👎 混入自定义 class，这会破坏 utility-first 的原则
 ```html
-<div class="custom-card bg-white p-6">Content</div>
+<div class="flex items-center user-profile-card">...</div>
 ```
+:::
 
-**反例：**
+:::tip 建议 👍 若确实需要，应在CSS中使用 `@apply`
+```css
+.user-profile-card {
+  @apply p-4 bg-gray-100 rounded-lg;
+}
+```
+:::
+
+### 1.4 任意值的正确使用
+
+- **负数任意值**：当需要使用一个负数的任意值时，负号 `-` 应该放在方括号 `[]` 的外面。
+- **避免不必要的任意值**：如果 Tailwind 已经提供了对应的 utility class，则不应再使用任意值。
+
+:::tip 建议 👍 正确使用负数任意值
 ```html
-<div class="bg-white p-6">Content</div>
-<style>
-.bg-white { background: yellow; } /* 冲突！ */
-</style>
+<div class="-top-[-10px]">...</div>
 ```
+:::
 
-## 三、CSS 通用规范
+:::tip 建议 👍 避免不必要的任意值
+```html
+<div class="w-10">...</div>
+```
+:::
 
-### 3.1 命名规范
-使用kebab-case命名法，所有类名、ID、自定义属性名都应使用小写字母和连字符。
+:::danger 不建议 👎 错误的负数任意值语法
+```html
+<div class="top-[-10px]">...</div>
+```
+:::
 
-**正例：**
+:::danger 不建议 👎 当存在 w-10 时，这是不必要的
+```html
+<div class="w-[2.5rem]">...</div>
+```
+:::
+
+## 2. 通用格式
+
+### 2.1 缩进
+
+使用 2 个空格进行缩进。
+
+:::tip 建议 👍
 ```css
-.header-navigation { }
-.user-profile-card { }
-#main-content { }
---primary-color: #3b82f6;
+.card {
+  color: #fff;
+  background-color: #999;
+}
 ```
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
-.headerNavigation { }
-.UserProfileCard { }
-#mainContent { }
---primaryColor: #3b82f6;
+.card {
+    color: #fff;
+      background-color: #999;
+}
 ```
+:::
 
-### 3.2 选择器规范
+### 2.2 大小写
 
-#### 避免过度嵌套
-选择器嵌套不超过4层，避免过高的特异性。
+所有代码均使用小写，包括选择器、属性、值（字符串除外）。
 
-**正例：**
+:::tip 建议 👍
 ```css
-.card { }
-.card .header { }
-.card .header .title { }
+.btn {
+  display: block;
+  color: #fff;
+}
 ```
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
-.page .container .sidebar .widget .card .header .title { }
+.BTN {
+  DISPLAY: BLOCK;
+  COLOR: #FFF;
+}
 ```
+:::
 
-#### 选择器类型限制
-- 类选择器：最多4个
-- ID选择器：避免使用（最多0个）
-- 属性选择器：最多2个
-- 组合选择器：最多4个
-- 通用选择器：最多1个
+### 2.3 引号
 
-**正例：**
+统一使用双引号（`""`）。
+
+:::tip 建议 👍
 ```css
-.btn.btn-primary { }
-.form [type="email"] { }
+.element::before {
+  content: "some text";
+  font-family: "Helvetica Neue", sans-serif;
+}
 ```
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
-#header .nav .item.active.selected.highlighted.special { }
+.element::before {
+  content: 'some text';
+  font-family: 'Helvetica Neue', sans-serif;
+}
 ```
+:::
 
-#### 类型选择器限制
-避免使用类型选择器限定类选择器。
+### 2.4 空白与换行
 
-**正例：**
+- 文件末尾保留一个空行。
+- 禁止行尾出现多余的空格。
+- 两个规则集之间最多保留一个空行。
+- 文件第一行不应为空行。
+
+## 3. 命名规范
+
+### 3.1 class、id、keyframe动画、自定义媒体查询
+
+命名统一使用 kebab-case (短横线连接式)。
+
+:::tip 建议 👍
 ```css
-.warning { color: orange; }
-```
+.user-profile {
+  /* ... */
+}
+#main-navigation {
+  /* ... */
+}
+@keyframes slide-in {
+  /* ... */
+}
+@custom-media --viewport-medium (width >= 50rem);
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
-div.warning { color: orange; }
+.userProfile {
+  /* ... */
+}
+#mainNavigation {
+  /* ... */
+}
+@keyframes slideIn {
+  /* ... */
+}
+@custom-media --viewportMedium (width >= 50rem);
 ```
+:::
 
-### 3.3 属性值规范
+## 4. 选择器
 
-#### 颜色值格式
-- 十六进制颜色使用小写字母
-- 优先使用短格式
-- 现代颜色函数使用新语法
+### 4.1 属性选择器
 
-**正例：**
+属性选择器的值必须使用双引号包裹。
+
+:::tip 建议 👍
+```css
+[type="submit"] {
+  /* ... */
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+[type=submit] {
+  /* ... */
+}
+[type='submit'] {
+  /* ... */
+}
+```
+:::
+
+### 4.2 伪类与伪元素
+
+- 伪类使用单冒号（`:`），伪元素使用双冒号（`::`）。
+- 伪类和伪元素本身使用小写。
+
+:::tip 建议 👍
+```css
+a:hover {
+  color: #f00;
+}
+p::first-line {
+  font-weight: bold;
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+a:HOVER {
+  color: #f00;
+}
+p:first-line { /* 应使用双冒号 */
+  font-weight: bold;
+}
+```
+:::
+
+### 4.3 组合器
+
+在组合器（`>`、`+`、`~`）前后各保留一个空格。
+
+:::tip 建议 👍
+```css
+.parent > .child {
+  /* ... */
+}
+.item + .item {
+  /* ... */
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+.parent>.child {
+  /* ... */
+}
+.item+.item {
+  /* ... */
+}
+```
+:::
+
+### 4.4 选择器列表
+
+- 多个选择器在多行书写时，每个选择器占一行。
+- 单行书写时，逗号后保留一个空格。
+
+:::tip 建议 👍
+```css
+.class1,
+.class2 {
+  color: black;
+}
+
+.class3, .class4 {
+  color: white;
+}
+
+```
+:::
+
+:::danger 不建议 👎
+```css
+.class1, .class2 { /* 多行时应换行 */
+  color: black;
+}
+
+.class3,
+.class4 { /* 单行时不应换行 */
+  color: white;
+}
+```
+:::
+
+### 4.5 复杂度限制
+
+为了保持较低的特异性和较高的性能，对选择器的复杂度进行以下限制：
+
+- 禁止使用 ID 选择器。
+- 一个选择器中最多使用 4 个 class 选择器。
+- 一个选择器中最多使用 2 个属性选择器。
+- 一个选择器中最多使用 4 个组合器。
+- 一个选择器中最多使用 1 个通用选择器 (`*`)。
+- 一个选择器中最多使用 2 个类型选择器 (如 `div`, `p`)。
+- 禁止在 class 或 id 选择器前添加类型选择器进行限定（如 `div.my-class`）。
+
+:::tip 建议 👍
+```css
+.card .header .title {
+  font-size: 1.5rem;
+}
+
+.btn[disabled] {
+  opacity: .5;
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+#main-content { /* 禁止使用 ID */
+  padding: 1rem;
+}
+
+div.container.main.content.wrapper { /* class 过多 */
+  border: 1px solid #ccc;
+}
+
+input[type="text"][required][disabled] { /* 属性选择器过多 */
+  background: #eee;
+}
+
+html body .container > .content * { /* 组合器和通用选择器过多 */
+  color: #333;
+}
+
+div.my-class { /* 禁止限定类型 */
+  color: red;
+}
+```
+:::
+
+## 5. 属性与值
+
+### 5.1 颜色
+
+- 颜色值如果可以，优先使用 3 位十六进制的缩写形式。
+- 颜色值必须使用小写。
+- 禁止使用颜色名称。
+- 色相（Hue）值使用角度单位（`deg`）。
+
+:::tip 建议 👍
 ```css
 .element {
   color: #fff;
-  background-color: #f3f4f6;
-  border-color: hsl(220 14% 96%);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
+  background-color: #f0c;
+  border-color: hsl(270deg 60% 70%);
 }
 ```
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
 .element {
   color: #FFFFFF;
-  background-color: #F3F4F6;
-  border-color: hsl(220, 14%, 96%);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  background-color: #ff00cc;
+  border-color: red; /* 禁止使用颜色名称 */
+  border-color: hsl(270 60% 70%); /* 色相缺少单位 */
 }
 ```
+:::
 
-#### 长度单位
-- 零值不添加单位
-- 保留自定义属性中的单位
-- 优先使用相对单位
+### 5.2 数值
 
-**正例：**
+- 对于值为 `0` 的长度单位，省略单位。
+- 小数值如果小于1，省略小数点前的 `0`。
+- 禁止数值末尾出现多余的 `0`。
+
+:::tip 建议 👍
 ```css
 .element {
-  margin: 0;
-  padding: 1rem 0.5rem;
-  --gap: 0px; /* 自定义属性保留单位 */
+  padding: 0;
+  opacity: .5;
+  width: 1.5rem;
 }
 ```
+:::
 
-**反例：**
+:::danger 不建议 👎
 ```css
 .element {
-  margin: 0px;
-  padding: 16px 8px;
+  padding: 0px;
+  opacity: 0.5;
+  width: 1.500rem;
 }
 ```
+:::
 
-#### 字体族名称
-字体名称在必要时使用引号。
+### 5.3 字体权重
 
-**正例：**
+字体权重应使用数值（如 `400`, `700`），而不是关键字（`normal`, `bold`）。
+
+:::tip 建议 👍
 ```css
 .element {
-  font-family: "Times New Roman", serif;
-  font-family: system-ui, sans-serif;
+  font-weight: 700;
 }
 ```
+:::
 
-### 3.4 函数和URL
-- 函数名使用小写
-- URL始终使用引号
-
-**正例：**
+:::danger 不建议 👎
 ```css
 .element {
-  background-image: url("./image.jpg");
-  transform: rotate(45deg);
+  font-weight: bold;
 }
 ```
+:::
 
-**反例：**
+### 5.4 简写属性
+
+- 避免使用冗余的值。
+- 禁止使用简写属性覆盖已声明的完整属性。
+
+:::tip 建议 👍
 ```css
 .element {
-  background-image: url(./image.jpg);
-  transform: ROTATE(45deg);
+  margin: 10px 20px;
 }
 ```
+:::
 
-### 3.5 重要性声明
-避免使用 `!important`，优先通过提高选择器特异性解决样式优先级问题。
-
-**正例：**
-```css
-.modal.is-open { display: block; }
-```
-
-**反例：**
-```css
-.modal { display: block !important; }
-```
-
-### 3.6 属性简写
-避免不必要的简写属性冗余。
-
-**正例：**
+:::danger 不建议 👎
 ```css
 .element {
-  margin: 1rem;
-  padding: 1rem 0.5rem;
+  margin: 10px 20px 10px 20px; /* 冗余 */
 }
-```
 
-**反例：**
-```css
 .element {
-  margin: 1rem 1rem 1rem 1rem;
-  padding: 1rem 0.5rem 1rem 0.5rem;
+  padding-left: 10px;
+  padding: 20px; /* 覆盖了 padding-left */
 }
 ```
+:::
 
-## 四、CSS 格式化规范
+### 5.5 厂商前缀
 
-### 4.1 缩进和空格
-- 使用2个空格缩进
-- 冒号后添加一个空格
-- 逗号后添加一个空格
-- 运算符前后添加空格
+禁止为属性、值、`@`规则和媒体查询特性名称添加厂商前缀，除非有特殊需要（如 `-webkit-line-clamp`）。
 
-**正例：**
-```css
-.element {
-  padding: 1rem 0.5rem;
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  calc(100% - 2rem);
-}
-
-@media (min-width: 768px) {
-  .element { padding: 2rem; }
-}
-```
-
-### 4.2 换行和分号
-- 每个声明独占一行
-- 始终在声明末尾添加分号
-- 块结束大括号前换行
-
-**正例：**
+:::tip 建议 👍
 ```css
 .element {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  transition: all 4s ease;
 }
 ```
+:::
 
-**反例：**
-```css
-.element { display: flex; align-items: center; justify-content: space-between }
-```
-
-### 4.3 引号使用
-统一使用双引号。
-
-**正例：**
+:::danger 不建议 👎
 ```css
 .element {
-  content: "Hello World";
-  background-image: url("./image.jpg");
+  display: -webkit-flex;
+  -webkit-transition: all 4s ease;
 }
-
-.element[data-type="button"] { }
 ```
+:::
 
-### 4.4 空行规范
-- 文件首行不为空行
-- 文件末尾保留换行符
-- 规则块之间添加空行
-- 去除行末空白字符
-- 避免连续空行
+### 5.6 `!important`
 
-**正例：**
+禁止使用 `!important`。
+
+:::danger 不建议 👎
 ```css
-.header {
-  background: white;
-}
-
-.main {
-  padding: 2rem;
-}
-
-@media (min-width: 768px) {
-  .main {
-    padding: 3rem;
-  }
+.element {
+  color: red !important;
 }
 ```
+:::
 
-## 五、CSS 属性排序
+## 6. 注释
 
-按照以下顺序组织CSS属性：
+- 注释内容前后各保留一个空格。
+- 注释前通常需要一个空行（除非位于代码块的起始位置）。
+- SCSS中推荐使用 `//` 进行单行注释。
 
-1. **组合规则** (CSS Modules的composes)
-2. **all属性**
-3. **定位** (position, top, right, bottom, left, z-index等)
-4. **显示模式** (box-sizing, display)
-5. **弹性盒子** (flex相关属性)
-6. **网格布局** (grid相关属性)
-7. **间距** (gap, row-gap, column-gap)
-8. **对齐** (align-*, justify-*)
-9. **顺序** (order)
-10. **盒模型** (width, height, padding, margin, overflow等)
-11. **排版** (font-*, color, text-*, line-height等)
-12. **交互** (appearance, cursor, pointer-events等)
-13. **背景和边框** (background-*, border-*, outline等)
-14. **遮罩** (mask相关属性)
-15. **SVG属性**
-16. **过渡和动画** (transition, animation, transform等)
-17. **分页媒体** (break-*, orphans, widows)
+:::tip 建议 👍
+```scss
+.element {
+// 这是个好注释
+  color: #333;
+}
+```
+:::
 
-**正例：**
+:::danger 不建议 👎
+```scss
+.element {
+//这是个坏注释
+color: #333;
+}
+```
+:::
+
+## 7. 代码块
+
+- 左花括号（`{`）与选择器在同一行，并与选择器之间保留一个空格。
+- 右花括号（`}`）单独占一行，且前面应有一个空行（多行模式下）。
+- 声明的冒号（`:`）后保留一个空格，前面没有空格。
+- 每条声明以分号（`;`）结尾，且分号后在多行模式下必须换行。
+- 单行规则集最多只包含一条声明。
+
+:::tip 建议 👍 多行
 ```css
 .card {
-  position: relative;
-  z-index: 1;
-  
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  
-  width: 100%;
-  max-width: 24rem;
-  padding: 1.5rem;
-  margin: 0 auto;
-  
-  font-family: system-ui, sans-serif;
-  color: #374151;
-  
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
-  
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
+  display: block;
+  padding: 1rem;
 }
 ```
+:::
 
-## 六、SCSS 特定规范
-
-### 6.1 变量命名
-SCSS变量使用kebab-case命名，函数和混合器同样使用kebab-case。
-
-**正例：**
-```scss
-$primary-color: #3b82f6;
-$border-radius-lg: 0.5rem;
-
-@function calculate-rem($px) {
-  @return #{$px / 16}rem;
-}
-
-@mixin button-style($bg-color) {
-  background-color: $bg-color;
-  border: none;
-  padding: 0.75rem 1rem;
-}
-```
-
-**反例：**
-```scss
-$primaryColor: #3b82f6;
-$BORDER_RADIUS_LG: 0.5rem;
-
-@function calculateRem($px) { }
-@mixin ButtonStyle($bgColor) { }
-```
-
-### 6.2 嵌套规范
-- 避免不必要的选择器嵌套分组
-- 合理使用@else语句，避免额外空行
-- 条件语句的括号前添加空格
-
-**正例：**
-```scss
-@if $theme == dark {
-  background: black;
-} @else if $theme == light {
-  background: white;
-} @else {
-  background: gray;
-}
-```
-
-**反例：**
-```scss
-@if $theme == dark {
-  background: black;
-}
-
-@else if$theme == light {
-  background: white;
-}
-
-@else {
-  background: gray;
-}
-```
-
-### 6.3 操作符规范
-SCSS操作符前后不允许换行，必须添加空格。
-
-**正例：**
-```scss
-$width: $base-width + 2rem;
-$height: $base-height - 1rem;
-```
-
-**反例：**
-```scss
-$width: $base-width+2rem;
-$height: $base-width
-+ 2rem;
-```
-
-### 6.4 混合器和函数调用
-函数和混合器调用的括号前不添加空格。
-
-**正例：**
-```scss
-@include button-style($primary-color);
-width: calculate-rem(16);
-```
-
-**反例：**
-```scss
-@include button-style ($primary-color);
-width: calculate-rem (16);
-```
-
-### 6.5 加载语句
-- 使用字符串语法导入
-- 省略前导下划线和文件扩展名
-
-**正例：**
-```scss
-@import "variables";
-@import "mixins";
-@use "functions";
-```
-
-**反例：**
-```scss
-@import url("_variables.scss");
-@import url(_mixins.scss);
-```
-
-## 七、注释规范
-
-### 7.1 注释格式
-- 注释内容前后添加空格
-- 多行注释每行都要有适当的间距
-- 在复杂逻辑前添加解释性注释
-
-**正例：**
+:::tip 建议 👍 单行
 ```css
-/* 主导航样式 */
-.nav { }
+.hidden { display: none; }
+```
+:::
 
-/* 
- * 响应式网格布局
- * 在移动设备上显示单列，桌面设备上显示多列
- */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
+:::danger 不建议 👎
+```css
+.card{ /* `{` 前缺少空格 */
+  display:block; /* 冒号后缺少空格 */
+  padding: 1rem
+} /* 分号丢失 */
+
+.hidden { display: none; padding: 0; } /* 单行模式声明过多 */
+```
+:::
+
+## 8. 函数
+
+- 函数名与括号之间不能有空格。
+- 括号内的参数，逗号后保留一个空格，逗号前没有空格。
+- 多行函数中，括号内和参数后需要换行。
+- 禁止出现空的函数。
+
+:::tip 建议 👍
+```css
+.element {
+  transform: translate(10px, 20px);
+  background-image: linear-gradient(
+    to bottom,
+    #fff,
+    #000
+  );
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+.element {
+  transform: translate (10px, 20px); /* 函数名后有空格 */
+  width: calc(100% - 20px); /* 操作符两边缺少空格 */
+}
+```
+:::
+
+## 9. 媒体查询
+
+- 特性名称与冒号之间没有空格，冒号后有一个空格。
+- 括号内与内容之间没有空格。
+- 范围操作符（`=`、`<`、`>`）前后各有一个空格。
+
+:::tip 建议 👍
+```css
+@media (max-width: 600px) {
+  /* ... */
+}
+@media (width >= 50rem) {
+  /* ... */
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+@media ( max-width: 600px ) {
+  /* ... */
+}
+@media (width >=50rem) {
+  /* ... */
+}
+```
+:::
+
+## 10. 禁止项
+
+- 禁止空的样式文件、代码块和注释。
+- 禁止重复的选择器和 `@import` 规则。
+- 禁止在声明块中出现重复的属性或重复的混合。
+- 禁止无效的十六进制颜色值。
+- 禁止在字符串中出现换行。
+- 禁止使用未知的单位、属性、函数、伪类、伪元素等。
+
+## 11. 属性声明顺序
+
+为了提升代码的可读性和一致性，属性应按照以下分组和顺序进行声明：
+
+- 组合 (Composes): CSS Modules中的组合。
+- 定位 (Positioning): position, z-index, top, right, bottom, left 等。
+- 显示与盒模型 (Display & Box Model): display, flex, grid, width, height, padding, margin, border, overflow 等。
+- 排版 (Typography): font, line-height, color, text-align 等。
+- 视觉效果 (Visual): background, box-shadow, opacity, transform 等。
+- 动画 (Animation): transition, animation 等。
+- 其他 (Misc): cursor, user-select 等。
+
+:::tip 建议 👍
+```css
+.element {
+  /* 定位 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+
+  /* 显示与盒模型 */
+  display: block;
+  width: 100px;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+
+  /* 排版 */
+  font-size: 1rem;
+  color: #333;
+
+  /* 视觉效果 */
+  background-color: #f0f0f0;
+  opacity: .9;
+
+  /* 动画 */
+  transition: opacity .2s;
+}
+```
+:::
+
+:::danger 不建议 👎
+```css
+.element {
+  color: #333;
+  width: 100px;
+  position: absolute;
+  left: 0;
+  display: block;
+  top: 0;
+  height: 100px;
+  opacity: .9;
+  transition: opacity .2s;
+  z-index: 10;
+  font-size: 1rem;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+}
+```
+:::
+
+## 12. SCSS/Sass
+
+### 12.1 命名规范
+
+SCSS 中的变量 (`$variable`)、函数 (`@function`)、混合 (`@mixin`) 和占位符 (`%placeholder`) 命名统一使用 kebab-case (短横线连接式)。
+
+:::tip 建议 👍
+```scss
+$variable-name: #000;
+%placeholder-name { /* ... */ }
+
+@function function-name($arg) {
+  @return $arg;
 }
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
+@mixin mixin-name() {
+  /* ... */
+}
+
+```
+:::
+
+:::danger 不建议 👎
+```scss
+$variableName: #000;
+%placeholderName { /* ... */ }
+
+@function functionName($arg) {
+  @return $arg;
+}
+
+@mixin mixinName() {
+  /* ... */
+}
+```
+:::
+
+### 12.2 变量
+
+- 变量声明时，冒号 (`:`) 前面不能有空格，冒号后必须有至少一个空格。
+- 在选择器或属性名中使用变量时，必须使用插值 `#{}`。
+
+:::tip 建议 👍
+```scss
+$my-color: #f00;
+$my-property: margin;
+$my-selector: ".foo";
+
+#{$my-selector} {
+  #{$my-property}-left: 10px;
+}
+```
+:::
+
+:::danger 不建议 👎
+```scss
+$my-color : #f00; // 冒号前有空格
+$my-font-size:#f00; // 冒号后无空格
+
+.bar {
+  $my-property: 20px; // 变量未被插值
+}
+```
+:::
+
+### 12.3 操作符
+
+- 在数学操作符 (`+`, `-`, `*`, `/`) 两侧必须保留一个空格。
+- 操作符前后禁止换行。
+
+:::tip 建议 👍
+```scss
+.element {
+  width: 100% - 20px;
+  font-size: $font-base * 1.2;
+}
+```
+:::
+
+:::danger 不建议 👎
+```scss
+.element {
+  width: 100%-20px;
+  font-size: $font-base*1.2;
+}
+.element {
+  width: 100% -
+  20px;
+}
+```
+:::
+
+### 12.4 混合与函数
+
+- 定义混合和函数时，名称与括号之间不能有空格。
+- 调用无参数的混合时，必须在混合名称后加上括号 `()`。
+- 调用函数时，禁止使用命名参数。
+
+:::tip 建议 👍
+```scss
+@mixin my-mixin() { /* ... */ }
+@function my-function($a, $b) { /* ... */ }
+
+.element {
+  @include my-mixin();
+  width: my-function(10px, 20px);
+}
+```
+:::
+
+:::danger 不建议 👎
+```scss
+@mixin my-mixin () { /* ... */ }
+@function my-function ($a, $b) { /* ... */ }
+
+.element {
+  @include my-mixin; // 缺少括号
+  width: my-function($a: 10px, $b: 20px); // 使用了命名参数
+}
+```
+:::
+
+### 12.5 嵌套
+
+- 禁止使用不必要的父选择器引用 `&`。
+- 对于嵌套属性（如 `font`），其子属性之间不能有空行。
+
+:::tip 建议 👍
+```scss
+.element {
+.child {
+  color: #000;
+}
+
+font: {
+  family: sans-serif;
+  weight: bold;
+}
+}
+```
+:::
+
+:::danger 不建议 👎
+```scss
+.element {
+  & .child { // & 是多余的
+    color: #000;
+  }
+
+  font: {
+    family: sans-serif;
+
+    weight: bold; // 中间有空行
   }
 }
 ```
+:::
 
-### 7.2 自定义属性注释
-为复杂的CSS自定义属性添加说明注释。
+### 12.6 导入与继承
 
-**正例：**
-```css
-.component {
-  /* 组件内部间距，可通过外部覆盖 */
-  --component-padding: 1rem;
-  /* 主题色，支持亮暗模式切换 */
-  --component-bg: light-dark(white, #1a1a1a);
+- 导入 SCSS 分部文件时，必须省略文件名前的下划线 (`_`) 和文件扩展名 (`.scss`)。
+- 必须使用字符串形式导入。
+- 禁止 @extend 一个普通的 class、id 或元素选择器，只允许继承占位符选择器 (`%`)。
+
+:::tip 建议 👍
+```scss
+@import "variables";
+@import "mixins/buttons";
+
+%message-shared {
+  border: 1px solid #ccc;
+}
+.message {
+  @extend %message-shared;
 }
 ```
+:::
 
-## 八、媒体查询规范
+:::danger 不建议 👎
+```scss
+@import "_variables";
+@import "mixins/buttons.scss";
+@import url("variables");
 
-### 8.1 媒体查询格式
-- 媒体特性名称使用小写
-- 括号内不添加空格
-- 优先使用现代范围语法
-
-**正例：**
-```css
-@media (min-width: 768px) {
-  .element { padding: 2rem; }
+.error {
+  // ...
 }
-
-@media (768px <= width < 1024px) {
-  .element { font-size: 1.125rem; }
+.serious-error {
+  @extend .error; // 继承了普通 class
 }
 ```
+:::
 
-**反例：**
-```css
-@media ( MIN-WIDTH: 768px ) {
-  .element { padding: 2rem; }
-}
+### 12.7 控制流
 
-@media (min-width: 768px) and (max-width: 1023px) {
-  .element { font-size: 1.125rem; }
+- `@else` 语句前不能有空行。
+- `@else if` 语句的括号前必须有一个空格。
+- `@else` 语句的花括号换行和空格规则与普通规则块一致。
+
+:::tip 建议 👍
+```scss
+@if $condition {
+  // ...
+} @else if $other-condition {
+  // ...
+} @else {
+  // ...
 }
 ```
+:::
 
-## 九、性能和维护性建议
+:::danger 不建议 👎
+```scss
+@if $condition {
+  // ...
+}
 
-### 9.1 组件库优先策略
-充分利用组件库的设计系统，保持界面一致性，减少自定义样式的维护成本。
+@else { // @else 前有空行
+  // ...
+}
 
-### 9.2 避免深层嵌套
-保持选择器的简洁性，避免过深的嵌套影响性能和可维护性。
-
-### 9.3 使用语义化命名
-类名应该反映内容的含义而非外观，提高代码的可维护性。
-
-### 9.4 组件化思维
-将重复的样式模式提取为可复用的组件类，减少代码重复。
-
-### 9.5 渐进增强
-优先保证基础功能，然后通过CSS增强用户体验。
+@if $condition {
+  // ...
+} @else if($other-condition) { // 括号前无空格
+  // ...
+}
+```
+:::
