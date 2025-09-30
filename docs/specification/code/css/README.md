@@ -654,13 +654,23 @@ color: #333;
 
 为了提升代码的可读性和一致性，属性应按照以下分组和顺序进行声明：
 
-- 组合 (Composes): CSS Modules中的组合。
-- 定位 (Positioning): position, z-index, top, right, bottom, left 等。
-- 显示与盒模型 (Display & Box Model): display, flex, grid, width, height, padding, margin, border, overflow 等。
-- 排版 (Typography): font, line-height, color, text-align 等。
-- 视觉效果 (Visual): background, box-shadow, opacity, transform 等。
-- 动画 (Animation): transition, animation 等。
-- 其他 (Misc): cursor, user-select 等。
+1. 组合规则 (CSS Modules的composes)
+2. all属性
+3. 定位 (position, top, right, bottom, left, z-index等)
+4. 显示模式 (box-sizing, display)
+5. 弹性盒子 (flex相关属性)
+6. 网格布局 (grid相关属性)
+7. 间距 (gap, row-gap, column-gap)
+8. 对齐 (align-, justify-)
+9. 顺序 (order)
+10. 盒模型 (width, height, padding, margin, overflow等)
+11. 排版 (font-, color, text-, line-height等)
+12. 交互 (appearance, cursor, pointer-events等)
+13. 背景和边框 (background-, border-, outline等)
+14. 遮罩 (mask相关属性)
+15. SVG属性
+16. 过渡和动画 (transition, animation, transform等)
+17. 分页媒体 (break-*, orphans, widows)
 
 :::tip 建议 👍
 ```css
