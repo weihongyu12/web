@@ -1,4 +1,4 @@
-# CSS 开发规范
+# CSS 规范
 
 import TOCInline from '@theme/TOCInline';
 
