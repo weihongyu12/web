@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # CSS 规范
 
 import TOCInline from '@theme/TOCInline';

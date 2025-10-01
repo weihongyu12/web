@@ -1,8 +1,12 @@
+---
+sidebar_position: 4
+---
+
 # Vue 规范
 
 import TOCInline from '@theme/TOCInline';
 
-本文档旨在为 Vue.js 项目提供一套统一的代码风格和开发规范，以提高代码质量、可读性和可维护性。规范结合了 Vue 官方风格指南、Airbnb JavaScript 风格指南以及一系列最佳实践。
+本文档旨在为 Vue 项目提供一套统一的代码风格和开发规范，以提高代码质量、可读性和可维护性。规范结合了 Vue 官方风格指南、Airbnb JavaScript 风格指南以及一系列最佳实践。
 
 <TOCInline toc={toc} />
 

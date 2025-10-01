@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # 测试代码规范
 
 import TOCInline from '@theme/TOCInline';

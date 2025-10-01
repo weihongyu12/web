@@ -1,8 +1,10 @@
+---
+sidebar_position: 3
+---
+
 # JavaScript/TypeScript 规范
 
 import TOCInline from '@theme/TOCInline';
-
-
 
 本文档旨在为前端 JavaScript 和 TypeScript 项目提供一套统一的编码风格和最佳实践，以提高代码质量、可读性和可维护性。规范主要基于 [Airbnb JavaScript Style Guide](https://airbnb.io/javascript/)，并结合了 TypeScript 的特性和一系列优秀的 ESLint 插件规则。
 
