@@ -78,10 +78,45 @@ module.exports = {
 
 专为 React Hooks 设计的 Airbnb 规则集，用于确保 Hooks 的正确使用，例如依赖项的完整性检查。
 
+```js
+module.exports = {
+  extends: [
+    // ...
+    'plugin:react-hooks/recommended-latest',
+  ],
+};
+```
+
+:::warning
+截止目前 `eslint-config-airbnb` 对 `eslint-plugin-react-hooks` 的支持仍为旧版本，不支持 **React Compiler 规则**，需要手动配置。
+:::
+
+#### 核心 Hooks 规则
+
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
-|----------|-------|----------|------|
-| [react-hooks/rules-of-hooks](https://github.com/facebook/react/blob/c11015ff4f610ac2924d1fc6d569a17657a404fd/packages/eslint-plugin-react-hooks/src/RulesOfHooks.js) | error | - | 确保 Hooks 在函数组件或自定义 Hook 的最顶层调用，禁止在循环、条件或嵌套函数中使用。 |
-| [react-hooks/exhaustive-deps](https://github.com/facebook/react/blob/1204c789776cb01fbaf3e9f032e7e2ba85a44137/packages/eslint-plugin-react-hooks/src/ExhaustiveDeps.js)                  | error | - | 检查 `useEffect`、`useMemo` 等 Hook 的依赖项是否完整，避免因依赖缺失导致逻辑错误。  |
+|---------|---------|---------|------|
+| [react-hooks/rules-of-hooks](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/rules-of-hooks) | error | - | 强制遵守 React Hooks 规则（只能在函数组件或自定义 Hook 中调用） |
+| [react-hooks/exhaustive-deps](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps) | warn | - | 验证 React Hooks 的依赖数组是否包含所有必要的依赖项 |
+
+#### React Compiler 规则
+
+| 规则名称 | 错误级别 | 配置选项 | 描述 |
+|---------|---------|---------|------|
+| [react-hooks/config](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/config) | error | - | 验证编译器配置选项 |
+| [react-hooks/error-boundaries](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/error-boundaries) | error | - | 验证使用错误边界而不是 try/catch 来处理子组件错误 |
+| [react-hooks/component-hook-factories](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/component-hook-factories) | error | - | 验证定义嵌套组件或 Hook 的高阶函数 |
+| [react-hooks/gating](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/gating) | error | - | 验证门控模式的配置 |
+| [react-hooks/globals](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/globals) | error | - | 防止在渲染期间对全局变量进行赋值/修改 |
+| [react-hooks/immutability](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/immutability) | error | - | 防止修改 props、state 和其他不可变值 |
+| [react-hooks/preserve-manual-memoization](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/preserve-manual-memoization) | error | - | 确保编译器保留现有的手动记忆化 |
+| [react-hooks/purity](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/purity) | error | - | 通过检查已知的不纯函数来验证组件/Hook 的纯度 |
+| [react-hooks/refs](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/refs) | error | - | 验证 ref 的正确使用，避免在渲染期间读取/写入 |
+| [react-hooks/set-state-in-effect](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect) | error | - | 防止在 Effect 中同步调用 setState |
+| [react-hooks/set-state-in-render](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-render) | error | - | 防止在渲染期间设置状态 |
+| [react-hooks/static-components](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/static-components) | error | - | 验证组件是静态的，不会在每次渲染时重新创建 |
+| [react-hooks/unsupported-syntax](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/unsupported-syntax) | warn | - | 防止使用 React Compiler 不支持的语法 |
+| [react-hooks/use-memo](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/use-memo) | error | - | 验证 useMemo Hook 的使用（检查是否有返回值） |
+| [react-hooks/incompatible-library](https://zh-hans.react.dev/reference/eslint-plugin-react-hooks/lints/incompatible-library) | warn | - | 防止使用与记忆化不兼容的库 |
 
 ### a11y
 

@@ -205,8 +205,8 @@ function MyComponent() {
 :::danger 不建议 👎 属性缩进错误
 ```tsx
 <MyComponent
-    propA="valueA"
-    propB="valueB"
+  propA="valueA"
+  propB="valueB"
 />;
 ```
 :::
@@ -236,8 +236,8 @@ JSX 的花括号内侧不应有空格。
 :::tip 建议 👍
 ```tsx
 interface MyComponentProps {
-    name: string;
-    age: number;
+  name: string;
+  age: number;
 }
 
 function MyComponent({ name, age }: MyComponentProps) {
@@ -249,8 +249,8 @@ function MyComponent({ name, age }: MyComponentProps) {
 :::danger 不建议 👎
 ```tsx
 interface MyComponentProps {
-    name: string;
-    age: number;
+  name: string;
+  age: number;
 }
 
 function MyComponent(props: MyComponentProps) {
@@ -365,9 +365,9 @@ function userProfile() { /* ... */ }
 ```
 :::
 
-## 4. State 与 Hooks
+## 4. State、Hooks 与 Compiler
 
-### 4.1 Hooks 使用规则
+### 4.1 核心 Hooks 使用规则
 
 - **只在顶层调用 Hooks**：不要在循环、条件或嵌套函数中调用 Hooks。
 - **只在 React 函数中调用 Hooks**：只能在函数组件或自定义 Hooks 中调用 Hooks。
@@ -410,10 +410,9 @@ function MyComponentWithBadHooks({ condition }: { condition: boolean }) {
 
 ### 4.2 `useEffect` 依赖项
 
-`useEffect`、`useCallback`、`useMemo` 等 Hooks 必须包含所有外部依赖项。ESLint 会自动检查并提示。
+`useEffect`、`useCallback`、`useMemo` 等 Hooks 必须包含所有外部依赖项。
 
 :::tip 建议 👍 依赖项数组中包含了 `userId`
-
 ```tsx
 interface User {
   id: string;
@@ -435,7 +434,6 @@ function UserInfo({ userId }: { userId: string }) {
 :::
 
 :::danger 不建议 👎 缺少依赖项 `userId`
-
 ```tsx
 interface User {
   id: string;
@@ -446,7 +444,7 @@ declare function fetchUser(userId: string): Promise<User>;
 
 function UserInfo({ userId }: { userId: string }) {
   const [user, setUser] = useState<User | null>(null);
-  
+
   useEffect(() => {
     fetchUser(userId).then(setUser).catch(console.error);
   }, []); // 这会导致 userId 变化时，数据不会重新获取
@@ -472,11 +470,116 @@ const [countValue, updateCount] = useState(0);
 ```
 :::
 
+### 4.4 为 React Compiler 编写代码
+
+为了使代码与未来的 React Compiler (Forget) 兼容，我们需要遵循更严格的规则，确保组件和 Hooks 的“纯净性”。
+
+#### 4.4.1 保持组件和 Hooks 纯净
+
+组件和 Hooks 应该像纯函数一样，对于相同的输入（props, state），总是返回相同的输出（UI），并且没有可观察的副作用。
+
+**禁止在渲染期间修改 State**：不要在组件的顶层作用域或 `render` 逻辑中调用 `setState`。
+
+:::tip 建议 👍 在事件处理器中更新 state
+```tsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+  };
+
+  return <button type="button" onClick={handleClick}>{count}</button>;
+}
+```
+:::
+
+:::danger 不建议 👎 在渲染期间更新 state 会导致无限循环
+```tsx
+function BrokenCounter() {
+  const [count, setCount] = useState(0);
+
+  // 错误：在 render 逻辑中直接调用 setState
+  setCount(count + 1);
+
+  return <div>{count}</div>;
+}
+```
+:::
+
+#### 4.4.2 状态和属性的不可变性
+
+**不要直接修改 Props 或 State**：Props 和 State 都应被视为不可变的。要更新它们，请使用 `setState` 并创建新的对象或数组。
+
+:::tip 建议 👍 使用函数式更新创建新对象
+```tsx
+function Profile() {
+  const [user, setUser] = useState({ name: 'John', age: 30 });
+
+  const handleBirthday = () => {
+    setUser(currentUser => ({ ...currentUser, age: currentUser.age + 1 }));
+  };
+
+  return <div onClick={handleBirthday}>{user.name}: {user.age}</div>
+}
+```
+:::
+
+:::danger 不建议 👎 直接修改 state 对象
+```tsx
+function BrokenProfile() {
+  const [user, setUser] = useState({ name: 'John', age: 30 });
+
+  const handleBirthday = () => {
+    // 错误：直接修改了 state 对象
+    user.age += 1;
+    setUser(user); // 这可能不会触发重新渲染
+  };
+
+  return <div onClick={handleBirthday}>{user.name}: {user.age}</div>
+}
+```
+:::
+
+#### 4.4.3 `useMemo` 和 `useCallback` 的正确使用
+
+React Compiler 会自动进行记忆化，**因此不再需要手动使用 `useMemo` 和 `useCallback` 进行性能优化**。
+
+:::tip 建议 👍 未来趋势：代码简洁，由编译器处理记忆化
+```tsx
+function UserProfile({ user }) {
+  const fullName = `${user.firstName} ${user.lastName}`;
+
+  const handleClick = () => {
+    console.log(fullName);
+  };
+
+  return <div onClick={handleClick}>{fullName}</div>;
+}
+```
+:::
+
+:::danger 不建议 👎 旧模式：不再需要手动记忆化
+```tsx
+function UserProfileWithManualMemo({ user }) {
+  // eslint-disable-next-line react-hooks/use-memo -- 不再需要
+  const fullName = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 不再需要
+  const handleClick = useCallback(() => {
+    console.log(fullName);
+  }, [fullName]);
+
+  return <div onClick={handleClick}>{fullName}</div>;
+}
+```
+:::
+
 ## 5. 性能优化
 
 ### 5.1 避免在 Props 中创建新对象、数组或函数
 
-在渲染过程中，每次都创建新的对象、数组或函数实例会导致子组件不必要的重新渲染。
+在渲染过程中，每次都创建新的对象、数组或函数实例会导致子组件不必要的重新渲染。**注意：随着 React Compiler 的成熟，这一条规则的重要性会降低，但目前仍然是最佳实践。**
 
 #### 5.1.1 对象
 

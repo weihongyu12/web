@@ -1075,10 +1075,10 @@ module.exports = {
   // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc eslint-plugin-eslint-comments
   extends: [
     'airbnb',
-    'airbnb/hooks',
     'airbnb-typescript',
     // 仅 Next.js 项目需要引入
     // 'plugin:@next/next/recommended',
+    'plugin:react-hooks/recommended-latest',
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:react-perf/recommended',
