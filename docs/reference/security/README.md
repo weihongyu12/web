@@ -23,7 +23,7 @@ import TOCInline from '@theme/TOCInline';
 建议使用以下方法之一启用严格的 CSP：
 
 - 如果在服务器上呈现 HTML 页面，请使用**基于 nonce 的严格 CSP**
-- 如果您的 HTML 必须静态提供或缓存，例如，如果它是单页应用程序，请使用**基于哈希的严格 CSP**
+- 如果 HTML 必须静态提供或缓存，例如，如果它是单页应用程序，请使用**基于哈希的严格 CSP**
 
 基于 nonce 的严格 CSP：
 
@@ -81,7 +81,7 @@ X-Frame-Options: DENY
 
 #### Cross-Origin Resource Policy (CORP) - 跨域资源策略
 
-攻击者可以嵌入来自另一个来源的资源，例如来自您的站点，以通过利用基于 Web 的跨站点泄漏来了解有关它们的信息。
+攻击者可以嵌入来自另一个来源的资源，例如来自站点，以通过利用基于 Web 的跨站点泄漏来了解有关它们的信息。
 
 `Cross-Origin-Resource-Policy` 通过指示它可以加载的网站集来减轻这种风险。 标头采用以下三个值之一：`same-origin`, `same-site` 和 `cross-origin`。 建议**所有资源**都发送这个header，以表明它们是否允许被其他网站加载。
 
@@ -152,7 +152,7 @@ Access-Control-Max-Age: 86400
 
 `Cross-Origin-Embedder-Policy：require-corp` 阻止文档和 worker 加载跨源资源，例如图像、脚本、样式表、iframe 等，除非这些资源明确选择通过 CORS 或 CORP Headers 加载。 COEP 可以与 Cross-Origin-Opener-Policy 结合，将文档选择为跨域隔离。
 
-当您想要为文档启用跨域隔离时，请使用 `Cross-Origin-Embedder-Policy: require-corp`。
+当想要为文档启用跨域隔离时，请使用 `Cross-Origin-Embedder-Policy: require-corp`。
 
 ```:no-line-numbers
 Cross-Origin-Embedder-Policy: require-corp
@@ -164,7 +164,199 @@ Cross-Origin-Embedder-Policy: require-corp
 
 ## 使用 HTTPS 安全连接
 
+### HTTPS 的重要性
+
+请始终使用 HTTPS 保护所有网站，即使网站不处理敏感通信也应如此。除了为网站和用户的个人信息提供重要的安全保障和数据完整性支持外，许多新的浏览器功能（尤其是 PWA 所需的功能）也要求使用 HTTPS。
+
+#### HTTPS 可保护网站的完整性
+
+HTTPS 有助于防止入侵者篡改网站与用户浏览器之间的通信。入侵者包括故意进行恶意攻击的攻击者，以及合法但侵扰性的公司，例如向网页中注入广告的 ISP。
+
+入侵者会利用未保护的通信来诱骗用户提供敏感信息或安装恶意软件，或者插入自己的资源。例如，某些第三方会注入广告，这可能会破坏用户体验并造成安全漏洞。
+
+入侵者会利用在网站和用户之间传输的所有未保护资源。图片、Cookie、脚本和 HTML 都可能被利用。入侵可能发生在网络中的任何位置，包括用户的机器、Wi-Fi 热点或遭到入侵的 ISP，等等。HTTPS 会增加入侵者访问网站资源的难度。
+
+#### HTTPS 可保护用户的隐私和安全
+
+HTTPS 可防止入侵者被动地监听网站与用户之间的通信。
+
+关于 HTTPS 的一个常见误解是，只有处理敏感通信的网站才需要使用 HTTPS。事实上，每个未保护的 HTTP 请求都可能会泄露有关用户行为和身份的信息。
+
+一次访问未保护的网站可能看起来没什么坏意，但有些入侵者会查看用户的汇总浏览活动，以推断用户的行为和意图，并[取消匿名化](https://en.wikipedia.org/wiki/De-anonymization)用户的身份。例如，员工只需阅读未经保护的医学文章，就可能会无意中向其雇主披露敏感的健康问题。
+
+#### HTTPS 是网络的未来
+
+强大的新型 Web 平台功能（例如使用 `getUserMedia()` 拍照或录制音频、通过 [Service Worker](https://web.dev/articles/service-workers-cache-storage?hl=zh-cn) 实现离线应用体验，或 PWA ）需要通过 HTTPS 从用户那里获得明确的权限。许多旧版 API 也正在更新，以要求获得执行权限，例如 [Geolocation API](https://developer.mozilla.org/zh-CN/docs/Web/API/Geolocation_API)。对于新功能和更新后的功能，HTTPS 是权限工作流的关键组成部分。
+
 ## 防止信息泄露
+
+### 跨源资源共享 (CORS)
+
+浏览器的同源政策会阻止从其他来源读取资源。此机制可阻止恶意网站读取其他网站的数据，但也会阻止合法用途。
+
+现代 Web 应用通常希望从其他来源获取资源，例如从其他网域检索 JSON 数据，或将其他网站中的图片加载到 `<canvas>` 元素中。这些资源可能是应该供所有人阅读的公共资源，但同源政策会阻止使用这些资源。过去，开发者一直使用 JSONP 等权宜解决方法。
+
+跨源资源共享 (CORS) 以标准化的方式解决此问题。启用 CORS 后，服务器可以告知浏览器它可以使用其他来源。
+
+#### 资源请求在网络上如何运作？
+
+![请求和响应](assets/request-response_1920.png)
+
+浏览器和服务器可以使用超文本传输协议 (HTTP) 通过网络交换数据。HTTP 定义了请求方和响应方之间的通信规则，包括获取资源所需的信息。
+
+HTTP 标头用于协商客户端和服务器之间的消息交换，并用于确定访问权限。浏览器的请求和服务器的响应消息都分为标头和正文。
+
+##### 标题
+
+消息的相关信息，例如消息类型或消息编码。标头可以包含以键值对形式表示的各种信息。请求标头和响应标头包含不同的信息。
+
+```
+Accept: text/html
+Cookie: Version=1
+```
+
+此标头相当于说“我希望收到 HTML 响应。这是我的 Cookie。”
+
+```
+Content-Encoding: gzip
+Cache-Control: no-store
+```
+
+此标头相当于说“此响应中的数据是使用 gzip 编码的。不要缓存此值。”
+
+:::warning
+标头不能包含注释。
+:::
+
+##### 正文
+
+邮件本身。这可以是纯文本、图片二进制文件、JSON、HTML 或许多其他格式。
+
+#### CORS 如何运作？
+
+同源政策会指示浏览器阻止跨源请求。当需要来自其他来源的公共资源时，提供资源的服务器会告知浏览器发送请求的来源可以访问其资源。浏览器会记住该设置，并允许对该资源进行跨源资源共享。
+
+##### 第 1 步：客户端（浏览器）请求
+
+当浏览器发出跨源请求时，浏览器会添加包含当前来源（架构、主机和端口）的 `Origin` 标头。
+
+##### 第 2 步：服务器响应
+
+当服务器看到此标头并希望允许访问时，它会向响应中添加 `Access-Control-Allow-Origin` 标头来指定请求来源（或 `*` 以允许任何来源）。
+
+##### 第 3 步：浏览器收到响应
+
+当浏览器看到包含适当 `Access-Control-Allow-Origin` 标头的此响应时，会与客户端网站共享响应数据。
+
+#### 使用 CORS 共享凭据
+
+出于隐私保护方面的原因，CORS 通常用于匿名请求，其中请求方未标识。如果想在使用 CORS 时发送 Cookie（可识别发件人），则需要向请求和响应添加其他标头。
+
+##### 请求
+
+将 `credentials: 'include'` 添加到提取选项中，如以下示例所示。这包括包含请求的 Cookie，如下所示：
+
+```js
+fetch('https://example.com', {
+  mode: 'cors',
+  credentials: 'include',
+});
+```
+
+##### 响应
+
+`Access-Control-Allow-Origin` 必须设置为特定来源（不使用 `*` 的通配符），并且 `Access-Control-Allow-Credentials` 必须设置为 `true`。
+
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Credentials: true
+```
+
+#### 针对复杂 HTTP 调用的预检请求
+
+当 Web 应用发出复杂的 HTTP 请求时，浏览器会在请求链的开头添加[预检请求](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/CORS#%E9%A2%84%E6%A3%80%E8%AF%B7%E6%B1%82)。
+
+CORS 规范定义了复杂请求，如下所示：
+
+- 使用 GET、POST 或 HEAD 以外的方法的请求。
+- 请求包含 `Accept`、`Accept-Language` 或 `Content-Language` 以外的标头。
+- 请求具有 `application/x-www-form-urlencoded`、`multipart/form-data` 或 `text/plain` 以外的 `Content-Type` 标头。
+
+浏览器会自动创建所有必要的预处理请求，并在实际请求消息之前发送这些请求。预检请求是 OPTIONS 请求，如以下示例所示：
+
+```
+OPTIONS /data HTTP/1.1
+Origin: https://example.com
+Access-Control-Request-Method: DELETE
+```
+
+在服务器端，接收请求的应用会响应预处理请求，并提供有关应用从此来源接受的方法的信息：
+
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: GET, DELETE, HEAD, OPTIONS
+```
+
+服务器响应还可以包含 `Access-Control-Max-Age` 标头，以指定缓存预检结果的时长（以秒为单位）。这样，客户端就可以发送多个复杂请求，而无需重复发送预检请求。
+
+### 使用 COOP 和 COEP 将网站设置为“跨源隔离”
+
+使用 COOP 和 COEP 设置跨源隔离环境，并启用 `SharedArrayBuffer`、`performance.measureUserAgentSpecificMemory()` 和高分辨率计时器等功能，从而提高精确度。
+
+#### 部署 COOP 和 COEP 以实现网站跨源隔离
+
+##### 集成 COOP 和 COEP
+
+###### 1. 在顶级文档中设置 `Cross-Origin-Opener-Policy: same-origin` 标头
+
+通过在顶级文档上启用 `Cross-Origin-Opener-Policy: same-origin`，具有相同源的窗口以及从该文档打开的窗口将具有单独的浏览上下文组，除非它们位于具有相同 COOP 设置的同一源中。因此，系统会强制隔离已打开的窗口，并停用这两个窗口之间的相互通信。
+
+:::warning
+这会破坏需要跨源窗口交互的集成，例如 OAuth 和付款。为缓解此问题，我们正在探索放宽条件，以便为 `Cross-Origin-Opener-Policy: same-origin-allow-popups` 启用跨源隔离。这样，就可以与自行打开的窗口进行通信。如果想启用跨源隔离，但受此问题阻碍，我们建议注册源代码试用计划，并等到新条件可用。在该问题得到妥善解决之前，我们不打算终止来源试用。
+:::
+
+浏览上下文组是一组可以相互引用的窗口。例如，通过 `<iframe>` 嵌入的顶级文档及其子文档。如果某个网站 (`https://a.example`) 打开一个弹出式窗口 (`https://b.example`)，则打开窗口和弹出式窗口共享相同的浏览上下文，因此它们可以通过 DOM API（例如 `window.opener`）相互访问。
+
+![浏览情境组](assets/browsing-context-group_1920.png)
+
+###### 2. 确保资源已启用 CORP 或 CORS
+
+确保页面中的所有资源均使用 CORP 或 CORS HTTP 标头加载。此步骤是[第 4 步（启用 COEP）](#4-启用-coep)的必需步骤。
+
+需要根据资源的性质执行以下操作：
+
+- 如果资源只能从同一来源加载，请设置 `Cross-Origin-Resource-Policy: same-origin` 标头。
+- 如果资源预计仅从同一网站加载，但跨源，请设置 `Cross-Origin-Resource-Policy: same-site` 标头。
+- 如果资源从控制的跨源加载，请尽可能设置 `Cross-Origin-Resource-Policy: cross-origin` 标头。
+- 对于无法控制的跨源资源：
+  - 如果资源是使用 CORS 提供的，请在加载 HTML 标记中使用 `crossorigin` 属性。（例如 `<img src="***" crossorigin>`。）
+  - 请要求资源所有者支持 CORS 或 CORP。
+- 对于 iframe，请遵循上述相同的原则，并设置 `Cross-Origin-Resource-Policy: cross-origin`（或 `same-site`、`same-origin`，具体取决于上下文）。
+- 使用 WebWorker 加载的脚本必须从同源提供，因此无需 CORP 或 CORS 标头。
+- 对于使用 `Cross-Origin-Embedder-Policy: require-corp` 提供的文档或 worker，未使用 CORS 加载的跨源子资源必须设置 `Cross-Origin-Resource-Policy: cross-origin` 标头，以选择嵌入。例如，这适用于 `<script>`、`importScripts`、`<link>`、`<video>`、`<iframe>` 等。
+
+:::tips
+可以通过将 `allow="cross-origin-isolated"` 权限政策应用于 `<iframe>` 标记并满足本文档中所述的相同条件，为嵌入在 iframe 中的文档启用跨源隔离。请注意，文档的整个链（包括父框架和子框架）也必须进行跨源隔离。
+:::
+
+:::tips
+请务必了解“同网站”和“同源”之间的区别。
+:::
+
+###### 3. 使用 COEP 报告专用 HTTP 标头评估嵌入资源
+
+在完全启用 COEP 之前，可以使用 `Cross-Origin-Embedder-Policy-Report-Only` 标头进行试运行，以检查该政策是否实际有效。将收到报告，但不会屏蔽嵌入内容。
+
+
+###### 4. 启用 COEP
+
+确认一切正常运行且所有资源都能成功加载后，将 `Cross-Origin-Embedder-Policy-Report-Only` 标头切换为 `Cross-Origin-Embedder-Policy` 标头，并为所有文档（包括通过 `iframe` 和 `worker` 脚本嵌入的文档）使用相同的值。
+
+##### 使用 `self.crossOriginIsolated` 确定隔离是否成功
+
+当网页处于跨源隔离状态且所有资源和窗口都隔离在同一浏览上下文组中时，`self.crossOriginIsolated` 属性会返回 `true`。可以使用此 API 确定是否已成功隔离浏览上下文组，并获得对 `performance.measureUserAgentSpecificMemory()` 等强大功能的访问权限。
 
 ## 保护网站免受 XSS
 
@@ -183,7 +375,7 @@ Trusted Types 的工作原理是锁定以下有风险的接收器函数；
 - **执行插件内容：**[`<embed src>`](https://developer.mozilla.org/docs/Web/HTML/Element/embed#attr-src)、[`<object data>`](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-data) 和 [`<object codebase>`](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-codebase)
 - **运行时 JavaScript 代码编译：**`eval`、`setTimeout`、`setInterval`、`new Function()`
 
-Trusted Types 要求您在将数据传递给上述接收器函数之前对其进行处理。仅使用字符串将失败，因为浏览器不知道数据是否可信：
+Trusted Types 要求在将数据传递给上述接收器函数之前对其进行处理。仅使用字符串将失败，因为浏览器不知道数据是否可信：
 
 :::danger 错误做法 👎
 ```js
@@ -201,7 +393,7 @@ Element.innerHTML  = TrustedHTML;
 启用 Trusted Types 后，浏览器会抛出 *TypeError*，并阻止将 DOM XSS 接收器与字符串一起使用。
 :::
 
-Trusted Types 大大减小了应用程序的 DOM XSS 攻击面。它简化了安全审核，并允许您在浏览器中在运行时编译、lint 或捆绑代码时强制执行基于类型的安全检查。
+Trusted Types 大大减小了应用程序的 DOM XSS 攻击面。它简化了安全审核，并允许在浏览器中在运行时编译、lint 或捆绑代码时强制执行基于类型的安全检查。
 
 #### 启用 Trusted Types
 
@@ -216,7 +408,7 @@ Trusted Types 仅在 HTTPS 和 localhost 等安全上下文中可用。
 :::
 
 :::tip
-大多数此类违规还可以通过对代码库运行代码 [eslint-plugin-no-unsanitized](https://github.com/mozilla/eslint-plugin-no-unsanitized) 来进行检测。这有助于快速识别大量违规。 也就是说，您还应该分析 CSP 违规，因为这些违规会在执行不合规的代码时触发。
+大多数此类违规还可以通过对代码库运行代码 [eslint-plugin-no-unsanitized](https://github.com/mozilla/eslint-plugin-no-unsanitized) 来进行检测。这有助于快速识别大量违规。 也就是说，还应该分析 CSP 违规，因为这些违规会在执行不合规的代码时触发。
 :::
 
 #### 修复 Trusted Type 违规
@@ -299,20 +491,20 @@ nonce 是仅使用一次的随机数，可用于将 `<script>` 标签标记为�
 基于随机数或散列的内容安全策略通常称为**严格 CSP**。 当应用程序使用严格的 CSP 时，发现 HTML 注入漏洞的攻击者通常无法使用它们来强制浏览器在易受攻击的文档的上下文中执行恶意脚本。 这是因为严格的 CSP 只允许在服务器上生成散列脚本或具有正确 nonce 值的脚本，因此攻击者无法在不知道给定响应的正确 nonce 的情况下执行脚本。
 
 :::tip
-为了保护您的站点免受 XSS 攻击，请确保清理用户输入并将 CSP 用作额外的安全层。 CSP 是一种深度防御技术，可以防止恶意脚本的执行，但它不能替代避免（并及时修复）XSS 错误。
+为了保护站点免受 XSS 攻击，请确保清理用户输入并将 CSP 用作额外的安全层。 CSP 是一种深度防御技术，可以防止恶意脚本的执行，但它不能替代避免（并及时修复）XSS 错误。
 :::
 
 白名单 CSP 在阻止攻击者利用 XSS 方面通常无效。 这就是为什么建议使用基于加密随机数或散列的严格 CSP 的原因，这样可以避免上述陷阱。
 
 
 :::danger 白名单 CSP 👎
-- 不能有效地保护您的网站。 ❌
+- 不能有效地保护网站。 ❌
 - 必须高度定制。 😓
 - 在大多数配置中可以绕过。😓
 :::
 
 :::tip 严格 CSP 👍
-- 有效保护您的网站。 ✅
+- 有效保护网站。 ✅
 - 始终具有相同的结构。 😌
 :::
 
@@ -348,7 +540,5 @@ Content-Security-Policy:
 - 限制 `base-uri` 以阻止 `<base>` 标记的注入。 这可以防止攻击者更改从相对 URL 加载的脚本的位置。
 
 :::tip
-严格 CSP 的另一个优点是 CSP 始终具有相同的结构，并且不需要为您的应用程序定制。
+严格 CSP 的另一个优点是 CSP 始终具有相同的结构，并且不需要为应用程序定制。
 :::
-
-## 保护用户不被跟踪
