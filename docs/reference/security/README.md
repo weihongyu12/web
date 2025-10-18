@@ -337,11 +337,11 @@ Access-Control-Allow-Methods: GET, DELETE, HEAD, OPTIONS
 - 使用 WebWorker 加载的脚本必须从同源提供，因此无需 CORP 或 CORS 标头。
 - 对于使用 `Cross-Origin-Embedder-Policy: require-corp` 提供的文档或 worker，未使用 CORS 加载的跨源子资源必须设置 `Cross-Origin-Resource-Policy: cross-origin` 标头，以选择嵌入。例如，这适用于 `<script>`、`importScripts`、`<link>`、`<video>`、`<iframe>` 等。
 
-:::tips
+:::tip
 可以通过将 `allow="cross-origin-isolated"` 权限政策应用于 `<iframe>` 标记并满足本文档中所述的相同条件，为嵌入在 iframe 中的文档启用跨源隔离。请注意，文档的整个链（包括父框架和子框架）也必须进行跨源隔离。
 :::
 
-:::tips
+:::tip
 请务必了解“同网站”和“同源”之间的区别。
 :::
 
