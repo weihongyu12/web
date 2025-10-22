@@ -108,7 +108,7 @@ const config: Config = {
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/weihongyu12',
           label: 'GitHub',
           position: 'right',
         },
@@ -122,24 +122,44 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/getting-started',
+              to: '/docs/getting-started/',
+            },
+            {
+              label: '规范',
+              to: '/docs/specification/code/',
+            },
+            {
+              label: '代码规则',
+              to: '/docs/specification/rule/',
             },
           ],
         },
         {
-          title: 'Community',
+          title: 'Reference',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              label: '性能优化',
+              to: '/docs/reference/performance/',
             },
             {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              label: '安全',
+              to: '/docs/reference/security/',
             },
             {
-              label: 'Twitter',
-              href: 'https://twitter.com/docusaurus',
+              label: 'SEO',
+              to: '/docs/reference/seo/',
+            },
+            {
+              label: '配置参考',
+              to: '/docs/reference/configuration/',
+            },
+            {
+              label: '流水线',
+              to: '/docs/pipeline/branch-commit/',
+            },
+            {
+              label: '功能设计',
+              to: '/docs/features/',
             },
           ],
         },
@@ -153,6 +173,10 @@ const config: Config = {
             {
               label: 'GitHub',
               href: 'https://github.com/weihongyu12',
+            },
+            {
+              label: 'Donation 捐赠',
+              to: '/docs/support',
             },
           ],
         },
