@@ -481,20 +481,13 @@ function handleClick() {
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { sanitizeUrl } from '@braintree/sanitize-url';
 import DOMPurify from 'dompurify';
 
 const userProvidedUrl = ref('javascript:alert("XSS")');
 const userHtml = ref('<img src=x onerror=alert("XSS") />');
 
-const validatedUrl = computed(() => {
-  const url = userProvidedUrl.value;
-  // 只允许 http, https, 或 mailto 协议
-  if (url && !url.startsWith('http') && !url.startsWith('mailto:')) {
-    return '#';
-  }
-  return url;
-});
-
+const validatedUrl = sanitizeUrl(userProvidedUrl.value);
 const sanitizedHtml = computed(() => DOMPurify.sanitize(userHtml.value));
 </script>
 ```

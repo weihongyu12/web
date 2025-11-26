@@ -857,14 +857,14 @@ $my-font-size:#f00; // 冒号后无空格
 :::tip 建议 👍
 ```scss
 .element {
-.child {
-  color: #000;
-}
+  .child {
+    color: #000;
+  }
 
-font: {
-  family: sans-serif;
-  weight: bold;
-}
+  font: {
+    family: sans-serif;
+    weight: bold;
+  }
 }
 ```
 :::
