@@ -123,13 +123,13 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 - 接口路径使用资源**名词而非动词**，比如 `/api/product` `/api/order`，**动作应由 HTTP Method 体现**，资源组可以进行逻辑嵌套。
 
 :::tip 正面例子 👍
-```:no-line-numbers
+```http request:no-line-numbers
 POST /api/product
 ```
 :::
 
 :::danger 反面例子 👎
-```:no-line-numbers
+```http request:no-line-numbers
 POST /api/create-product
 ```
 :::
