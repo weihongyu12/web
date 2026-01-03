@@ -130,7 +130,7 @@ description: 架构指南和总览
 | [print-js](http://printjs.crabbly.com/)                                          | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
 | [qs](https://github.com/ljharb/qs)                                               | 序列化和反序列化 querystring                                                               |
 | [socket.io-client](https://socket.io/)                                           | WebSocket 客户端库，用于实现实时双向通信                                                          |
-| [xlsx](https://docs.sheetjs.com/)                                                | Excel 文件读写库,支持多种表格格式的解析和生成                                                         |
+| [xlsx](https://docs.sheetjs.com/)                                                | Excel 文件读写库，支持多种表格格式的解析和生成                                                         |
 | [xstate](https://stately.ai/docs)                                                | 状态机和状态图库，用于管理复杂的应用状态逻辑                                                             |
 | [zod](https://zod.dev/)                                                          | 数据验证库，用于验证、转换数据结构                                                                  |
 
