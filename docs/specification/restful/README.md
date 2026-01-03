@@ -406,7 +406,7 @@ Content-Type: application/json
 ```
 :::
 
-- **时间字段以 ISO 8601 格式返回：YYYY-MM-DDTHH:MM:SSZ**
+- **时间字段以 RFC 3339 格式返回：YYYY-MM-DDTHH:MM:SSZ**
 
 :::tip 正面例子 👍
 ```json
@@ -418,7 +418,7 @@ Content-Type: application/json
 
 :::danger 反面例子 👎
 
-时间格式不符合 ISO 8601 格式
+时间格式不符合 RFC 3339 格式
 
 ```json
 {
@@ -654,6 +654,24 @@ GET /api/product?afterDate=2022-07-01T00:00:00+08:00&beforeDate=2022-09-30T23:59
 # 查询所有 date 在 2022-01-01 ~ 2022-12-31 的数据（一年）
 GET /api/product?afterDate=2022-01-01T00:00:00+08:00&beforeDate=2022-12-31T23:59:59+08:00
 ```
+
+:::tip
+建议充分使用 [`date-fns`](https://date-fns.org/) 的 [`startOfDay`](https://date-fns.org/docs/startOfDay)、[`endOfDay`](https://date-fns.org/docs/endOfDay) 和 [`formatRFC3339`](https://date-fns.org/docs/formatRFC3339) 方法，获取当天的开始时间和结束时间，并对参数进行格式化。
+
+```ts
+import { startOfDay, endOfDay, formatRFC3339 } from 'date-fns';
+
+const startDate = formatRFC3339(startOfDay(form.startDate));
+const endDate = formatRFC3339(endOfDay(form.startDate));
+
+fetch(url, {
+  data: {
+    afterDate: startDate,
+    beforeDate: endDate,
+  },
+});
+```
+:::
 
 ### 查询类接口响应格式
 
