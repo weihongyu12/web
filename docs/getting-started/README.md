@@ -119,6 +119,8 @@ description: 架构指南和总览
 | [date-fns](https://date-fns.org/)                                                | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
 | [dompurify](https://www.npmjs.com/package/dompurify)                             | 适用于 DOM 的 XSS 清理器，用于防御针对 HTML 的 XSS 攻击                                             |
 | [es-toolkit](https://es-toolkit.dev/zh_hans/)                                    | JavaScript 工具库，Lodash 的现代化替代品                                                      |
+| [file-saver-es](https://github.com/eligrey/FileSaver.js)                         | 文件下载库，提供浏览器端文件保存功能                                                                 |
+| [fingerprintjs](https://fingerprintjs.github.io/fingerprintjs/)                  | 浏览器指纹识别库，用于唯一标识用户浏览器                                                               |
 | [framer-motion](https://motion.dev/)                                             | 动画库，提供声明式动画和手势交互功能                                                                 |
 | [html2canvas](https://html2canvas.hertzen.com/)                                  | 将 HTML 元素转换为 Canvas，用于网页截图和导出图片                                                    |
 | [js-cookie](https://github.com/js-cookie/js-cookie)                              | 浏览器 cookie 操作                                                                      |
