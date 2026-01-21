@@ -541,45 +541,11 @@ function BrokenProfile() {
 ```
 :::
 
-#### 4.4.3 `useMemo` 和 `useCallback` 的正确使用
-
-React Compiler 会自动进行记忆化，**因此不再需要手动使用 `useMemo` 和 `useCallback` 进行性能优化**。
-
-:::tip 建议 👍 未来趋势：代码简洁，由编译器处理记忆化
-```tsx
-function UserProfile({ user }) {
-  const fullName = `${user.firstName} ${user.lastName}`;
-
-  const handleClick = () => {
-    console.log(fullName);
-  };
-
-  return <div onClick={handleClick}>{fullName}</div>;
-}
-```
-:::
-
-:::danger 不建议 👎 旧模式：不再需要手动记忆化
-```tsx
-function UserProfileWithManualMemo({ user }) {
-  // eslint-disable-next-line react-hooks/use-memo -- 不再需要
-  const fullName = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- 不再需要
-  const handleClick = useCallback(() => {
-    console.log(fullName);
-  }, [fullName]);
-
-  return <div onClick={handleClick}>{fullName}</div>;
-}
-```
-:::
-
 ## 5. 性能优化
 
 ### 5.1 避免在 Props 中创建新对象、数组或函数
 
-在渲染过程中，每次都创建新的对象、数组或函数实例会导致子组件不必要的重新渲染。**注意：随着 React Compiler 的成熟，这一条规则的重要性会降低，但目前仍然是最佳实践。**
+在渲染过程中，每次都创建新的对象、数组或函数实例会导致子组件不必要的重新渲染。
 
 #### 5.1.1 对象
 
@@ -638,7 +604,6 @@ function MySelectComponentWithNewArray() {
 #### 5.1.3 函数
 
 使用 `useCallback` 来记忆化函数，或者将函数定义在组件外部。
-
 
 :::tip 建议 👍 使用 `useCallback`
 
