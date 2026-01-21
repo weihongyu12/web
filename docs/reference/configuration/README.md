@@ -1094,6 +1094,7 @@ module.exports = {
   ],
   plugin: [
     'risxss',
+    'react-refresh',
   ],
   rules: {
     // React 17+ 不用再引入 React
@@ -1109,6 +1110,8 @@ module.exports = {
     'unicorn/filename-case': 'off',
     // RisXSS 规则，预防 XSS 攻击
     'risxss/catch-potential-xss-react': 'error',
+    // React Refresh 规则，确保热更新时仅导出组件
+    'react-refresh/only-export-components': 'error',
   },
   overrides: [
     {
@@ -1136,6 +1139,7 @@ module.exports = {
     'plugin:vue/recommended',
     '@vue/eslint-config-airbnb-with-typescript',
     // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
+    'plugin:vue-scoped-css/vue3-recommended',
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:tailwindcss/recommended',
   ],
