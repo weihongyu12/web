@@ -89,15 +89,24 @@ description: 架构指南和总览
 - **[ESLint](https://zh-hans.eslint.org/)**：代码质量和风格检查工具，确保代码规范一致性
 - **[Sass](https://sass-lang.com/)**：CSS 预处理器，提供变量、嵌套、混入等编程特性
 - **[stylelint](https://stylelint.io/)**：CSS 代码检查工具，确保样式代码质量
+- **[Tailwind CSS](https://tailwindcss.com/)**：实用优先的 CSS 框架，通过组合原子类快速构建界面
 
 ### React 框架
 
-| 特性          | 框架                                       | 说明                     |
-|-------------|------------------------------------------|------------------------|
-| 框架          | [React](https://zh-hans.react.dev/)      | 用于构建用户界面的 JavaScript 库 |
-| 路由          | [React Router](https://reactrouter.com/) | 为 React 应用提供声明式路由功能    |
-| 状态管理        | [Zustand](https://zustand-demo.pmnd.rs/) | 轻量级的状态管理库，API 简洁易用     |
-| React Hooks | [ahooks](https://ahooks.js.org/zh-CN/)   | React Hooks 库          |
+| 特性          | 框架                                                           | 说明                                    |
+|-------------|--------------------------------------------------------------|---------------------------------------|
+| 框架          | [React](https://zh-hans.react.dev/)                          | 用于构建用户界面的 JavaScript 库                |
+| 路由          | [React Router](https://reactrouter.com/)                     | 为 React 应用提供声明式路由功能                   |
+| 状态管理        | [Zustand](https://zustand-demo.pmnd.rs/)                     | 轻量级的状态管理库，API 简洁易用                    |
+| React Hooks | [ahooks](https://ahooks.js.org/zh-CN/)                       | React Hooks 库，提供常用的自定义 Hooks          |
+| 数据请求        | [TanStack Query](https://tanstack.com/query/)                | 强大的异步状态管理库，用于数据获取、缓存和同步               |
+| 表格          | [TanStack Table](https://tanstack.com/table/)                | 无头表格库，提供灵活的表格构建能力                     |
+| 虚拟滚动        | [TanStack Virtual](https://tanstack.com/virtual/)            | 虚拟化滚动库，用于高性能渲染大量列表数据                  |
+| 表单          | [React Hook Form](https://react-hook-form.com/)              | 高性能表单库，基于 Hooks 实现表单验证和状态管理           |
+| 拖拽          | [@dnd-kit](https://dndkit.com/)                              | 现代化的拖拽工具库，提供可访问性友好的拖放功能               |
+| 虚拟滚动        | [React Virtuoso](https://virtuoso.dev/)                      | 功能丰富的虚拟滚动组件，支持动态高度和复杂布局               |
+| PDF渲染       | [React PDF](https://projects.wojtekmaj.pl/react-pdf/)        | PDF 文档渲染库，用于在 React 中显示 PDF 文件        |
+| Markdown渲染  | [react-markdown](https://remarkjs.github.io/react-markdown/) | Markdown 渲染组件，将 Markdown 转换为 React 组件 |
 
 ### Vue 框架
 
@@ -114,6 +123,7 @@ description: 架构指南和总览
 |----------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | [@braintree/sanitize-url](https://www.npmjs.com/package/@braintree/sanitize-url) | 适用于 Url 的 XSS 清理器，用于防御针对 Url 的 XSS 攻击                                              |
 | [async-es](https://caolan.github.io/async/v3/)                                   | 异步函数功能函数，提供类似 map、reduce、filter 等功能，同时提供 parallel、series、waterfall、queue 等常见的异步控制流 |
+| [autosuggest-highlight](https://github.com/moroshko/autosuggest-highlight)       | 自动建议高亮工具，用于在搜索建议中高亮匹配的文本部分                                                         |
 | [axios](https://axios-http.com/)                                                 | HTTP 客户端，XmlHttpRequest API 的封装                                                    |
 | [crypto-js](http://github.com/brix/crypto-js)                                    | 实现 MD5、SHA1、RSA 等常用加密算法                                                            |
 | [date-fns](https://date-fns.org/)                                                | 日期/时间处理函数，提供时间日期格式化、计算操作等功能                                                        |
@@ -128,10 +138,12 @@ description: 架构指南和总览
 | [lexical](https://lexical.dev/)                                                  | Meta 开发的可扩展文本编辑器框架，提供丰富的编辑功能                                                       |
 | ~~[lodash](https://lodash.com/)~~                                                | JS 工具函数集，提供诸如数据类型判断、转换、节流、防抖等函数                                                    |
 | [mathjs](https://mathjs.org/)                                                    | JS 数学计算函数，能有效避免 JS 数学计算中可能出现的数值精度问题                                                |
+| [nanoid](https://zelark.github.io/nano-id-cc/)                                   | 轻量级唯一 ID 生成器，生成 URL 友好的短 ID 字符串，比 UUID 更小更快                                        |
 | [nzh](http://cnwhy.github.io/nzh)                                                | 实现数值转中文大写字符功能                                                                      |
 | [print-js](http://printjs.crabbly.com/)                                          | 为浏览器提供原生打印功能，可以打印 HTML、JSON、PDF、图片等                                                |
 | [qs](https://github.com/ljharb/qs)                                               | 序列化和反序列化 querystring                                                               |
 | [socket.io-client](https://socket.io/)                                           | WebSocket 客户端库，用于实现实时双向通信                                                          |
+| [uuid](https://github.com/uuidjs/uuid)                                           | 通用唯一标识符生成器，用于生成符合 RFC4122 标准的 UUID                                                 |
 | [xlsx](https://docs.sheetjs.com/)                                                | Excel 文件读写库，支持多种表格格式的解析和生成                                                         |
 | [xstate](https://stately.ai/docs)                                                | 状态机和状态图库，用于管理复杂的应用状态逻辑                                                             |
 | [zod](https://zod.dev/)                                                          | 数据验证库，用于验证、转换数据结构                                                                  |
