@@ -106,7 +106,7 @@ RESTful API 文档推荐使用 [Open API](https://www.openapis.org/)，Open API�
 
 [React Styleguidist](https://react-styleguidist.js.org/) 是一个独立的组件开发环境和文档生成工具，它提供交互式组件预览和自动从组件代码和注释中提取文档。
 
-![React Styleguidist截图](./assets/react-styleguide.png)
+![React Styleguidist截图](./assets/react-styleguide.png?as=avif)
 
 ### 特点与价值
 

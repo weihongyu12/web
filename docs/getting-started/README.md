@@ -6,7 +6,7 @@ description: 架构指南和总览
 
 # 架构
 
-![前端架构](./assets/architecture.png?as=webp)
+![前端架构](./assets/architecture.png?as=avif)
 
 ## 总览
 
@@ -150,7 +150,7 @@ description: 架构指南和总览
 
 ## 关注点
 
-![关注点模型](./assets/focus.png?as=webp)
+![关注点模型](./assets/focus.png?as=avif)
 
 开发时，应该把**性能**、**安全**、**代码维护**、**用户体验**作为前端开发工作的关注点。
 
@@ -213,7 +213,7 @@ description: 架构指南和总览
 
 ## 核心
 
-![工作核心](./assets/work-core.png?as=webp)
+![工作核心](./assets/work-core.png?as=avif)
 
 - **代码：** 如何实现系统架构中的逻辑
 - **流程：** 构建高效并防止出错的工作流程
@@ -222,7 +222,7 @@ description: 架构指南和总览
 
 ## 能力模型
 
-![三角能力模型](./assets/capability.png?as=webp)
+![三角能力模型](./assets/capability.png?as=avif)
 
 - **专业深度：** 完成本职工作的专业技术能力
 - **owner意识/能力：** 更加主动的去关心项目上下游，更关注项目整体
@@ -230,7 +230,7 @@ description: 架构指南和总览
 
 ## 思维方式
 
-![工作核心](./assets/thinking.png?as=webp)
+![工作核心](./assets/thinking.png?as=avif)
 
 掌握好思维方式，不仅仅对自己的工作大有帮助，还可以有效的跟产品经理、后端开发等其他岗位进行沟通。
 

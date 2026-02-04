@@ -392,7 +392,7 @@ Link: <http://www.example.com/downloads/white-paper.pdf>; rel="canonical"
 - **永久重定向**：在搜索结果中显示新的重定向目标。
 - **临时重定向**：在搜索结果中显示源网页。
 
-![重定向类型](assets/redirects.png?as=webp)
+![重定向类型](assets/redirects.png?as=avif)
 
 ###### 服务器端重定向
 
@@ -625,7 +625,7 @@ Googlebot 对 JavaScript 网络应用的处理流程分为 3 大阶段：
 
 Googlebot 会抓取并呈现网页，然后将其编入索引。
 
-![Googlebot 编入索引](assets/googlebot-crawl-render-index.png?as=webp)
+![Googlebot 编入索引](assets/googlebot-crawl-render-index.png?as=avif)
 
 当 Googlebot 尝试通过发出 HTTP 请求从抓取队列中抓取某个网址时，它首先会检查是否允许抓取。Googlebot 会读取 robots.txt 文件。如果此文件将该网址标记为“disallowed”，Googlebot 就会跳过向该网址发出 HTTP 请求的操作，然后会跳过该网址。
 
