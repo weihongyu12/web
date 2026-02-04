@@ -208,7 +208,7 @@ CDN 由服务器网络组成，这些服务器网络经过优化，可快速将�
 
 CDN 可以将资源基于地理位置提供给临近的用户，以此提升性能。
 
-![有无CDN的连接设置比较](assets/cdn.png?as=avif)
+![有无CDN的连接设置比较](assets/cdn.png?as=webp)
 
 :::tip
 参见[阿里云 CDN 文档](https://www.alibabacloud.com/help/zh/product/27099.html)
@@ -282,7 +282,7 @@ CDN 可以将资源基于地理位置提供给临近的用户，以此提升性�
 <link rel="preconnect" href="https://example.com">
 ```
 
-![preconnect](assets/preconnect.png?as=avif)
+![preconnect](assets/preconnect.png?as=webp)
 
 通过与重要的第三方来源建立早期连接，可以将加载时间缩短100–500 ms。 这些数字看似很小，但它们在用户对网页性能的感知方式上却有所不同。
 
@@ -331,7 +331,7 @@ DNS解析的启动类似于预连接：通过在文档的 `<head>` 中添加 `<l
 <link rel="prefetch" href="style.css" as="style">
 ```
 
-![prefetch](assets/prefetch.png?as=avif)
+![prefetch](assets/prefetch.png?as=webp)
 
 预取提示会消耗不立即需要的资源额外的字节，因此需要谨慎地应用此技术。仅在确信用户将需要资源时才预取资源。当用户的连接速度较慢时，请考虑不预取。可以使用 [Network Information API](https://developer.mozilla.org/zh-CN/docs/Web/API/NetworkInformation) 进行检测。
 
@@ -1003,13 +1003,13 @@ body {
 
 具有 `async` 属性的脚本在完成下载后和窗口[加载](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/load_event)事件之前第一时间执行。这意味着 `async` 脚本可能（并且很可能）不会按照它们在 HTML 中出现的顺序执行。这也意味着如果他们在解析器仍在工作时完成下载，他们可以中断 DOM 构建。
 
-![async加载过程](assets/async-defer.png?as=avif)
+![async加载过程](assets/async-defer.png?as=webp)
 
 ###### `defer`
 
 具有 `defer` 属性的脚本在 HTML 解析完全完成之后，但在 [`DOMContentLoaded`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/DOMContentLoaded_event) 事件之前执行。`defer` 保证脚本将按照它们在 HTML 中出现的顺序执行并且不会阻塞解析器。
 
-![defer加载过程](assets/defer-script.png?as=avif)
+![defer加载过程](assets/defer-script.png?as=webp)
 
 ##### 建立与所需来源的早期连接
 

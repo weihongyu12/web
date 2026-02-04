@@ -30,14 +30,6 @@
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
-    "image-minimizer-webpack-plugin": "^4.1.4",
-    "imagemin": "^9.0.1",
-    "imagemin-gifsicle": "^7.0.0",
-    "imagemin-jpegtran": "^8.0.0",
-    "imagemin-optipng": "^8.0.0",
-    "imagemin-svgo": "^11.0.1",
-    "imagemin-webp": "^8.0.0",
-    "sharp": "^0.34.5",
     "typescript": "~5.9.3"
   },
   "browserslist": {

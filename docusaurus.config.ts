@@ -2,8 +2,6 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
-
 const config: Config = {
   title: '老魏的工作笔记',
   tagline: '前端架构与开发最佳实践',
@@ -202,77 +200,6 @@ const config: Config = {
 
   plugins: [
     '@docusaurus/plugin-pwa',
-
-    function imageOptimizerPlugin(context, options) {
-      return {
-        name: 'image-optimizer-plugin',
-        configureWebpack(config, isServer, { currentBundler }) {
-          return {
-            optimization: {
-              minimizer: [
-                '...',
-                new ImageMinimizerPlugin({
-                  test: /\.(jpe?g|png|gif|tif|webp|svg|avif)$/i,
-                  minimizer: {
-                    implementation: ImageMinimizerPlugin.imageminMinify,
-                    options: {
-                      plugins: [
-                        ['gifsicle', { optimizationLevel: 3, interlaced: true }],
-                        ['jpegtran', { progressive: true }],
-                        ['optipng', { optimizationLevel: 6 }],
-                        [
-                          'svgo',
-                          {
-                            plugins: [
-                              {
-                                name: 'preset-default',
-                                params: {
-                                  overrides: {
-                                    removeViewBox: false,
-                                  },
-                                },
-                              },
-                              {
-                                name: 'addAttributesToSVGElement',
-                                params: {
-                                  attributes: [
-                                    { xmlns: 'http://www.w3.org/2000/svg' },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        ],
-                      ],
-                    },
-                  },
-                  generator: [
-                    {
-                      // 可以使用 "?as=webp" 生成器,生成 WebP 图片格式
-                      preset: 'webp',
-                      implementation: ImageMinimizerPlugin.imageminGenerate,
-                      options: {
-                        plugins: [['imagemin-webp', { quality: 100, lossless: true }]],
-                      },
-                    },
-                    {
-                      // 可以使用 "?as=avif" 生成器,生成 AVIF 图片格式
-                      preset: 'avif',
-                      implementation: ImageMinimizerPlugin.sharpGenerate,
-                      options: {
-                        encodeOptions: {
-                          avif: { lossless: false },
-                        },
-                      },
-                    },
-                  ],
-                }),
-              ],
-            },
-          };
-        },
-      };
-    },
   ],
 
   themes: ['@docusaurus/theme-mermaid'],
@@ -283,10 +210,10 @@ const config: Config = {
     mermaid: true,
   },
 
-  // future: {
-  //   experimental_faster: true,
-  //   v4: true,
-  // },
+  future: {
+    experimental_faster: true,
+    v4: true,
+  },
 };
 
 export default config;
