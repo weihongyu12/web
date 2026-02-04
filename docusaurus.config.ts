@@ -207,9 +207,6 @@ const config: Config = {
       return {
         name: 'image-optimizer-plugin',
         configureWebpack(config, isServer, { currentBundler }) {
-          // 只在客户端构建时优化图片
-          if (isServer) return {};
-
           return {
             optimization: {
               minimizer: [
