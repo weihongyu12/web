@@ -1068,11 +1068,9 @@ module.exports = {
   parserOptions: {
     project: [
       './tsconfig.json',
-      './tsconfig.node.json',
-      './tsconfig.test.json',
     ],
   },
-  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc eslint-plugin-eslint-comments
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc @eslint-community/eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb-typescript',
@@ -1083,14 +1081,14 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:react-perf/recommended',
     'plugin:@tanstack/query/recommended',
-    // 以下为实验性功能
-    'plugin:@typescript-eslint/stylistic-type-checked',
-    'plugin:unicorn/recommended',
-    'plugin:tailwindcss/recommended',
     'plugin:promise/recommended',
     'plugin:regexp/recommended',
     'plugin:jsdoc/recommended-typescript',
-    'plugin:eslint-comments/recommended',
+    'plugin:@eslint-community/eslint-comments/recommended',
+    // 以下为实验性功能
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    'plugin:unicorn/recommended',
+    // 'plugin:tailwindcss/recommended',
   ],
   plugin: [
     'risxss',

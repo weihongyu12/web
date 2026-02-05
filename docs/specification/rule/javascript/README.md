@@ -419,7 +419,7 @@ module.exports = {
 };
 ```
 
-:::danger
+:::warning
 这是一个实验性功能，请谨慎使用！部分规则和 Airbnb 规则有冲突，目前仍在整理中。如遇规则冲突，请以**Airbnb 规则**为准。
 :::
 
@@ -578,10 +578,6 @@ module.exports = {
 };
 ```
 
-:::danger
-这是一个实验性功能，请谨慎使用！
-:::
-
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |--------|----------|----------|------|
 | [promise/always-return](https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/always-return.md) | error | - | 要求在 Promise 链中的 `then()` 方法里必须返回一个值，以确保函数有返回值，避免意外错误 |
@@ -610,10 +606,6 @@ module.exports = {
   ],
 };
 ```
-
-:::danger
-这是一个实验性功能，请谨慎使用！部分规则和 Airbnb 规则有冲突，目前仍在整理中。如遇规则冲突，请以**Airbnb 规则**为准。
-:::
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |--------|----------|----------|------|
@@ -696,10 +688,6 @@ module.exports = {
 };
 ```
 
-:::danger
-这是一个实验性功能，请谨慎使用！
-:::
-
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |--------|----------|----------|------|
 | [jsdoc/check-access](https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/check-access.md) | warn | - | 检查 JSDoc 注释中 `@access` 标签的使用是否正确 |
@@ -768,28 +756,24 @@ module.exports = {
 
 ## ESLint 注释
 
-[`eslint-plugin-eslint-comments`](https://github.com/mysticatea/eslint-plugin-eslint-comments) 用于规范代码中 ESLint 注释（例如 `/* eslint-disable */`）的使用，防止不必要的禁用规则注释，确保规则禁用的原因清晰。
+[`@eslint-community/eslint-plugin-eslint-comments`](https://eslint-community.github.io/eslint-plugin-eslint-comments/) 用于规范代码中 ESLint 注释（例如 `/* eslint-disable */`）的使用，防止不必要的禁用规则注释，确保规则禁用的原因清晰。
 
 ```js
 // .eslintrc.js
 
 module.exports = {
   extends: [
-    'plugin:eslint-comments/recommended',
+    'plugin:@eslint-community/eslint-comments/recommended',
   ],
 };
 ```
 
-:::danger
-这是一个实验性功能，请谨慎使用！
-:::
-
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |--------|----------|----------|------|
-| [eslint-comments/disable-enable-pair](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/disable-enable-pair.md) | error | - | 要求 `/* eslint-disable */` 注释必须有一个对应的 `/* eslint-enable */` 注释成对出现，防止规则被意外地全局禁用 |
-| [eslint-comments/no-aggregating-enable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-aggregating-enable.md) | error | - | 禁止使用一个 `/* eslint-enable */` 注释来同时启用多个之前被禁用的规则，要求逐一明确启用 |
-| [eslint-comments/no-duplicate-disable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-duplicate-disable.md) | error | - | 禁止对同一个规则进行重复的禁用注释，避免冗余 |
-| [eslint-comments/no-unlimited-disable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-unlimited-disable.md) | error | - | 禁止不使用任何规则名参数的 `/* eslint-disable */` 注释（即禁用所有规则），要求禁用注释必须明确指定要禁用的规则列表，防止无意中关闭所有检查 |
-| [eslint-comments/no-unused-enable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-unused-enable.md) | error | - | 禁止存在没有对应禁用注释的 `/* eslint-enable */` 注释，确保启用的有效性 |
+| [@eslint-community/eslint-comments/disable-enable-pair](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/disable-enable-pair.md) | error | - | 要求 `/* eslint-disable */` 注释必须有一个对应的 `/* eslint-enable */` 注释成对出现，防止规则被意外地全局禁用 |
+| [@eslint-community/eslint-comments/no-aggregating-enable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-aggregating-enable.md) | error | - | 禁止使用一个 `/* eslint-enable */` 注释来同时启用多个之前被禁用的规则，要求逐一明确启用 |
+| [@eslint-community/eslint-comments/no-duplicate-disable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-duplicate-disable.md) | error | - | 禁止对同一个规则进行重复的禁用注释，避免冗余 |
+| [@eslint-community/eslint-comments/no-unlimited-disable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-unlimited-disable.md) | error | - | 禁止不使用任何规则名参数的 `/* eslint-disable */` 注释（即禁用所有规则），要求禁用注释必须明确指定要禁用的规则列表，防止无意中关闭所有检查 |
+| [@eslint-community/eslint-comments/no-unused-enable](https://github.com/mysticatea/eslint-plugin-eslint-comments/blob/master/docs/rules/no-unused-enable.md) | error | - | 禁止存在没有对应禁用注释的 `/* eslint-enable */` 注释，确保启用的有效性 |
 
 
