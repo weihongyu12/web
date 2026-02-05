@@ -21,6 +21,7 @@ module.exports = {
     'plugin:vue/recommended',
     '@vue/eslint-config-airbnb-with-typescript', 
     // '@vue/eslint-config-airbnb-with-typescript/allow-tsx-in-vue',
+    'plugin:vue-scoped-css/vue3-recommended',
   ],
 };
 ```
@@ -277,3 +278,19 @@ module.exports = {
 | [vue/no-v-html](https://eslint.vuejs.org/rules/no-v-html.html) | warn | - | 禁止使用潜在危险的v-html指令 |
 | [vue/order-in-components](https://eslint.vuejs.org/rules/order-in-components.html) | warn | - | 强制组件选项的顺序 |
 | [vue/this-in-template](https://eslint.vuejs.org/rules/this-in-template.html) | warn | - | 禁止在模板中使用this上下文 |
+
+## Scoped CSS
+
+[`eslint-plugin-vue-scoped-css`](https://future-architect.github.io/eslint-plugin-vue-scoped-css/) 是一个用于检查和强制规范 Vue 单文件组件中作用域 CSS（`<style scoped>`）写法。
+
+| 规则名称 | 错误级别 | 配置选项 | 描述 |
+|---------|---------|---------|-----|
+| [vue-scoped-css/enforce-style-type](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/enforce-style-type.html) | warn | - | 强制 `<style>` 标签的 `scoped` 属性使用特定类型（如 `scoped` 或 `module`） |
+| [vue-scoped-css/no-deprecated-deep-combinator](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/no-deprecated-deep-combinator.html) | warn | - | 禁止使用已弃用的深度选择器语法（如 `>>>` 或 `/deep/`），推荐使用 `::v-deep` |
+| [vue-scoped-css/no-parent-of-v-global](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/no-parent-of-v-global.html) | warn | - | 禁止在 `::v-global` 伪类外再包裹其他选择器（因为 `::v-global` 本身不应被限定在父选择器内） |
+| [vue-scoped-css/no-parsing-error](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/no-parsing-error.html) | warn | - | 禁止由 `vue-scoped-css` 插件无法解析的 CSS 语法错误 |
+| [vue-scoped-css/no-unused-keyframes](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/no-unused-keyframes.html) | warn | - | 禁止定义未使用的 `@keyframes` 动画 |
+| [vue-scoped-css/no-unused-selector](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/no-unused-selector.html) | warn | - | 禁止在 `scoped` 样式中定义未使用的选择器（这些选择器不会匹配任何元素） |
+| [vue-scoped-css/require-v-deep-argument](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/require-v-deep-argument.html) | warn | - | 要求 `::v-deep` 必须带有参数（例如 `::v-deep(.child)`），除非用作组合器 |
+| [vue-scoped-css/require-v-global-argument](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/require-v-global-argument.html) | warn | - | 要求 `::v-global` 必须带有参数（例如 `::v-global(.global-class)`） |
+| [vue-scoped-css/require-v-slotted-argument](https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/require-v-slotted-argument.html) | warn | - | 要求 `::v-slotted` 必须带有参数（例如 `::v-slotted(.slot-class)`） |
