@@ -466,6 +466,101 @@ function handleClick() {
 ```
 :::
 
+## CSS 作用域  (CSS Scoped)
+
+
+### 1. 强制样式类型
+
+单文件组件中的 `<style>` 标签必须使用 `scoped` 或 `module` 属性，以防止样式污染全局。
+
+:::tip 建议 👍
+```vue
+<style scoped>
+/* 仅作用于当前组件 */
+.title { color: red; }
+</style>
+```
+:::
+
+:::danger 不建议 👎
+```vue
+<style>
+/* 污染全局 */
+.title { color: red; }
+</style>
+```
+:::
+
+### 2. 移除未使用的 CSS 
+
+定义的 CSS 选择器或关键帧 (`keyframes`) 必须在模板中被使用。这有助于保持代码库的轻量和整洁。
+
+:::tip 建议 👍
+```vue
+<template>
+  <div class="active"></div>
+</template>
+
+<style scoped>
+.active { color: blue; }
+</style>
+```
+:::
+
+:::danger 不建议 👎
+```vue
+<template>
+  <div class="active"></div>
+</template>
+
+<style scoped>
+/* 警告：未使用的选择器 */
+.inactive { color: grey; } 
+</style>
+```
+:::
+
+### 3. 废弃的深度选择器
+
+不要使用 `>>>` 或 `/deep/`，它们已被废弃。请使用 Vue 3 推荐的 `:deep()` 伪类。
+
+:::tip 建议 👍
+```vue
+<style scoped>
+.a :deep(.b) { /* ... */ }
+</style>
+```
+:::
+
+:::danger 不建议 👎
+```vue
+<style scoped>
+.a >>> .b { /* ... */ }
+.a /deep/ .b { /* ... */ }
+</style>
+```
+:::
+
+### 4. 伪类参数要求
+
+伪类 `:deep`, `:global`, 和 `:slotted` 必须包含选择器参数。
+
+:::tip 建议 👍
+```vue
+<style scoped>
+:deep(.a) { /* ... */ }
+</style>
+```
+:::
+
+:::danger 不建议 👎
+```vue
+<style scoped>
+.:deep { /* ... */ }
+</style>
+```
+:::
+
 ## 安全性 (Security)
 
 ### 1. 避免潜在的 XSS 攻击
