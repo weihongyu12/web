@@ -1688,3 +1688,269 @@ CMD ["nginx", "-g", "daemon off;"]
 </details>
   </TabItem>
 </Tabs>
+
+
+## Gitlab CI/CD
+
+```yaml
+# .gitlab-ci.yml
+
+include:
+  # GitLab 安全扫描工具
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
+image: node:lts
+
+stages:
+  - install
+  - lint
+  - build
+  - test
+  - quality
+  - security
+  - deploy
+
+# 全局变量
+variables:
+  PNPM_CACHE_FOLDER: .pnpm-store
+  LOCAL_REGISTRY: docker-registry.example.com
+  IMAGE_NAME: ${CI_PROJECT_NAME}
+
+# 全局缓存策略
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store/
+    - node_modules/
+  policy: pull-push
+
+# 基础模板
+.install_template: &install_template
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest --activate
+    - pnpm config set store-dir $PNPM_CACHE_FOLDER
+    - pnpm config set package-import-method copy
+
+.docker_template: &docker_template
+  image: docker:29-cli
+  services:
+    - name: docker:29-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+
+# 安装依赖
+setup:
+  stage: install
+  <<: *install_template
+  script:
+    - pnpm install --frozen-lockfile --prefer-offline
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store/
+      - node_modules/
+    policy: pull-push
+
+# ESLint
+eslint:
+  stage: lint
+  needs: ["setup"]
+  <<: *install_template
+  script:
+    - pnpm run lint
+
+# stylelint
+stylelint:
+  stage: lint
+  needs: ["setup"]
+  <<: *install_template
+  script:
+    - pnpm run lint:css
+
+# 构建应用
+build_app:
+  stage: build
+  needs: ["setup"]
+  <<: *install_template
+  script:
+    - pnpm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+# 构建镜像
+build_docker:
+  <<: *docker_template
+  stage: build
+  needs: ["build_app"]
+  timeout: 6h
+  script:
+    - docker build -t $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA -t $LOCAL_REGISTRY/$IMAGE_NAME:latest .
+    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
+    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:latest
+
+# 单元测试
+unit tests:
+  stage: test
+  needs: ["setup"]
+  <<: *install_template
+  script:
+    - pnpm run test:unit --watchAll=false --ci
+
+# 覆盖率测试
+coverage tests:
+  stage: test
+  needs: ["setup"]
+  <<: *install_template
+  script:
+    - pnpm run test:coverage --watchAll=false --ci
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+
+# E2E 测试
+e2e tests:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.58.2-noble
+  needs: ["build_app"]
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest --activate
+    - pnpm config set store-dir $PNPM_CACHE_FOLDER
+    - pnpm config set package-import-method copy
+  script:
+    - pnpm install --frozen-lockfile --prefer-offline
+    - pnpm run test:e2e
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+      prefix: e2e
+    paths:
+      - .pnpm-store/
+      - node_modules/
+    policy: pull-push
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# 质量检查
+qodana:
+  stage: quality
+  image:
+    name: jetbrains/qodana-js:2025.3
+    entrypoint: [""]
+  needs: ["setup"]
+  cache:
+    - key: qodana-2025.3-$CI_DEFAULT_BRANCH-$CI_COMMIT_REF_SLUG
+      fallback_keys:
+        - qodana-2025.3-$CI_DEFAULT_BRANCH-
+        - qodana-2025.3-
+      paths:
+        - .qodana/cache
+  variables:
+    QODANA_TOKEN: $QODANA_TOKEN
+    QODANA_ENDPOINT: "https://qodana.cloud"
+  script:
+    - qodana --cache-dir=$CI_PROJECT_DIR/.qodana/cache
+  allow_failure: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Lighthouse CI
+lighthouse:
+  stage: quality
+  image: cypress/browsers:latest
+  needs: ["build_app"]
+  variables:
+    CI: true
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest --activate
+    - pnpm config set store-dir $PNPM_CACHE_FOLDER
+    - pnpm config set package-import-method copy
+  script:
+    - pnpm install --frozen-lockfile --prefer-offline
+    - pnpm run lighthouse
+  allow_failure: true
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store/
+      - node_modules/
+    policy: pull-push
+  artifacts:
+    paths:
+      - .lighthouseci/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# 安全扫描
+sast:
+  stage: security
+
+# 密钥检测
+secret_detection:
+  stage: security
+
+# 依赖扫描
+dependency_scanning:
+  stage: security
+
+# 容器扫描
+container_scanning:
+  stage: security
+  needs: ['build_docker']
+  variables:
+    CS_IMAGE: $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
+    CS_DOCKERFILE_PATH: Dockerfile
+    GIT_STRATEGY: fetch
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# 部署到开发环境
+deploy_dev:
+  <<: *docker_template
+  stage: deploy
+  needs: ["build_docker"]
+  environment:
+    name: development
+    url: https://dev.example.com
+  script:
+    - docker pull $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
+    - docker tag $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $LOCAL_REGISTRY/$IMAGE_NAME:dev
+    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# 部署到生产环境
+deploy_production:
+  <<: *docker_template
+  stage: deploy
+  needs: ["build_docker"]
+  environment:
+    name: production
+    url: https://example.com
+  script:
+    - docker pull $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
+    - docker tag $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $LOCAL_REGISTRY/$IMAGE_NAME:prod
+    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:prod
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
