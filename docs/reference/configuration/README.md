@@ -449,6 +449,25 @@ export default defineConfig({
   </TabItem>
 </Tabs>
 
+## Babel
+
+:::warning
+现代化工具链通常不需要 Babel 转译。但是目前 React Compiler 只支持 Babel 来处理 JSX 转译，所以需要安装并配置 Babel。
+:::
+
+```js
+// babel.config.js
+
+// $ pnpm add babel-loader @babel/preset-typescript babel-plugin-react-compiler @babel/plugin-syntax-jsx --save-dev
+module.exports = {
+  presets: ['@babel/preset-typescript'],
+  plugins: [
+    'babel-plugin-react-compiler', 
+    '@babel/plugin-syntax-jsx',
+  ],
+};
+```
+
 ## Nginx
 
 :::tip
