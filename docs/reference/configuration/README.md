@@ -30,15 +30,6 @@ import TOCInline from '@theme/TOCInline';
     "styleguidist:build": "styleguidist build",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss}": ["npm run format", "git add"]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   }
 }
 ```
@@ -2002,6 +1993,55 @@ Biome 作为一个相对较新的工具，虽然在性能和功能上有很多�
 }
 ```
 
+## Commitlint & Conventional Changelog
+
+:::tip
+[https://commitlint.js.org/#/reference-configuration](https://commitlint.js.org/#/reference-configuration)
+:::
+
+```ts
+// commitlint.config.ts
+
+// $ pnpm add @commitlint/cli @commitlint/config-conventional @commitlint/types --save-dev
+import type { UserConfig } from '@commitlint/types';
+
+const Configuration: UserConfig = {
+  extends: ['@commitlint/config-conventional'],
+};
+
+export default Configuration;
+```
+
+## Lint Staged
+
+:::tip
+[https://github.com/lint-staged/lint-staged#configuration](https://github.com/lint-staged/lint-staged#configuration)
+:::
+
+```js
+// lint-staged.config.js
+
+// $ pnpm add lint-staged @biomejs/biome eslint stylelint --save-dev
+export default {
+  '**/*.{js,ts,jsx,tsx,vue}': ['biome format --write', 'eslint --fix --cache'],
+  '**/*.{css,scss,sass,tsx,jsx}': ['biome format --write', 'stylelint --fix --cache'],
+};
+```
+
+## husky
+
+### pre-commit
+
+```
+npx lint-staged
+```
+
+### commit-msg
+
+```
+npx --no -- commitlint --edit $1
+```
+
 ## browserslist
 
 :::tip
@@ -2036,21 +2076,6 @@ last 1 safari version
 
 Jest 可使用 CRA 提供的默认配置，如需修改配置可修改 `jest.config.js` 文件
 :::
-
-## Commitlint & Conventional Changelog
-
-:::tip
-[https://commitlint.js.org/#/reference-configuration](https://commitlint.js.org/#/reference-configuration)
-:::
-
-```js
-// commitlint.config.js
-
-// $ pnpm install @commitlint/cli @commitlint/config-conventional --save-dev
-module.exports = {
-  extends: ['@commitlint/config-conventional'],
-};
-```
 
 ## Docker
 
