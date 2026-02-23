@@ -171,7 +171,7 @@ import TOCInline from '@theme/TOCInline';
 ```js
 // webpack.config.js
 
-// $ pnpm install @vue/preload-webpack-plugin --save-dev
+// $ pnpm add @vue/preload-webpack-plugin --save-dev
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 
 module.exports = {
@@ -201,7 +201,7 @@ module.exports = {
 ```js
 // webpack.config.js
 
-// $ pnpm install compression-webpack-plugin --save-dev
+// $ pnpm add compression-webpack-plugin --save-dev
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
@@ -233,7 +233,7 @@ module.exports = {
 // vite.config.ts
 import { defineConfig } from 'vite';
 
-// $ pnpm install vite-plugin-compression --save-dev
+// $ pnpm add vite-plugin-compression --save-dev
 import compression from 'vite-plugin-compression';
 
 export default defineConfig({
@@ -267,7 +267,7 @@ export default defineConfig({
 ```js
 // webpack.config.js
 
-// $ pnpm install webpack-subresource-integrity --save-dev
+// $ pnpm add webpack-subresource-integrity --save-dev
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 
 module.exports = {
@@ -283,7 +283,7 @@ module.exports = {
 ```ts
 import { defineConfig } from 'vite';
 
-// $ pnpm install vite-plugin-sri --save-dev
+// $ pnpm add vite-plugin-sri --save-dev
 import sri from 'vite-plugin-sri';
 
 export default defineConfig({
@@ -307,19 +307,19 @@ export default defineConfig({
 ```js
 // webpack.config.js
 
-// pnpm install image-minimizer-webpack-plugin imagemin sharp --save-dev
+// pnpm add image-minimizer-webpack-plugin imagemin sharp --save-dev
 //
 // 无损压缩（推荐）：
-// pnpm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --save-dev
+// pnpm add imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --save-dev
 //
 // 有损压缩：
-// pnpm install imagemin-gifsicle imagemin-mozjpeg imagemin-pngquant imagemin-svgo --save-dev
+// pnpm add imagemin-gifsicle imagemin-mozjpeg imagemin-pngquant imagemin-svgo --save-dev
 //
 // WebP格式转化（推荐）：
-// pnpm install imagemin-webp --save-dev
+// pnpm add imagemin-webp --save-dev
 //
 // AVIF格式转化（推荐，基于sharp）：
-// pnpm install sharp --save-dev
+// pnpm add sharp --save-dev
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 
 module.exports = {
@@ -391,7 +391,7 @@ module.exports = {
 // vite.config.ts
 import { defineConfig } from 'vite';
 
-// $ pnpm install vite-plugin-image-optimizer vite-imagetools svgo --save-dev
+// $ pnpm add vite-plugin-image-optimizer vite-imagetools svgo --save-dev
 import { ViteImageOptimizer as imageOptimizer } from 'vite-plugin-image-optimizer';
 import { imagetools } from 'vite-imagetools';
 import type { PluginConfig } from 'svgo';
