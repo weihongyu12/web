@@ -2420,6 +2420,37 @@ export default defineConfig({
 });
 ```
 
+## Lighthouse CI
+
+```js
+// lint-staged.config.js
+
+// $ pnpm add @lhci/cli --save-dev
+module.exports = {
+  ci: {
+    collect: {
+      staticDistDir: './dist',
+      numberOfRuns: 3,
+      settings: {
+        chromeFlags: '--no-sandbox --headless',
+        onlyCategories: [
+          'performance',
+          'accessibility',
+          'best-practices',
+          'seo',
+        ],
+      },
+    },
+    upload: {
+      target: 'filesystem',
+      outputDir: '.lighthouseci',
+      reportFilenamePattern: '%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%',
+    },
+  },
+};
+
+```
+
 ## Docker
 
 <Tabs>
