@@ -2206,21 +2206,18 @@ last 1 safari version
   ```ts
   // jest.config.ts
 
-  // $ pnpm add jest @types/jest ts-jest react-app-polyfill jest-watch-typeahead identity-obj-proxy --save-dev
+  // $ pnpm add jest @types/jest ts-jest identity-obj-proxy --save-dev
   import type { Config } from 'jest';
 
   const config: Config = {
     preset: 'ts-jest',
     testEnvironment: 'jsdom',
     roots: [
-      '<rootDir>/src'
+      '<rootDir>/src',
     ],
     collectCoverageFrom: [
       'src/**/*.{js,jsx,ts,tsx}',
       '!src/**/*.d.ts',
-    ],
-    setupFiles: [
-      'react-app-polyfill/jsdom',
     ],
     setupFilesAfterEnv: [
       '<rootDir>/src/setupTests.ts',
@@ -2229,20 +2226,23 @@ last 1 safari version
       '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
       '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
     ],
-    testEnvironment: 'jsdom',
     transform: {
-      '^.+\\.(js|jsx|ts|tsx)$': '<rootDir>/node_modules/ts-jest',
-      '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
-      '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '<rootDir>/config/jest/fileTransform.js',
+      '^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
     },
     transformIgnorePatterns: [
       '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
-      '^.+\\.module\\.(css|sass|scss)$',
     ],
     modulePaths: [],
     moduleNameMapper: {
       '^react-native$': 'react-native-web',
       '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+      '^@/(.*)$': '<rootDir>/src/$1',
+      '^.+\\.css$': '<rootDir>/src/__mocks__/styleMock.js',
+      '^.+\\.svg$': '<rootDir>/src/__mocks__/svgMock.jsx',
+      '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico)$': '<rootDir>/src/__mocks__/fileMock.js',
+      '^.+\\.(woff|woff2|eot|otf)$': '<rootDir>/src/__mocks__/fileMock.js',
+      '^.+\\.(mp3|wav|ogg|flac|aac)$': '<rootDir>/src/__mocks__/fileMock.js',
+      '^.+\\.(mp4|webm|mov|avi|mkv|ogv)$': '<rootDir>/src/__mocks__/fileMock.js',
     },
     moduleFileExtensions: [
       'web.js',
@@ -2255,10 +2255,6 @@ last 1 safari version
       'web.jsx',
       'jsx',
       'node',
-    ],
-    watchPlugins: [
-      'jest-watch-typeahead/filename',
-      'jest-watch-typeahead/testname',
     ],
     resetMocks: true,
   };
@@ -2277,65 +2273,29 @@ last 1 safari version
   import '@testing-library/jest-dom';
   ```
   </TabItem>
-  <TabItem value="cssTransform.js" label="cssTransform.js">
+  <TabItem value="styleMock.js" label="styleMock.js">
   ```js
-  'use strict';
-
-  // This is a custom Jest transformer turning style imports into empty objects.
-  // http://facebook.github.io/jest/docs/en/webpack.html
-
-  module.exports = {
-    process() {
-      return 'module.exports = {};';
-    },
-    getCacheKey() {
-      // The output is always the same.
-      return 'cssTransform';
-    },
-  };
+  module.exports = {};
   ```
   </TabItem>
-  <TabItem value="fileTransform.js" label="fileTransform.js">
+  <TabItem value="fileMock.js" label="fileMock.js">
   ```js
-  'use strict';
+  module.exports = 'test-file-stub';
+  ```
+  </TabItem>
+  <TabItem value="svgMock.jsx" label="svgMock.jsx">
+  ```jsx
+  const React = require('react');
 
-  const path = require('path');
-  const camelcase = require('camelcase');
+  const SvgMock = React.forwardRef((props, ref) => (
+    React.createElement('svg', { ref, ...props })
+  ));
 
-  // This is a custom Jest transformer turning file imports into filenames.
-  // http://facebook.github.io/jest/docs/en/webpack.html
+  SvgMock.displayName = 'SvgMock';
 
   module.exports = {
-    process(src, filename) {
-      const assetFilename = JSON.stringify(path.basename(filename));
-
-      if (filename.match(/\.svg$/)) {
-        // Based on how SVGR generates a component name:
-        // https://github.com/smooth-code/svgr/blob/01b194cf967347d43d4cbe6b434404731b87cf27/packages/core/src/state.js#L6
-        const pascalCaseFilename = camelcase(path.parse(filename).name, {
-          pascalCase: true,
-        });
-        const componentName = `Svg${pascalCaseFilename}`;
-        return `const React = require('react');
-        module.exports = {
-          __esModule: true,
-          default: ${assetFilename},
-          ReactComponent: React.forwardRef(function ${componentName}(props, ref) {
-            return {
-              $$typeof: Symbol.for('react.element'),
-              type: 'svg',
-              ref: ref,
-              key: null,
-              props: Object.assign({}, props, {
-                children: ${assetFilename}
-              })
-            };
-          }),
-        };`;
-      }
-
-      return `module.exports = ${assetFilename};`;
-    },
+    ReactComponent: SvgMock,
+    default: 'svg-stub',
   };
   ```
   </TabItem>
