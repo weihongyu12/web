@@ -17,19 +17,23 @@ import TOCInline from '@theme/TOCInline';
 ```json
 {
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js",
+    "dev": "rspack dev",
+    "build": "rspack build",
+    "analyze": "rspack build --analyze",
+    "preview": "rspack preview",
+    "format": "biome format --write",
     "lint": "npm run lint:js && npm run lint:css",
-    "lint:js": "eslint ./src/**/*.{js,jsx,ts,tsx}",
-    "lint:css": "stylelint ./src/**/*.{css,scss,jsx,tsx}",
-    "format": "npm run format:js && npm run format:css",
-    "format:js": "npm run lint:js -- --fix",
-    "format:css": "npm run lint:css -- --fix",
+    "lint:js": "eslint . --cache",
+    "lint:css": "stylelint . --cache",
+    "fix:js": "eslint . --cache --fix",
+    "fix:css": "stylelint . --cache --fix",
+    "test:unit": "jest",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
     "styleguidist": "styleguidist server",
     "styleguidist:build": "styleguidist build",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "analyze": "source-map-explorer 'build/static/js/*.js'"
+    "changelog": "conventional-changelog -p conventional -i CHANGELOG.md -s",
+    "lighthouse": "lhci autorun --config=lighthouse.config.js"
   }
 }
 ```
