@@ -30,15 +30,6 @@ import TOCInline from '@theme/TOCInline';
     "styleguidist:build": "styleguidist build",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss}": ["npm run format", "git add"]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   }
 }
 ```
@@ -2002,6 +1993,55 @@ Biome 作为一个相对较新的工具，虽然在性能和功能上有很多�
 }
 ```
 
+## Commitlint & Conventional Changelog
+
+:::tip
+[https://commitlint.js.org/#/reference-configuration](https://commitlint.js.org/#/reference-configuration)
+:::
+
+```ts
+// commitlint.config.ts
+
+// $ pnpm add @commitlint/cli @commitlint/config-conventional @commitlint/types --save-dev
+import type { UserConfig } from '@commitlint/types';
+
+const Configuration: UserConfig = {
+  extends: ['@commitlint/config-conventional'],
+};
+
+export default Configuration;
+```
+
+## Lint Staged
+
+:::tip
+[https://github.com/lint-staged/lint-staged#configuration](https://github.com/lint-staged/lint-staged#configuration)
+:::
+
+```js
+// lint-staged.config.js
+
+// $ pnpm add lint-staged @biomejs/biome eslint stylelint --save-dev
+export default {
+  '**/*.{js,ts,jsx,tsx,vue}': ['biome format --write', 'eslint --fix --cache'],
+  '**/*.{css,scss,sass,tsx,jsx}': ['biome format --write', 'stylelint --fix --cache'],
+};
+```
+
+## husky
+
+### pre-commit
+
+```
+npx lint-staged
+```
+
+### commit-msg
+
+```
+npx --no -- commitlint --edit $1
+```
+
 ## browserslist
 
 :::tip
@@ -2033,24 +2073,147 @@ last 1 safari version
 
 :::tip
 [https://jestjs.io/docs/zh-Hans/configuration](https://jestjs.io/docs/zh-Hans/configuration)
-
-Jest 可使用 CRA 提供的默认配置，如需修改配置可修改 `jest.config.js` 文件
 :::
 
-## Commitlint & Conventional Changelog
+<Tabs>
+  <TabItem value="jest.config.ts" label="jest.config.ts" default>
+  ```ts
+  // jest.config.ts
 
-:::tip
-[https://commitlint.js.org/#/reference-configuration](https://commitlint.js.org/#/reference-configuration)
-:::
+  // $ pnpm add jest @types/jest ts-jest react-app-polyfill jest-watch-typeahead identity-obj-proxy --save-dev
+  import type { Config } from 'jest';
 
-```js
-// commitlint.config.js
+  const config: Config = {
+    preset: 'ts-jest',
+    testEnvironment: 'jsdom',
+    roots: [
+      '<rootDir>/src'
+    ],
+    collectCoverageFrom: [
+      'src/**/*.{js,jsx,ts,tsx}',
+      '!src/**/*.d.ts',
+    ],
+    setupFiles: [
+      'react-app-polyfill/jsdom',
+    ],
+    setupFilesAfterEnv: [
+      '<rootDir>/src/setupTests.ts',
+    ],
+    testMatch: [
+      '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+    ],
+    testEnvironment: 'jsdom',
+    transform: {
+      '^.+\\.(js|jsx|ts|tsx)$': '<rootDir>/node_modules/ts-jest',
+      '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
+      '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '<rootDir>/config/jest/fileTransform.js',
+    },
+    transformIgnorePatterns: [
+      '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
+      '^.+\\.module\\.(css|sass|scss)$',
+    ],
+    modulePaths: [],
+    moduleNameMapper: {
+      '^react-native$': 'react-native-web',
+      '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+    },
+    moduleFileExtensions: [
+      'web.js',
+      'js',
+      'web.ts',
+      'ts',
+      'web.tsx',
+      'tsx',
+      'json',
+      'web.jsx',
+      'jsx',
+      'node',
+    ],
+    watchPlugins: [
+      'jest-watch-typeahead/filename',
+      'jest-watch-typeahead/testname',
+    ],
+    resetMocks: true,
+  };
 
-// $ pnpm install @commitlint/cli @commitlint/config-conventional --save-dev
-module.exports = {
-  extends: ['@commitlint/config-conventional'],
-};
-```
+  export default config;
+  ```
+  </TabItem>
+  <TabItem value="setupTests" label="setupTests">
+  ```ts
+  // jest-dom adds custom jest matchers for asserting on DOM nodes.
+  // allows you to do things like:
+  // expect(element).toHaveTextContent(/react/i)
+  // learn more: https://github.com/testing-library/jest-dom
+  
+  // $ pnpm add @testing-library/jest-dom @testing-library/react @testing-library/user-event --save-dev
+  import '@testing-library/jest-dom';
+  ```
+  </TabItem>
+  <TabItem value="cssTransform.js" label="cssTransform.js">
+  ```js
+  'use strict';
+
+  // This is a custom Jest transformer turning style imports into empty objects.
+  // http://facebook.github.io/jest/docs/en/webpack.html
+
+  module.exports = {
+    process() {
+      return 'module.exports = {};';
+    },
+    getCacheKey() {
+      // The output is always the same.
+      return 'cssTransform';
+    },
+  };
+  ```
+  </TabItem>
+  <TabItem value="fileTransform.js" label="fileTransform.js">
+  ```js
+  'use strict';
+
+  const path = require('path');
+  const camelcase = require('camelcase');
+
+  // This is a custom Jest transformer turning file imports into filenames.
+  // http://facebook.github.io/jest/docs/en/webpack.html
+
+  module.exports = {
+    process(src, filename) {
+      const assetFilename = JSON.stringify(path.basename(filename));
+
+      if (filename.match(/\.svg$/)) {
+        // Based on how SVGR generates a component name:
+        // https://github.com/smooth-code/svgr/blob/01b194cf967347d43d4cbe6b434404731b87cf27/packages/core/src/state.js#L6
+        const pascalCaseFilename = camelcase(path.parse(filename).name, {
+          pascalCase: true,
+        });
+        const componentName = `Svg${pascalCaseFilename}`;
+        return `const React = require('react');
+        module.exports = {
+          __esModule: true,
+          default: ${assetFilename},
+          ReactComponent: React.forwardRef(function ${componentName}(props, ref) {
+            return {
+              $$typeof: Symbol.for('react.element'),
+              type: 'svg',
+              ref: ref,
+              key: null,
+              props: Object.assign({}, props, {
+                children: ${assetFilename}
+              })
+            };
+          }),
+        };`;
+      }
+
+      return `module.exports = ${assetFilename};`;
+    },
+  };
+  ```
+  </TabItem>
+</Tabs>
 
 ## Docker
 
