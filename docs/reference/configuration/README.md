@@ -34,6 +34,132 @@ import TOCInline from '@theme/TOCInline';
 }
 ```
 
+## tsconfig.json
+
+<Tabs>
+  <TabItem value="tsconfig.json" label="tsconfig.json" default>
+  ```json
+  {
+    "files": [],
+    "references": [
+      {
+        "path": "./tsconfig.node.json"
+      },
+      {
+        "path": "./tsconfig.app.json"
+      },
+      {
+        "path": "./tsconfig.test.json"
+      }
+    ]
+  }
+  ```
+  </TabItem>
+  <TabItem value="tsconfig.app.json" label="tsconfig.app.json">
+  ```json
+  {
+    "compilerOptions": {
+      "lib": ["DOM", "ES2020"],
+      "jsx": "react-jsx",
+      "target": "ES2020",
+      "noEmit": true,
+      "skipLibCheck": true,
+      "useDefineForClassFields": true,
+
+      /* modules */
+      "module": "ESNext",
+      "resolveJsonModule": true,
+      "moduleResolution": "bundler",
+      "allowImportingTsExtensions": true,
+
+      /* type checking */
+      "strict": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"]
+      }
+    },
+    "include": ["src"],
+    "ts-node": {
+      "compilerOptions": {
+        "module": "CommonJS"
+      }
+    }
+  }
+  ```
+  </TabItem>
+  <TabItem value="tsconfig.node.json" label="tsconfig.node.json">
+  ```json
+  {
+    /* $ pnpm add @tsconfig/node24 --save-dev */
+    "extends": "@tsconfig/node24/tsconfig.json",
+    "compilerOptions": {
+      "noEmit": true,
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "types": ["node"],
+
+      "paths": {
+        "@/*": ["src/*"]
+      }
+    },
+    "include": [
+      "*.config.{js,ts,mjs,cjs}",
+      "**/jest.config.*",
+      "**/vite.config.*",
+      "**/vitest.config.*",
+      "**/webpack.config.*",
+      "**/rspack.config.*",
+      "**/rollup.config.*",
+      "**/eslint.config.*",
+      "**/prettier.config.*",
+      "**/tailwind.config.*",
+      "**/tsup.config.*",
+      "**/tsdown.config.*"
+    ]
+  }
+  ```
+  </TabItem>
+  <TabItem value="tsconfig.test.json" label="tsconfig.test.json">
+  ```json
+  {
+    "extends": "./tsconfig.app.json",
+    "compilerOptions": {
+      "strict": true,
+      "strictNullChecks": true,
+      "noImplicitAny": true,
+      "types": [
+        "node",
+        "jest",
+        "jsdom",
+        "@testing-library/jest-dom",
+        "@playwright/test"
+      ],
+
+      "paths": {
+        "@/*": ["src/*"]
+      }
+    },
+    "include": [
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+      "src/**/*.spec.ts",
+      "src/**/*.spec.tsx",
+      "src/__tests__/**/*",
+      "src/setupTests.ts",
+      "e2e/**/*.ts",
+      "e2e/**/*.spec.ts",
+      "jest.config.ts"
+    ],
+    "exclude": ["node_modules", "dist", "coverage"]
+  }
+  ```
+  </TabItem>
+</Tabs>
+
 ## Webpack/Vite
 
 :::tip
