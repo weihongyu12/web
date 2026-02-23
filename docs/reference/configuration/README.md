@@ -3106,3 +3106,128 @@ deploy_production:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
+
+## Electron
+
+:::tip
+Electron 项目推荐使用 Vite 作为构建工具，使用 Electron 官方提供的 [electron-builder](https://www.electron.build/) 进行打包和发布。
+:::
+
+
+<Tabs>
+  <TabItem value="electron-builder.json5" label="electron-builder.json5" default>
+   ```json5
+   {
+     "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+     "appId": "com.example.app",
+     "asar": true,
+     "asarUnpack": [
+       "dist-electron/**/*.node"
+     ],
+     "electronFuses": {
+       runAsNode: false,
+       enableCookieEncryption: true,
+       enableNodeOptionsEnvironmentVariable: false,
+       enableNodeCliInspectArguments: false,
+       enableEmbeddedAsarIntegrityValidation: true,
+       onlyLoadAppFromAsar: true
+     },
+     "productName": "ExampleAppName",
+     "directories": {
+       "output": "release/${version}"
+     },
+     "files": [
+       "dist",
+       "dist-electron",
+       "!dist-electron/**/*.map"
+     ],
+     "extraResources": [],
+     "mac": {
+       "target": [
+          "dmg"
+       ],
+       "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
+     },
+     "win": {
+       "target": [
+         {
+           "target": "nsis",
+           "arch": [
+             "x64"
+           ]
+         }
+       ],
+       "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+     },
+     "nsis": {
+       "oneClick": false,
+       "perMachine": false,
+       "allowToChangeInstallationDirectory": true,
+       "deleteAppDataOnUninstall": false
+     },
+     "linux": {
+       "target": [
+         "AppImage"
+       ],
+       "artifactName": "${productName}-Linux-${version}.${ext}"
+     }
+   }
+   ```
+  </TabItem>
+  <TabItem value="vite.config.ts" label="vite.config.ts">
+  ```ts
+  // vite.config.ts
+  import electron from 'vite-plugin-electron/simple';
+
+  // https://vite.dev/config/
+  export default defineConfig({
+    plugins: [
+      // ...
+      electron({
+        main: {
+          entry: 'electron/main.ts',
+        },
+        preload: {
+          input: 'electron/preload.ts',
+        },
+      }),
+    ],
+  });
+  ```
+  </TabItem>
+  <TabItem value="vite.main.config.ts" label="vite.main.config.ts">
+  ```ts
+  // vite.main.config.ts
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    build: {
+      lib: {
+        entry: 'electron/main.ts',
+        formats: ['es'],
+      },
+      rollupOptions: {
+        output: {
+          entryFileNames: 'main.js',
+        },
+      },
+    },
+  });
+  ```
+  </TabItem>
+  <TabItem value="vite.preload.config.ts" label="vite.preload.config.ts">
+  ```ts
+  // vite.preload.config.ts
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    build: {
+      lib: {
+        entry: 'electron/preload.ts',
+        formats: ['cjs'],
+      },
+    },
+  });
+  ```
+  </TabItem>
+</Tabs>

@@ -187,6 +187,7 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
       additionalLanguages: [
+        'json5',
         'scss',
         'http',
         'docker',
