@@ -184,10 +184,10 @@ title: 部署
 
 - [负载均衡 SLB](https://www.aliyun.com/product/slb)：通过对多台云服务器进行均衡的流量分发调度，消除单点故障提升应用系统的可靠性与吞吐力
 - [云服务器 ECS](https://www.aliyun.com/product/ecs)：部署 HTTP 服务器和项目代码
-  - CPU 内存比为 1:2，推荐使用 2vCPU 和 4GB 内存以上配置
-  - 推荐使用 5MB 带宽
+  - CPU 内存比为 1:2，推荐使用 2vCPU 和 4GB 内存以上配置，CPU 推荐使用 AMD EPYC 系列
+  - 推荐使用 5MB+ 带宽
   - 建议支持 IPv6
-  - 推荐使用 [Rocky Linux](https://rockylinux.org/) 或 [AlmaLinux](https://almalinux.org/) 操作系统
+  - 推荐使用 [Ubuntu Server](https://ubuntu.com/server)、[Rocky Linux](https://rockylinux.org/) 或 [AlmaLinux](https://almalinux.org/) 操作系统
 
 ### 存储层
 
