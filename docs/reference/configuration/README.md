@@ -3389,6 +3389,39 @@ deploy_production:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
+## Orval
+
+<Tabs>
+  <TabItem value="orval.config.ts" label="orval.config.ts" default>
+  ```
+  // orval.config.ts
+  import { defineConfig } from 'orval';
+
+  export default defineConfig({
+    api: {
+      output: {
+        mode: 'tags-split',
+        target: 'src/api/service.ts',
+        schemas: 'src/api/model',
+        client: 'react-query',
+        mock: true,
+        override: {
+          mutator: {
+          path: 'src/api/mutator/fetchInstance.ts',
+          name: 'fetchInstance',
+        },
+      },
+      input: {
+        target: 'https://openapi-v3-specification.exaple.com',
+      },
+    },
+  });
+   ```
+  </TabItem>
+  <TabItem value="fetchInstance.ts" label="fetchInstance.ts">
+  </TabItem>
+</Tabs>
+
 ## Electron
 
 :::tip
