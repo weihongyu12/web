@@ -3230,7 +3230,6 @@ build_docker:
   <<: *docker_template
   stage: build
   needs: ["build_app"]
-  timeout: 6h
   script:
     - docker build -t $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA -t $LOCAL_REGISTRY/$IMAGE_NAME:latest .
     - docker push $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
@@ -3381,6 +3380,16 @@ deploy_production:
     name: production
     url: https://example.com
   script:
+    # 上传静态资源到阿里云 OSS
+    - apk add --no-cache curl
+    - sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
+    - ossutil config -i $ALI_ACCESS_KEY_ID -k $ALI_ACCESS_KEY_SECRET -e $OSS_ENDPOINT
+    - ossutil cp -rf ./dist oss://$OSS_BUCKET/$CI_ENVIRONMENT_SLUG/ --exclude "index.html,service-worker.js" --meta
+    # 上传静态资源到腾讯云 COS
+    # - apk add --no-cache python3 py3-pip
+    # - pip install coscmd
+    # - coscmd config -a $TENCENT_SECRET_ID -s $TENCENT_SECRET_KEY -b $COS_BUCKET -r $COS_REGION
+    # - coscmd upload -r ./dist /$CI_ENVIRONMENT_SLUG/ --ignore "index.html,service-worker.js"
     - docker pull $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
     - docker tag $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $LOCAL_REGISTRY/$IMAGE_NAME:prod
     - docker push $LOCAL_REGISTRY/$IMAGE_NAME:prod
