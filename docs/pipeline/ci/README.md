@@ -10,27 +10,7 @@ sidebar_position: 6
 
 整个 Pipeline 由 **7 个阶段**顺序执行：
 
-```
-install → lint → build → test → quality → security → deploy
-```
-
-```mermaid
-flowchart LR
-    A[install\n安装依赖] --> B[lint\n代码检查]
-    B --> C[build\n构建]
-    C --> D[test\n测试]
-    D --> E[quality\n质量检查]
-    E --> F[security\n安全扫描]
-    F --> G[deploy\n部署]
-
-    style A fill:#e2e3e5,stroke:#41464b
-    style B fill:#cfe2ff,stroke:#084298
-    style C fill:#d1e7dd,stroke:#0f5132
-    style D fill:#fff3cd,stroke:#664d03
-    style E fill:#f8d7da,stroke:#842029
-    style F fill:#f8d7da,stroke:#842029
-    style G fill:#d1e7dd,stroke:#0f5132
-```
+![Gitlab CI 流水线总览](./gitlab-ci-pipeline.png)
 
 阶段的顺序是刻意设计的：越早的阶段越轻量，发现问题的成本越低。lint 几秒内给出反馈，总比问题混进 main 分支后再排查要省力得多。
 
