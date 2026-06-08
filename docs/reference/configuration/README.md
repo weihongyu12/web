@@ -184,7 +184,7 @@ import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
 
-// pnpm add compression-webpack-plugin workbox-rspack-plugin image-minimizer-webpack-plugin node-polyfill-webpack-plugin -D
+// pnpm add compression-webpack-plugin @aaroon/workbox-rspack-plugin image-minimizer-webpack-plugin node-polyfill-webpack-plugin -D
 import CompressionPlugin from 'compression-webpack-plugin';
 import { InjectManifest } from '@aaroon/workbox-rspack-plugin';
 import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
