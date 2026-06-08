@@ -178,7 +178,7 @@ POST /api/user
 Authorization: Bearer b25ed4f6b1ec69afea62dc248e52b8b24c090dbf3c07046bf8ff8a6b
 
 {
-  "nickname": "meiko"
+  "nickname": "tarzan"
 }
 ```
 :::
@@ -190,7 +190,7 @@ POST /api/user
 
 {
   "userId": "OjP9LDwma1bMA68x8kzBm",
-  "nickname": "meiko"
+  "nickname": "tarzan"
 }
 ```
 :::
@@ -260,7 +260,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 :::tip[正面例子 👍]
 ```json
 {
-  "name": "田野",
+  "name": "李承勇",
   "idNumber": "RKGJ2oqWrHUhbV0YggJhCU3lZOD5H3/+vR944hOozl4=",
   "password": "5wlvu+Ye7TC33MT3VKxU6neaTpPk5EvfuGs+8a7zRLc="
 }
@@ -270,9 +270,9 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 :::danger[反面例子 👎]
 ```json
 {
-  "name": "田野",
+  "name": "李承勇",
   "idNumber": "310000199511159999",
-  "password": "meiko@xxx.com"
+  "password": "tarzan@xxx.com"
 }
 ```
 :::
@@ -386,11 +386,11 @@ Content-Type: application/json
   "data": [
     {
       "id": "zNBWQ4VrEeMKkmY4PgvaX",
-      "name": "施耐德 iC65 微型断路器"
+      "name": "极狐阿尔法S5"
     },
     {
       "id": "zKLNwDGMm6qQRegxvBr5A",
-      "name": "施耐德 EA9AN 微型断路器"
+      "name": "极狐阿尔法T5"
     }
   ]
 }
@@ -401,7 +401,7 @@ Content-Type: application/json
 
 ```json
 {
-  "data": "[{\"id\": \"zNBWQ4VrEeMKkmY4PgvaX\",\"name\": \"施耐德 iC65 微型断路器\"},{\"id\": \"zKLNwDGMm6qQRegxvBr5A\",\"name\": \"施耐德 EA9AN 微型断路器\"}]"
+  "data": "[{\"id\": \"zNBWQ4VrEeMKkmY4PgvaX\",\"name\": \"极狐阿尔法S5\"},{\"id\": \"zKLNwDGMm6qQRegxvBr5A\",\"name\": \"极狐阿尔法T5\"}]"
 }
 ```
 :::
@@ -587,8 +587,8 @@ GET /api/product?keyword=IC65  # 查询任意字段中包含 IC65 关键词的�
 ID型数据使用**精确查询**，常用于外联字段，需要支持多个查询，**参数命名以`Ids`结尾**
 
 ```:no-line-numbers
-GET /api/product?categoryIds=65     # 查询所有 categoryId 为 65 的数据
-GET /api/product?categoryIds=65,97  # 查询所有 categoryId 为 65 或 97 的数据
+GET /api/product?categoryIds=65                 # 查询所有 categoryId 为 65 的数据
+GET /api/product?categoryIds=65&categoryIds=97  # 查询所有 categoryId 为 65 或 97 的数据
 ```
 
 ##### 文本型
@@ -604,8 +604,8 @@ GET /api/product?name=IC65  # 查询所有 name 包含 IC65 的数据
 枚举型数据使用**精确查询**，需要支持多个查询，**参数命名为字段名**
 
 ```:no-line-numbers
-GET /api/product?status=pending           # 查询所有 status 为 pending 的数据
-GET /api/product?status=pending,complete  # 查询所有 status 为 pending 或 complete 的数据
+GET /api/product?status=pending                  # 查询所有 status 为 pending 的数据
+GET /api/product?status=pending&status=complete  # 查询所有 status 为 pending 或 complete 的数据
 ```
 
 ##### 数值型
@@ -682,14 +682,14 @@ fetch(url, {
   "content": [
     {
       "id": "PrJ38xvJd5gLwrBxO9Y1A",
-      "name": "施耐德 iC65 微型断路器",
+      "name": "极狐阿尔法S5",
       "stock": 10,
       "status": "sale",
       "createdAt": "2022-07-04T13:03:06+08:00"
     },
     {
       "id": "V0WJa4X26eygvwLZl9pom",
-      "name": "施耐德 EA9AN 微型断路器",
+      "name": "极狐阿尔法T5",
       "stock": 10,
       "status": "inquiry",
       "createdAt": "2022-07-04T13:03:06+08:00"
@@ -708,14 +708,14 @@ fetch(url, {
 [
   {
     "id": "PrJ38xvJd5gLwrBxO9Y1A",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "stock": 10,
     "status": "sale",
     "createdAt": "2022-07-04T13:03:06+08:00"
   },
   {
     "id": "V0WJa4X26eygvwLZl9pom",
-    "name": "施耐德 EA9AN 微型断路器",
+    "name": "极狐阿尔法T5",
     "stock": 10,
     "status": "inquiry",
     "createdAt": "2022-07-04T13:03:06+08:00"
@@ -728,7 +728,7 @@ fetch(url, {
 ```json
 {
   "id": "PrJ38xvJd5gLwrBxO9Y1A",
-  "name": "施耐德 iC65 微型断路器",
+  "name": "极狐阿尔法S5",
   "stock": 10,
   "status": "sale",
   "createdAt": "2022-07-04T13:03:06+08:00"
@@ -745,11 +745,11 @@ fetch(url, {
   "list": [
     {
       "id": "OjP9LDwma52gR21x8kzBm",
-      "name": "施耐德 iC65 微型断路器"
+      "name": "极狐阿尔法S5"
     },
     {
       "id": "JVny0D1v6G8Wqpe4d7XPR",
-      "name": "施耐德 EA9AN 微型断路器"
+      "name": "极狐阿尔法T5"
     }
   ]
 }
@@ -761,10 +761,10 @@ fetch(url, {
 {
   "list": [
     {
-      "name": "施耐德 iC65 微型断路器"
+      "name": "极狐阿尔法S5"
     },
     {
-      "name": "施耐德 EA9AN 微型断路器"
+      "name": "极狐阿尔法T5"
     }
   ]
 }
@@ -797,11 +797,11 @@ fetch(url, {
 ```json
 {
   "id": "PrJ38xvJd5gLwrBxO9Y1A",
-  "name": "施耐德 iC65 微型断路器",
+  "name": "极狐阿尔法S5",
   "categoryId": "1qWp840q2nPPy6kxJmyBn",
   "category": {
     "id": "1qWp840q2nPPy6kxJmyBn",
-    "name": "微信断路器"
+    "name": "纯电动轿车"
   }
 }
 ```
@@ -811,9 +811,9 @@ fetch(url, {
 ```json
 {
   "id": "PrJ38xvJd5gLwrBxO9Y1A",
-  "name": "施耐德 iC65 微型断路器",
+  "name": "极狐阿尔法S5",
   "categoryId": "1qWp840q2nPPy6kxJmyBn",
-  "categoryName": "微信断路器"
+  "categoryName": "纯电动轿车"
 }
 ```
 :::
@@ -830,7 +830,7 @@ POST /api/user
 Content-Type: application/json
 
 {
-  "username": "meiko",
+  "username": "tarzan",
   "password": "5wlvu+Ye7TC33MT3VKxU6neaTpPk5EvfuGs+8a7zRLc="
 }
 ```
@@ -838,7 +838,7 @@ Content-Type: application/json
 
 :::danger[反面例子 👎]
 ```http request:no-line-numbers
-POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8a7zRLc%3D
+POST /api/user?username=tarzan&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8a7zRLc%3D
 ```
 :::
 
@@ -865,7 +865,7 @@ POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8
 :::tip[正面例子 👍]
 ```json
 {
-  "username": "meiko",
+  "username": "tarzan",
   "password": "xxxx",
   "roleIds": [1, 2, 3]
 }
@@ -875,7 +875,7 @@ POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8
 :::danger[反面例子 👎]
 ```json
 {
-  "username": "meiko",
+  "username": "tarzan",
   "password": "xxxx",
   "roleIds": [
     {
@@ -1011,7 +1011,7 @@ Content-Type: multipart/form-data
 
 ```json
 {
-  "name": "施耐德 iC65 微型断路器",
+  "name": "极狐阿尔法S5",
   "fileId": "db93274594e9013a4190f068fabdfdbee5e9ccf8c02159439facb3bd51190bd2"
 }
 ```
@@ -1020,7 +1020,7 @@ Content-Type: multipart/form-data
 
 ```json
 {
-  "name": "施耐德 iC65 微型断路器",
+  "name": "极狐阿尔法S5",
   "fileUrl": "https://cdn.example.com/files/bb313c99.png"
 }
 ```
@@ -1031,7 +1031,7 @@ Content-Type: multipart/form-data
 :::danger[反面例子 👎]
 ```javascript
 {
-  name: "施耐德 iC65 微型断路器",
+  name: "极狐阿尔法S5",
   file: File
 }
 ```
@@ -1048,7 +1048,7 @@ Content-Type: multipart/form-data
 {
   "data": {
     "id": "6GLj047k6RqKAnR4Qyq2A",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "avatar": "/upload/bb313c99.png"
   }
 }
@@ -1060,7 +1060,7 @@ Content-Type: multipart/form-data
 {
   "data": {
     "id": "6GLj047k6RqKAnR4Qyq2A",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "avatar": "https://cdn.example.com/files/bb313c99.png"
   }
 }
@@ -1072,7 +1072,7 @@ Content-Type: multipart/form-data
 {
   "data": {
     "id": "6GLj047k6RqKAnR4Qyq2A",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "avatar": "bb313c99.png"
   }
 }
@@ -1086,7 +1086,7 @@ Content-Type: multipart/form-data
 {
   "data": {
     "id": "QPXw3DE7r8YaK2gxWm78e",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "avatar": "https://cdn.example.com/files/bb313c99.png"
   }
 }
@@ -1098,7 +1098,7 @@ Content-Type: multipart/form-data
 {
   "data": {
     "id": "QPXw3DE7r8YaK2gxWm78e",
-    "name": "施耐德 iC65 微型断路器",
+    "name": "极狐阿尔法S5",
     "avatar": "http://cdn.example.com/files/bb313c99.png"
   }
 }
