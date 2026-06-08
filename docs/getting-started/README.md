@@ -13,7 +13,7 @@ description: 架构指南和总览
 | 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
 |---------------|-----------------------|-----------------------|------------------------|-----------------------|
 | 框架            | Next.js               | Next.js               | Vue                    | React                 |
-| 打包工具          | RSpack                | RSpack                | Vite                   | RSpack                |
+| 打包工具          | RSpack                | RSpack                | Vite                   | RSbuild                |
 | UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
 | 路由            | -                     | -                     | Vue Router             | React Router          |
 | 路由模式          | history               | history               | hash                   | hash                  |
@@ -37,7 +37,7 @@ description: 架构指南和总览
 
 - **场景导向**：根据C端/B端不同需求特点，选择合适的框架和工具链
 - **性能优先**：C端项目普遍支持 SSR 和 PWA，注重 SEO 和用户体验
-- **开发效率**：统一采用 TypeScript、现代化打包工具（RSpack/Vite）和代码规范工具
+- **开发效率**：统一采用 TypeScript、现代化打包工具（RSpack/RSbuild/Vite）和代码规范工具
 - **质量保障**：全面的测试覆盖（单元测试、E2E 测试）和代码检查工具链
 - **跨平台能力**：支持桌面应用（Electron）和移动应用（Capacitor）扩展
 
@@ -82,6 +82,7 @@ description: 架构指南和总览
 ### 构建工具
 
 - **[RSpack](https://rspack.rs/zh/)**：基于 Rust 的高性能打包工具，兼容 Webpack 生态
+- **[RSbuild](https://rsbuild.rs/zh/)**：基于 Rspack 的构建工具，提供开箱即用的配置和最佳实践
 - **[Vite](https://cn.vite.dev/)**：现代前端构建工具，提供极速的开发服务器和构建速度
 
 ### 开发工具链

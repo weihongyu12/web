@@ -17,11 +17,11 @@ import TOCInline from '@theme/TOCInline';
 ```json
 {
   "scripts": {
-    "dev": "rspack dev",
+     "dev": "rsbuild dev --open",
     "build": "run-p type-check build-only",
-    "analyze": "rspack build --analyze",
-    "preview": "rspack preview",
-    "build-only": "rspack build",
+    "analyze": "cross-env RSDOCTOR=true rsbuild build",
+    "preview": "rsbuild preview",
+    "build-only": "rsbuild build",
     "type-check": "tsc --noEmit",
     "format": "biome format --write",
     "lint": "run-p lint:js lint:css",
@@ -168,278 +168,163 @@ import TOCInline from '@theme/TOCInline';
   </TabItem>
 </Tabs>
 
-## Rspack
+## RSbuild
 
 :::tip
-[Rspack](https://rspack.rs/zh/) 是一款基于 Rust 编写的现代化 Web 打包工具，具有极快的构建速度和优秀的性能表现。它支持现代 JavaScript 和 TypeScript 特性，并且与 Webpack 兼容，可以无缝迁移现有项目。
+[RSbuild](https://rsbuild.rs/zh/) 是基于 [Rspack](https://rspack.rs/zh/) 的现代化构建工具，提供开箱即用的配置和最佳实践，Rspack 基于 Rust 编写，具有极快的构建速度和优秀的性能表现。它支持现代 JavaScript 和 TypeScript 特性，并且与 Webpack 兼容，可以无缝迁移现有项目。
 :::
 
 ```ts
-// rspack.config.ts
+// rsbuild.config.ts
 
-// $ pnpm add @rspack/cli @rspack/core @rspack/plugin-react-refresh --save-dev
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import { defineConfig } from '@rspack/cli';
-import { rspack } from '@rspack/core';
-import type { Configuration, RspackPluginInstance } from '@rspack/core';
-import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
-// $ pnpm add @aaroon/workbox-rspack-plugin --save-dev
+// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-babel @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss -D
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginBabel } from '@rsbuild/plugin-babel';
+import { pluginSvgr } from '@rsbuild/plugin-svgr';
+import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
+
+// pnpm add compression-webpack-plugin workbox-rspack-plugin image-minimizer-webpack-plugin node-polyfill-webpack-plugin -D
+import CompressionPlugin from 'compression-webpack-plugin';
 import { InjectManifest } from '@aaroon/workbox-rspack-plugin';
-// $ pnpm add image-minimizer-webpack-plugin imagemin sharp imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo imagemin-webp --save-dev
 import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
-// $ pnpm add compression-webpack-plugin --save-dev
-import Compression from 'compression-webpack-plugin';
-// $ pnpm add node-polyfill-webpack-plugin --save-dev
-import NodePolyfillType from 'node-polyfill-webpack-plugin';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
-const require = createRequire(import.meta.url);
-
-const CompressionPlugin = require('compression-webpack-plugin') as typeof Compression;
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin') as typeof NodePolyfillType;
-
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
-
+const isProd = process.env.NODE_ENV === 'production';
 const isDev = process.env.NODE_ENV === 'development';
-const isProduction = process.env.NODE_ENV === 'production';
 
-const config: Configuration = {
-  entry: {
-    main: './src/main.tsx',
-  },
-  devServer: {
-    historyApiFallback: true,
-    hot: true,
-  },
-  resolve: {
-    extensions: ['...', '.ts', '.tsx', '.jsx'],
-    alias: {
-      '@': path.resolve(dirname, './src'),
-    },
-  },
-  target: 'browserslist',
-  module: {
-    rules: [
-      // $ pnpm add @svgr/webpack --save-dev
-      {
-        test: /\.svg$/,
-        issuer: /\.[jt]sx?$/,
-        use: ['@svgr/webpack'],
+// Docs: https://rsbuild.rs/config/
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginBabel({
+      include: /\.[jt]sx?$/,
+      exclude: [/[\\/]node_modules[\\/]/],
+      babelLoaderOptions: {
+        configFile: true,
       },
+    }),
+    pluginSvgr(),
+    pluginTailwindcss(),
+  ],
+  server: {
+    publicDir: [
       {
-        test: /\.js$/,
-        loader: 'builtin:swc-loader',
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.ts$/,
-        loader: 'builtin:swc-loader',
-        options: {
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-            },
-          },
-        },
-        type: 'javascript/auto',
-      },
-      // $ pnpm add babel-loader --save-dev
-      {
-        test: /\.jsx$/,
-        use: [
-          {
-            loader: 'builtin:swc-loader',
-            options: {
-              jsc: {
-                parser: {
-                  syntax: 'ecmascript',
-                  jsx: true,
-                },
-                transform: {
-                  react: {
-                    development: isDev,
-                    refresh: isDev,
-                  },
-                },
-              },
-            },
-          },
-          { loader: 'babel-loader' },
-        ],
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.tsx$/,
-        use: [
-          {
-            loader: 'builtin:swc-loader',
-            options: {
-              jsc: {
-                parser: {
-                  syntax: 'typescript',
-                  tsx: true,
-                },
-                transform: {
-                  react: {
-                    development: isDev,
-                    refresh: isDev,
-                  },
-                },
-              },
-            },
-          },
-          { loader: 'babel-loader' },
-        ],
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.css$/,
-        type: 'css/auto',
-      },
-      // $ pnpm add sass-loader sass-embedded --save-dev
-      {
-        test: /\.(sass|scss)$/,
-        use: [
-          {
-            loader: 'sass-loader',
-            options: {
-              api: 'modern-compiler',
-              implementation: require.resolve('sass-embedded'),
-            },
-          },
-        ],
-        type: 'css/auto',
-      },
-      {
-        test: /\.(jpe?g|png|gif|tif|webp|avif)$/i,
-        enforce: 'pre',
-        use: [
-          {
-            loader: ImageMinimizerPlugin.loader,
-            options: {
-              minimizer: {
-                implementation: ImageMinimizerPlugin.imageminMinify,
-                options: {
-                  plugins: [
-                    ['gifsicle', { optimizationLevel: 3, interlaced: true }],
-                    ['jpegtran', { progressive: true }],
-                    ['optipng', { optimizationLevel: 7 }],
-                    // Svgo configuration here https://github.com/svg/svgo#configuration
-                    [
-                      'svgo',
-                      {
-                        plugins: [
-                          {
-                            name: 'preset-default',
-                            params: {
-                              overrides: {
-                                removeViewBox: false,
-                                addAttributesToSVGElement: {
-                                  params: {
-                                    attributes: [
-                                      { xmlns: 'http://www.w3.org/2000/svg' },
-                                    ],
-                                  },
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                  ],
-                },
-              },
-              generator: [
-                {
-                  // 可以使用"?as=webp"生成器,生成 WebP 图片格式
-                  preset: 'webp',
-                  implementation: ImageMinimizerPlugin.imageminGenerate,
-                  options: {
-                    plugins: [['imagemin-webp', { quality: 100, lossless: true }]],
-                  },
-                },
-                {
-                  // 可以使用"?as=avif"生成器,生成 WebP 图片格式
-                  preset: 'avif',
-                  implementation: ImageMinimizerPlugin.sharpGenerate,
-                  options: {
-                    encodeOptions: {
-                      avif: { lossless: false },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ],
-        type: 'asset/resource',
+        ignore: ['mockServiceWorker.js'],
       },
     ],
   },
   output: {
-    filename: isProduction ? '[name].[contenthash:8].js' : undefined,
-    clean: true,
-    module: isProduction,
-    chunkFormat: isProduction ? 'module' : undefined,
-    chunkLoading: isProduction ? 'import' : undefined,
-    workerChunkLoading: isProduction ? 'import' : undefined,
-    crossOriginLoading: 'anonymous',
+    module: isProd,
+    manifest: isProd,
+    polyfill: 'usage',
+    dataUriLimit: 0,
   },
-  plugins: [
-    new rspack.SubresourceIntegrityPlugin(),
-    new rspack.HtmlRspackPlugin({
-      template: './index.html',
-      scriptLoading: isProduction ? 'module' : 'defer',
-    }),
-    isProduction ? new InjectManifest({
-      swSrc: './src/service-worker.ts',
-      dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
-      exclude: [/\.map$/, /asset-manifest\.json$/, /LICENSE/],
-      // Bump up the default maximum size (2mb) that's precached,
-      // to make lazy-loading failure scenarios less likely.
-      // See https://github.com/cra-template/pwa/issues/13#issuecomment-722667270
-      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-    }) : null,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    isDev ? new ReactRefreshRspackPlugin() : null,
-    // brotli 预压缩
-    isProduction ? new CompressionPlugin({
-      filename: '[path][base].br[query]',
-      algorithm: 'brotliCompress',
-      test: /\.(html|js|css|svg|ico|xml|json|wasm|eot|otf|ttf|bmp|md)$/,
-      compressionOptions: { level: 11 },
-      minRatio: 1,
-    }) as unknown as RspackPluginInstance : null,
-    // gzip 预压缩
-    isProduction ? new CompressionPlugin({
-      filename: '[path][base].gz[query]',
-      algorithm: 'gzip',
-      test: /\.(html|js|css|svg|ico|xml|json|wasm|eot|otf|ttf|bmp|md)$/,
-      compressionOptions: { level: 9 },
-      minRatio: 1,
-    }) as unknown as RspackPluginInstance : null,
+  html: isProd ? { crossorigin: 'anonymous' } : undefined,
+  security: isProd ? { sri: { enable: 'auto' } } : undefined,
+  performance: {
+    buildCache: isDev,
+    preload: isProd ? { type: 'initial' } : undefined,
+    prefetch: isProd ? { type: 'async-chunks' } : undefined,
+  },
+  tools: {
+    rspack: {
+      module: {
+        rules: [
+          ...(isProd ? [{
+            test: /\.(jpe?g|png|gif|tif|webp|svg|avif)$/i,
+            enforce: 'pre' as const,
+            use: [
+              {
+                loader: ImageMinimizerPlugin.loader,
+                options: {
+                  minimizer: {
+                    implementation: ImageMinimizerPlugin.imageminMinify,
+                    options: {
+                      plugins: [
+                        ['gifsicle', { optimizationLevel: 3, interlaced: true }],
+                        ['jpegtran', { progressive: true }],
+                        ['optipng', { optimizationLevel: 7 }],
+                        // Svgo configuration here https://github.com/svg/svgo#configuration
+                        [
+                          'svgo',
+                          {
+                            plugins: [
+                              {
+                                name: 'preset-default',
+                              },
+                              {
+                                name: 'addAttributesToSVGElement',
+                                params: {
+                                  attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+                                },
+                              },
+                            ],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  generator: [
+                    {
+                      preset: 'webp',
+                      implementation: ImageMinimizerPlugin.imageminGenerate,
+                      options: {
+                        plugins: [['imagemin-webp', { quality: 100, lossless: true }]],
+                      },
+                    },
+                    {
+                      preset: 'avif',
+                      implementation: ImageMinimizerPlugin.sharpGenerate,
+                      options: {
+                        encodeOptions: {
+                          avif: { lossless: false },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }] : []),
+        ],
+      },
+      plugins: [
+        ...(isProd
+          ? [
+            new CompressionPlugin({
+              filename: '[path][base].br[query]',
+              algorithm: 'brotliCompress',
+              test: /\.(html|js|css|svg|ico|xml|json|wasm|eot|otf|ttf|bmp|md)$/,
+              compressionOptions: { level: 11 },
+              // threshold: 10240,
+              minRatio: 1,
+            }),
+            new CompressionPlugin({
+              filename: '[path][base].gz[query]',
+              algorithm: 'gzip',
+              test: /\.(html|js|css|svg|ico|xml|json|wasm|eot|otf|ttf|bmp|md)$/,
+              compressionOptions: { level: 9 },
+              // threshold: 10240,
+              minRatio: 1,
+            }),
+            new InjectManifest({
+              swSrc: './src/service-worker.ts',
+              dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
+              exclude: [/\.map$/, /asset-manifest\.json$/, /LICENSE/],
+              // Bump up the default maximum size (2mb) that's precached,
+              // to make lazy-loading failure scenarios less likely.
+              // See https://github.com/cra-template/pwa/issues/13#issuecomment-722667270
+              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+            }),
+          ]
+          : []),
 
-    new NodePolyfillPlugin() as unknown as RspackPluginInstance,
-  ].filter(Boolean),
-  optimization: {
-    minimizer: [
-      new rspack.SwcJsMinimizerRspackPlugin(),
-      new rspack.LightningCssMinimizerRspackPlugin({
-        minimizerOptions: { targets },
-      }),
-    ],
+        new NodePolyfillPlugin(),
+      ],
+    },
   },
-  experiments: {
-    outputModule: isProduction,
-  },
-  devtool: isDev ? 'eval-cheap-module-source-map' : false,
-  lazyCompilation: false,
-};
-
-export default defineConfig(config);
+});
 ```
 
 ## Webpack/Vite
