@@ -64,14 +64,14 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 
 - 接口路径以 `/api` 或 `/{version}/api` 开头
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```:no-line-numbers
 /api/product
 /v7/api/product
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```:no-line-numbers
 /biz/product
 /biz/api/product
@@ -80,14 +80,14 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 
 **注意：一个产品无论后端有多少个服务组成也应该只有一个 API 入口**
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```:no-line-numbers
 /api/product
 /api/order
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```:no-line-numbers
 /product-service/product
 /order-service/order
@@ -96,7 +96,7 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 
 - 路径命名应该使用**中划线命名法**，而非驼峰命名法 或 下划线命名法
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 
 中划线命名法
 
@@ -105,7 +105,7 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 下划线命名法
 
@@ -122,13 +122,13 @@ CORS 请求失败会产生错误，但是为了安全，在 JavaScript 代码层
 
 - 接口路径使用资源**名词而非动词**，比如 `/api/product` `/api/order`，**动作应由 HTTP Method 体现**，资源组可以进行逻辑嵌套。
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```http request:no-line-numbers
 POST /api/product
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```http request:no-line-numbers
 POST /api/create-product
 ```
@@ -140,13 +140,13 @@ POST /api/create-product
 
 以获取筛选表单中的任务字段下拉选项为例：
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```:no-line-numbers
 /api/product
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```:no-line-numbers
 /api/product-with-select
 ```
@@ -172,7 +172,7 @@ Authorization: <type> <credentials>
 
 #### 用户信息应使用身份认证获取，不依赖客户端id
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```http request:no-line-numbers
 POST /api/user
 Authorization: Bearer b25ed4f6b1ec69afea62dc248e52b8b24c090dbf3c07046bf8ff8a6b
@@ -183,7 +183,7 @@ Authorization: Bearer b25ed4f6b1ec69afea62dc248e52b8b24c090dbf3c07046bf8ff8a6b
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 ```http request:no-line-numbers
 POST /api/user
@@ -212,7 +212,7 @@ POST /api/user
 
 规范使用 HTTP Headers，参见 [MDN Web Doc](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers)
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```http request:no-line-numbers
 POST /api/product
 Authorization: Bearer b25ed4f6b1ec69afea62dc248e52b8b24c090dbf3c07046bf8ff8a6b
@@ -220,7 +220,7 @@ Content-Type: application/json
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 Headers 不是标准 HTTP Headers
 
 ```http request:no-line-numbers
@@ -253,11 +253,11 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 - 家庭住址
 - 健康数据
 
-:::warning 注意
+:::warning[注意]
 密码仅限在请求时作为参数使用，响应参数不应该包含密码相关字段。在数据库，密码字段推荐使用 Bcrypt 算法 或者 PBKDF2 算法进行存储。
 :::
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "name": "田野",
@@ -267,7 +267,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "name": "田野",
@@ -283,7 +283,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 
 推荐对自增 ID 进行 Hash（例如 YouTube 和 bilibili），可以隐藏真实的业务 ID，从而增加了攻击成本。建议参考 [Sqids](https://sqids.org/)。
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "id": "Zn8DxdXx5Z5VD51dwElom"
@@ -291,7 +291,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "id": 1
@@ -343,7 +343,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 
 - 应该使用 JSON，避免使用 XML 或 其他数据格式
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "id": "GwW0bZAzm2qQE1wDKqope"
@@ -351,7 +351,7 @@ UserKey: param:key:loginInfo:zyd0214999218:WECHAT:b46bf79b
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 使用纯文本
 
@@ -380,7 +380,7 @@ Content-Type: application/json
 
 - 前后端传输过程以标准 JSON 格式，避免反复正反序列化
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "data": [
@@ -397,7 +397,7 @@ Content-Type: application/json
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 ```json
 {
@@ -408,7 +408,7 @@ Content-Type: application/json
 
 - **时间字段以 RFC 3339 格式返回：YYYY-MM-DDTHH:MM:SSZ**
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "date": "2022-07-03T23:01:36+08:00"
@@ -416,7 +416,7 @@ Content-Type: application/json
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 时间格式不符合 RFC 3339 格式
 
@@ -437,7 +437,7 @@ Content-Type: application/json
 
 - **空数组使用 `[]`，而不是 `null`**
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "list": []
@@ -445,7 +445,7 @@ Content-Type: application/json
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "list": null
@@ -479,7 +479,7 @@ interface Error {
 | `message` | 错误提示信息，可用于前端界面提示，要求：简短清晰、提示友好，引导用户进行下一步操作或解释错误原因，提示信息可以包括错误原因、上下文环境、推荐操作 |
 | `error`   | 导致错误的详细原因，需要记录进日志，在开发环境协助调试 |
 
-:::danger 5xx 服务端错误
+:::danger[5xx 服务端错误]
 
 对于出现 `5xx` 服务端错误，可以在开发环境将服务器的错误信息返回，方便在开发中调试：
 
@@ -739,7 +739,7 @@ fetch(url, {
 
 ##### 所有数组需要返回一个`key`
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "list": [
@@ -756,7 +756,7 @@ fetch(url, {
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "list": [
@@ -773,7 +773,7 @@ fetch(url, {
 
 ##### 可枚举字段使用有语义英文而非无语义数字
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "status": "pending"  // "pending" | "complete" | "error"
@@ -781,7 +781,7 @@ fetch(url, {
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "status": 0
@@ -793,7 +793,7 @@ fetch(url, {
 
 对于外联数据，使用自然嵌套结构而不是平铺
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "id": "PrJ38xvJd5gLwrBxO9Y1A",
@@ -807,7 +807,7 @@ fetch(url, {
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "id": "PrJ38xvJd5gLwrBxO9Y1A",
@@ -824,7 +824,7 @@ fetch(url, {
 
 创建类接口参数使用 JSON 作为请求体，不应该使用 QueryString
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```http request:no-line-numbers
 POST /api/user
 Content-Type: application/json
@@ -836,7 +836,7 @@ Content-Type: application/json
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```http request:no-line-numbers
 POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8a7zRLc%3D
 ```
@@ -862,7 +862,7 @@ POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8
 
 以创建用户为例：`POST /api/users`
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "username": "meiko",
@@ -872,7 +872,7 @@ POST /api/user?username=meiko&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B8
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "username": "meiko",
@@ -950,7 +950,7 @@ interface File {
 | `url`  | 文件在 CDN 或者 OSS 的 URL  |
 | `name` | 原文件名                  |
 
-:::warning 注意
+:::warning[注意]
 上传接口的参数为 FormData，而非 JSON
 
 ```http request:no-line-numbers
@@ -1006,7 +1006,7 @@ Content-Type: multipart/form-data
 
 - 对于使用到文件的接口使用文件 id 或地址而非 FormData
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 使用文件ID
 
 ```json
@@ -1028,7 +1028,7 @@ Content-Type: multipart/form-data
 **注意**：先由 `POST /api/file` 上传完文件拿到文件 id 或地址后再执行后续操作
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```javascript
 {
   name: "施耐德 iC65 微型断路器",
@@ -1041,7 +1041,7 @@ Content-Type: multipart/form-data
 
 - 文件路径至少补全至根路径
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 补全至根路径
 
 ```json
@@ -1067,7 +1067,7 @@ Content-Type: multipart/form-data
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "data": {
@@ -1081,7 +1081,7 @@ Content-Type: multipart/form-data
 
 - 使用 CDN 或者 OSS 时，**要求使用 HTTPS 协议**
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "data": {
@@ -1093,7 +1093,7 @@ Content-Type: multipart/form-data
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "data": {
@@ -1107,7 +1107,7 @@ Content-Type: multipart/form-data
 
 - **不要使用 CDN 或者 OSS 参数**，以便前端灵活处理
 
-:::tip 正面例子 👍
+:::tip[正面例子 👍]
 ```json
 {
   "fileUrl": "https://cdn.example.com/files/bb313c99.png"
@@ -1115,7 +1115,7 @@ Content-Type: multipart/form-data
 ```
 :::
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 ```json
 {
   "fileUrl": "https://cdn.example.com/files/bb313c99.png?x-oss-process=style/s1"

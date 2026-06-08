@@ -88,7 +88,7 @@ sidebar_position: 2
 
 无意义或者翻译式注释
 
-:::danger 反面例子 👎
+:::danger[反面例子 👎]
 
 ```javascript
 // 保存

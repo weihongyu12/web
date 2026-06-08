@@ -22,7 +22,7 @@ import TOCInline from '@theme/TOCInline';
 
 尽可能在网址中采用易读的字词而非冗长的 ID 编号。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 复杂、非描述性的网址：
 
 ```:no-line-numbers
@@ -30,7 +30,7 @@ http://www.example.com/index.php?id_sezione=360&sid=3a5ebc944f41daa6f849f730f1
 ```
 :::
 
-:::tip 建议 👍
+:::tip[建议 👍]
 简单、描述性的网址：
 
 ```:no-line-numbers
@@ -40,7 +40,7 @@ http://en.wikipedia.org/wiki/Aviation
 
 不妨考虑在网址中使用标点符号。这样有助于用户和搜索引擎更轻松地了解网址中的关键字。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 将网址中的关键字连接在一起：
 
 ```:no-line-numbers
@@ -48,7 +48,7 @@ http://www.example.com/greendress.html
 ```
 :::
 
-:::tip 建议 👍
+:::tip[建议 👍]
 网址中的关键字用标点符号分隔开：
 
 ```:no-line-numbers
@@ -58,7 +58,7 @@ http://en.wikipedia.org/wiki/Aviation
 
 建议在网址中使用连字符 `-`，而不要使用下划线 `_`。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 使用下划线 (`_`)：
 
 ```:no-line-numbers
@@ -66,7 +66,7 @@ http://www.example.com/summer_clothing/filter?color_profile=dark_grey
 ```
 :::
 
-:::tip 建议 👍
+:::tip[建议 👍]
 使用连字符 (`-`)：
 
 ```:no-line-numbers
@@ -94,7 +94,7 @@ http://www.example.com/summer-clothing/filter?color-profile=dark-grey
 
 并非所有用户的浏览器都启用了 JavaScript。此外，ActiveX 等技术在某些浏览器中的呈现效果可能并不好（或根本不适用）。建议按照富媒体文件使用指南创建网站，并在 Lynx 等纯文本浏览器中测试网站。如果提供富媒体内容和功能的纯文本替代版本，则有助于搜索引擎更方便地抓取网站并将其编入索引，同时也大大方便了使用屏幕阅读器等其他技术访问网站的用户。
 
-:::note 富媒体文件使用指南
+:::note[富媒体文件使用指南]
 
 **一般性最佳做法**
 
@@ -156,14 +156,14 @@ Flash 不再受支持。
 
 可以跟踪的链接示例：
 
-:::tip 可以跟踪的链接示例 👍
+:::tip[可以跟踪的链接示例 👍]
 ```html
 <a href="https://example.com">
 <a href="/relative/path/file">
 ```
 :::
 
-:::danger 无法跟踪的链接示例 👎
+:::danger[无法跟踪的链接示例 👎]
 ```html
 <a routerLink="some/path">
 <span href="https://example.com">
@@ -175,7 +175,7 @@ Flash 不再受支持。
 
 确保 `<a>` 标记所链接到的网址是搜索引擎可以向其发送请求的实际网址，例如：
 
-:::tip 可以解析 👍
+:::tip[可以解析 👍]
 ```
 https://example.com/stuff
 /products
@@ -183,7 +183,7 @@ https://example.com/stuff
 ```
 :::
 
-:::danger 无法解析 👎
+:::danger[无法解析 👎]
 ```
 javascript:goTo('products')
 javascript:window.location.href='/products'
@@ -473,7 +473,7 @@ Link: <http://www.example.com/downloads/white-paper.pdf>; rel="canonical"
 
 对于不会被转移到新网站的旧网站内容，请确保这些孤立网址能够正确返回 HTTP 404 或 410 错误响应代码。可以在新网站的配置面板中进行设定，让这些旧网址返回错误响应代码，或者为新网址创建重定向并使其返回 HTTP 错误代码。
 
-:::tip 避免无关的重定向
+:::tip[避免无关的重定向]
 请不要将多个旧网址重定向至一个无关的目标，如新网站的首页。这样做可能会令用户感到困惑，并可能会被视为软 404 错误。但是，如果将之前在多个网页上托管的内容合并成了一个新网页，可将多个旧网址重定向至这个合并后的新网页。
 :::
 
@@ -546,7 +546,7 @@ Googlebot 及搜索引擎的系统需要花费一段时间才能发现并处理�
 
 ##### 停用整个网站（不推荐）
 
-:::danger 警告
+:::danger[警告]
 Google 系统采用了可靠的设计，可以帮助网站从暂时性问题中恢复正常。不过，从 Google 索引中彻底移除网站是一项重大变更，需要相当长的一段时间才能恢复。彻底移除后的恢复过程所需的时间是不固定的，也没有加速完成此过程的机制。因此，搜索引擎强烈建议限制网站功能，而不要从 Google 搜索中移除网站。
 :::
 
@@ -559,7 +559,7 @@ Google 系统采用了可靠的设计，可以帮助网站从暂时性问题中�
 
 ###### 关于停用网站的最佳做法
 
-:::warning 警告
+:::warning[警告]
 请注意，如果网页返回了 503 HTTP 结果代码，则 Google 系统无法刷新网站中包含的标题、说明、元数据或结构化数据。
 :::
 

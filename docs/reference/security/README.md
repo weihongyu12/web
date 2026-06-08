@@ -43,7 +43,7 @@ Content-Security-Policy:
   base-uri 'none';
 ```
 
-:::tip 参见
+:::tip[参见]
 - [内容安全策略（CSP）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CSP)
 - [Content-Security-Policy](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Security-Policy)
 :::
@@ -61,7 +61,7 @@ X-Content-Type-Options: nosniff
 Content-Type: text/html; charset=utf-8
 ```
 
-:::tip 参见
+:::tip[参见]
 - [X-Content-Type-Options](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/X-Content-Type-Options)
 :::
 
@@ -75,7 +75,7 @@ Content-Type: text/html; charset=utf-8
 X-Frame-Options: DENY
 ```
 
-:::tip 参见
+:::tip[参见]
 - [X-Frame-Options](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/X-Frame-Options)
 :::
 
@@ -90,7 +90,7 @@ X-Frame-Options: DENY
 Cross-Origin-Resource-Policy: same-origin
 ```
 
-:::tip 参见
+:::tip[参见]
 - [Cross-Origin-Resource-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy)
 :::
 
@@ -104,7 +104,7 @@ Cross-Origin-Resource-Policy: same-origin
 Cross-Origin-Opener-Policy: same-origin-allow-popups
 ```
 
-:::tip 参见
+:::tip[参见]
 - [Cross-Origin-Opener-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
 :::
 
@@ -118,7 +118,7 @@ Cross-Origin-Opener-Policy: same-origin-allow-popups
 Strict-Transport-Security: max-age=31536000
 ```
 
-:::tip 参见
+:::tip[参见]
 - [HTTP Strict Transport Security](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Strict-Transport-Security)
 :::
 
@@ -138,7 +138,7 @@ Access-Control-Allow-Headers: Authorization
 Access-Control-Max-Age: 86400
 ```
 
-:::tip 参见
+:::tip[参见]
 - [Access-Control-Allow-Origin](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Origin)
 - [Access-Control-Allow-Credentials](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)
 - [Access-Control-Allow-Headers](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Headers)
@@ -158,7 +158,7 @@ Access-Control-Max-Age: 86400
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-:::tip 参见
+:::tip[参见]
 - [Cross-Origin-Embedder-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy)
 :::
 
@@ -377,7 +377,7 @@ Trusted Types 的工作原理是锁定以下有风险的接收器函数；
 
 Trusted Types 要求在将数据传递给上述接收器函数之前对其进行处理。仅使用字符串将失败，因为浏览器不知道数据是否可信：
 
-:::danger 错误做法 👎
+:::danger[错误做法 👎]
 ```js
 Element.innerHTML  = location.href;
 ```
@@ -386,7 +386,7 @@ Element.innerHTML  = location.href;
 
 要表示数据已被安全处理，请创建一个特殊对象 - Trusted Type。
 
-:::tip 正确做法 👍
+:::tip[正确做法 👍]
 ```js
 Element.innerHTML  = TrustedHTML;
 ```
@@ -477,7 +477,7 @@ el.innerHTML = escaped;  // '<img src="x" onerror="alert(1)">'
 
 [内容安全策略 (CSP)](https://developer.mozilla.org/docs/Web/HTTP/CSP) 是一个附加的安全层，有助于缓解 XSS。 配置 CSP 涉及将 Content-Security-Policy HTTP 标头添加到网页并设置值以控制允许用户代理为该页面加载哪些资源。使用基于随机数或哈希的 CSP 来缓解 XSS，而不是常用的基于主机白名单的 CSP，后者通常会使页面暴露于 XSS，因为它们可以在大多数配置中被绕过。
 
-:::tip 关键术语
+:::tip[关键术语]
 
 **nonce**
 
@@ -497,13 +497,13 @@ nonce 是仅使用一次的随机数，可用于将 `<script>` 标签标记为�
 白名单 CSP 在阻止攻击者利用 XSS 方面通常无效。 这就是为什么建议使用基于加密随机数或散列的严格 CSP 的原因，这样可以避免上述陷阱。
 
 
-:::danger 白名单 CSP 👎
+:::danger[白名单 CSP 👎]
 - 不能有效地保护网站。 ❌
 - 必须高度定制。 😓
 - 在大多数配置中可以绕过。😓
 :::
 
-:::tip 严格 CSP 👍
+:::tip[严格 CSP 👍]
 - 有效保护网站。 ✅
 - 始终具有相同的结构。 😌
 :::

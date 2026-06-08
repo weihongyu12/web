@@ -22,7 +22,7 @@ import TOCInline from '@theme/TOCInline';
 
 所有 HTML 文档必须以 HTML5 文档类型声明开始，并保持小写格式。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <!doctype html>
 <html lang="zh-CN">
@@ -37,7 +37,7 @@ import TOCInline from '@theme/TOCInline';
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <!DOCTYPE HTML>
 <HTML>
@@ -51,7 +51,7 @@ import TOCInline from '@theme/TOCInline';
 
 确保所有HTML文档包含必需的结构元素：`<html>`、`<head>` 和 `<body>`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <!doctype html>
 <html lang="zh-CN">
@@ -67,7 +67,7 @@ import TOCInline from '@theme/TOCInline';
 </html>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <!doctype html>
 <meta charset="utf-8">
@@ -82,7 +82,7 @@ import TOCInline from '@theme/TOCInline';
 
 在根 HTML 元素上指定语言属性，帮助屏幕阅读器和翻译工具正确处理内容。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <html lang="zh-CN">
 <!-- 中文内容 -->
@@ -93,7 +93,7 @@ import TOCInline from '@theme/TOCInline';
 </html>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <html>
 <!-- 缺少语言声明 -->
@@ -105,7 +105,7 @@ import TOCInline from '@theme/TOCInline';
 
 在文档头部明确声明 UTF-8 字符编码，确保内容正确渲染。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <head>
   <meta charset="utf-8">
@@ -113,7 +113,7 @@ import TOCInline from '@theme/TOCInline';
 </head>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <head>
   <title>缺少字符编码声明</title>
@@ -127,7 +127,7 @@ import TOCInline from '@theme/TOCInline';
 
 使用 2 个空格进行缩进，嵌套元素应当缩进一次。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <div class="container">
   <header>
@@ -142,7 +142,7 @@ import TOCInline from '@theme/TOCInline';
 </div>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <div class="container">
 <header>
@@ -160,7 +160,7 @@ import TOCInline from '@theme/TOCInline';
 ### 标签命名规范
 所有HTML标签使用小写字母，包括文档类型声明。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <section>
   <article>
@@ -172,7 +172,7 @@ import TOCInline from '@theme/TOCInline';
 </section>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <SECTION>
   <Article>
@@ -189,13 +189,13 @@ import TOCInline from '@theme/TOCInline';
 ### 属性引号使用
 所有属性值必须使用双引号包围。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <img src="images/logo.png" alt="公司标志" class="logo">
 <input type="email" placeholder="请输入邮箱地址">
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <img src='images/logo.png' alt=公司标志 class="logo">
 <input type=email placeholder='请输入邮箱地址'>
@@ -215,7 +215,7 @@ HTML属性应按以下顺序排列：
 7. `tabindex`
 8. `style`
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <a class="btn btn-primary" id="submit-btn" data-toggle="modal" href="#modal" title="提交表单" role="button">
   提交
@@ -223,7 +223,7 @@ HTML属性应按以下顺序排列：
 <input class="form-control" type="email" name="email" placeholder="邮箱地址" required>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <a href="#modal" class="btn btn-primary" title="提交表单" id="submit-btn">
   提交
@@ -235,7 +235,7 @@ HTML属性应按以下顺序排列：
 
 布尔属性不需要声明值，属性存在即表示`true`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <input type="checkbox" checked>
 <input type="text" disabled>
@@ -245,7 +245,7 @@ HTML属性应按以下顺序排列：
 </audio>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <input type="checkbox" checked="true">
 <input type="text" disabled="disabled">
@@ -257,14 +257,14 @@ HTML属性应按以下顺序排列：
 
 避免在同一元素上出现重复属性。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <div class="container main-content" data-role="main">
   内容
 </div>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <div class="container" class="main-content" data-role="main">
   内容
@@ -277,7 +277,7 @@ HTML属性应按以下顺序排列：
 ### 自闭合元素处理
 HTML5自闭合元素不需要尾部斜杠。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <img src="image.jpg" alt="描述">
 <input type="text" name="username">
@@ -287,7 +287,7 @@ HTML5自闭合元素不需要尾部斜杠。
 <br>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <img src="image.jpg" alt="描述" />
 <input type="text" name="username" />
@@ -301,7 +301,7 @@ HTML5自闭合元素不需要尾部斜杠。
 
 非空元素必须有对应的闭合标签，包括可选的闭合标签。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <ul>
   <li>项目一</li>
@@ -312,7 +312,7 @@ HTML5自闭合元素不需要尾部斜杠。
 <p>这是另一个段落。</p>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <ul>
   <li>项目一
@@ -328,7 +328,7 @@ HTML5自闭合元素不需要尾部斜杠。
 
 确保元素正确嵌套，遵循 HTML 语义化规则。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <article>
   <header>
@@ -341,7 +341,7 @@ HTML5自闭合元素不需要尾部斜杠。
 </article>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <p>
   <div>段落内不能包含块级元素</div>
@@ -358,7 +358,7 @@ HTML5自闭合元素不需要尾部斜杠。
 
 确保标题按逻辑层级正确使用，不要跳过级别。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <h1>主标题</h1>
   <h2>二级标题</h2>
@@ -368,7 +368,7 @@ HTML5自闭合元素不需要尾部斜杠。
     <h3>三级标题</h3>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <h1>主标题</h1>
   <h3>跳过了h2直接使用h3</h3>
@@ -382,7 +382,7 @@ HTML5自闭合元素不需要尾部斜杠。
 
 所有表单输入元素必须有适当的标签关联。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <label for="username">用户名：</label>
 <input type="text" id="username" name="username">
@@ -399,7 +399,7 @@ HTML5自闭合元素不需要尾部斜杠。
 </fieldset>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <input type="text" placeholder="用户名">
 <input type="email" placeholder="邮箱">
@@ -415,14 +415,14 @@ HTML5自闭合元素不需要尾部斜杠。
 
 所有图片必须提供适当的替代文本。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <img src="chart.png" alt="2023年销售额增长图表，显示同比增长15%">
 <img src="decorative-border.png" alt="">
 <img src="logo.png" alt="ABC公司">
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <img src="chart.png">
 <img src="important-graph.png" alt="图片">
@@ -433,7 +433,7 @@ HTML5自闭合元素不需要尾部斜杠。
 
 图像地图必须有有效的名称和区域定义。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <img src="worldmap.png" alt="世界地图" usemap="#worldmap">
 <map name="worldmap">
@@ -442,7 +442,7 @@ HTML5自闭合元素不需要尾部斜杠。
 </map>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <img src="worldmap.png" usemap="#worldmap">
 <map name="worldmap">
@@ -457,14 +457,14 @@ HTML5自闭合元素不需要尾部斜杠。
 
 CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或绝对路径。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <link rel="stylesheet" href="styles/main.css">
 <link rel="stylesheet" href="//cdn.example.com/bootstrap.css">
 <script src="scripts/app.js"></script>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <link rel="stylesheet" type="text/css" href="styles/main.css">
 <script type="text/javascript" src="scripts/app.js"></script>
@@ -475,7 +475,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 对于来自 CDN 的外部资源，建议添加完整性验证。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" 
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" 
@@ -489,7 +489,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 适当使用 ARIA 属性增强可访问性，但不要滥用。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <button aria-expanded="false" aria-controls="menu" id="menu-button">
   菜单
@@ -507,7 +507,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 </main>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <div role="button" onclick="openMenu()">菜单</div>
 <div role="main">
@@ -523,7 +523,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 一个页面只能有一个 `main` 元素，除非其他 `main` 元素被隐藏。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <body>
   <header><!-- 页头内容 --></header>
@@ -535,7 +535,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 </body>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <body>
   <main>第一个主要内容区域</main>
@@ -550,7 +550,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 确保页面中所有 ID 值唯一，被引用的 ID 必须存在。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <form>
   <label for="email">邮箱：</label>
@@ -566,7 +566,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 </section>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <div id="content">内容区域1</div>
 <div id="content">内容区域2</div> <!-- 重复ID -->
@@ -581,13 +581,13 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 避免在 HTML 中直接使用内联事件处理程序，优先使用外部 JavaScript。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <button id="submit-btn" class="btn-primary">提交</button>
 <script src="scripts/form-handler.js"></script>
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <button onclick="submitForm()" class="btn-primary">提交</button>
 ```
@@ -599,7 +599,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 对于预留的 XML 字符和特殊字符，适当使用 HTML 实体。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <p>价格：&lt; 100元 &amp; 免费配送</p>
 <p>版权所有 &copy; 2023 公司名称</p>
@@ -607,7 +607,7 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <p>价格：< 100元 & 免费配送</p>
 <p>版权所有 © 2023 公司名称</p>
@@ -620,14 +620,14 @@ CSS 和 JavaScript 文件引用不需要指定 `type` 属性，使用相对或�
 
 尽可能避免不必要的父元素，保持 HTML 结构简洁。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```html
 <img class="avatar" src="user.jpg" alt="用户头像">
 <h1 class="page-title">页面标题</h1>
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```html
 <span class="avatar">
   <img src="user.jpg" alt="用户头像">

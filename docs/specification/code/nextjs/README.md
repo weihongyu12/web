@@ -21,7 +21,7 @@ Next.js App Router 默认组件为 Server Components。为了减小客户端 Bun
 - **按需客户端**：仅在组件需要使用 React Hooks (`useState`, `useEffect`)、浏览器 API 或事件监听 (`onClick`) 时，才在文件顶部添加 `use client`。 
 - **异步限制**：Client Components 不能是 `async` 函数。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 // app/components/SubmitButton.tsx
 'use client'; // ✅ 只有交互组件才标记为 client
@@ -55,7 +55,7 @@ export default async function Page() {
 ```
 :::
 
-:::danger 不建议
+:::danger[不建议]
 ```tsx
 // ❌ 错误：在 Client Component 中使用 async
 'use client';
@@ -74,7 +74,7 @@ export default async function ClientPage() {
 - **首屏图片优先级**：对于页面顶部可见区域（LCP 元素）的图片，**必须**添加 `priority` 属性，以取消懒加载。 
 - **尺寸占位**：必须指定 `width` 和 `height`（或使用 `fill`），以防止布局偏移。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 import Image from 'next/image';
 import heroImage from '../public/hero.png';
@@ -105,7 +105,7 @@ export default function Hero() {
 :::
 
 
-:::danger 不建议
+:::danger[不建议]
 ```tsx
 // ❌ 违反 ESLint 规则，且会导致性能问题
 <img src="/hero.png" alt="Hero" />
@@ -120,7 +120,7 @@ export default function Hero() {
 - **内联脚本 ID**：内联脚本必须包含 `id` 属性，以便 Next.js 追踪和优化。 
 - **位置控制**：不要将 `<Script>` 组件放在 `next/head` 或 `Metadata` 中，应直接放在组件树里。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 import Script from 'next/script';
 
@@ -155,7 +155,7 @@ export default function RootLayout({ children }) {
 - **使用 Metadata API**：使用导出的 `metadata` 对象或 `generateMetadata` 函数来定义 `<title>`、`<meta>` 等标签。 
 - **禁止手动 Head**：禁止使用 `<head>` 标签或 `next/head`（在 App Router 中）。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 // app/layout.tsx
 import type { Metadata } from 'next';
@@ -178,7 +178,7 @@ export default function RootLayout({ children }) {
 ```
 :::
 
-:::danger 不建议
+:::danger[不建议]
 ```tsx
 // ❌ 不要在 App Router 页面中手动写 head
 export default function Page() {
@@ -200,7 +200,7 @@ export default function Page() {
 
 - **Google Fonts**：使用 `next/font/google`，严禁通过 `<link rel="stylesheet">` 引入 Google Fonts。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 import { Inter } from 'next/font/google';
 
@@ -231,7 +231,7 @@ export default function RootLayout({ children }) {
 - **服务端重定向**：在 Server Components、Server Actions 或 Route Handlers 中，使用 `redirect` 函数 。 
 - **预加载**：`<Link>` 组件在视口可见时会自动预加载目标路由。如果目标页面数据更新非常频繁或资源消耗极大，可视情况设置 `prefetch={false}`，但在大多数情况下应保持默认以提升用户体验。
 
-:::tip 建议
+:::tip[建议]
 ```tsx
 'use client';
 
@@ -261,7 +261,7 @@ export default function NavigationBar() {
 ```
 :::
 
-:::danger 不建议
+:::danger[不建议]
 ```tsx
 import { useRouter } from 'next/router'; // ❌ App Router 中不能使用 next/router
 

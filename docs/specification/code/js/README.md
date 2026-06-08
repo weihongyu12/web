@@ -14,7 +14,7 @@ import TOCInline from '@theme/TOCInline';
 
 1.1 优先使用 `const` 声明常量，对于需要重新赋值的变量则使用 `let`。避免使用 `var`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const name = 'Alice';
 let age = 30;
@@ -22,7 +22,7 @@ age = 31;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 var name = 'Alice'; // 不推荐
 ```
@@ -30,14 +30,14 @@ var name = 'Alice'; // 不推荐
 
 1.2 每个 `const` 或 `let` 声明一个变量。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const user = 'test';
 const age = 25;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const user = 'test', age = 25;
 ```
@@ -48,7 +48,7 @@ const user = 'test', age = 25;
 1.4 禁止删除变量。
 
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 let name = 'test';
 // delete name; // 编译错误
@@ -57,13 +57,13 @@ let name = 'test';
 
 1.5 避免将变量初始化为 `undefined`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 let name: string;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 let name = undefined;
 ```
@@ -73,7 +73,7 @@ let name = undefined;
 
 2.1 使用字面量创建原始类型。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const str = 'hello';
 const num = 118;
@@ -81,7 +81,7 @@ const bool = true;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const str = new String('hello');
 const num = new Number(118);
@@ -91,7 +91,7 @@ const bool = new Boolean(true);
 
 2.2 明确类型时，使用 `as const` 来创建只读的常量，而不是 `const` 断言。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const config = {
   host: 'localhost',
@@ -102,7 +102,7 @@ const config = {
 
 2.3 禁止使用 `any` 类型，除非在绝对必要的情况下。`any` 会绕过 TypeScript 的类型检查，降低代码安全性。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 let data: any; // 危险！
 data = 'string';
@@ -112,7 +112,7 @@ data = 118;
 
 2.4 禁止使用 `Function`、`Object`、`String`、`Number`、`Boolean` 等大写的基本类型。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 let name: string;
 let age: number;
@@ -121,7 +121,7 @@ let callback: () => void;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 let name: String;
 let age: Number;
@@ -134,13 +134,13 @@ let callback: Function;
 
 3.1 使用对象字面量 `{}` 创建对象。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const item = {};
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const item = new Object();
 ```
@@ -148,7 +148,7 @@ const item = new Object();
 
 3.2 使用对象方法的简写语法。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const person = {
   name: 'Alice',
@@ -159,7 +159,7 @@ const person = {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const person = {
   name: 'Alice',
@@ -172,14 +172,14 @@ const person = {
 
 3.3 使用对象属性值的简写语法。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const name = 'Alice';
 const person = { name };
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const name = 'Alice';
 const person = { name: name };
@@ -188,7 +188,7 @@ const person = { name: name };
 
 3.4 将简写属性放在对象声明的开头。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const name = 'Alice';
 const person = {
@@ -201,7 +201,7 @@ const person = {
 
 3.5 只对无效的标识符（例如包含特殊字符）使用引号。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const obj = {
   id: 1,
@@ -210,7 +210,7 @@ const obj = {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const obj = {
   'id': 1,
@@ -221,7 +221,7 @@ const obj = {
 
 3.6 不要直接使用 `Object.prototype` 上的内置方法，如 `hasOwnProperty`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const hasProperty = Object.prototype.hasOwnProperty.call(obj, 'key');
 // 更好的方式是:
@@ -229,7 +229,7 @@ const hasProp = Object.hasOwn(obj, 'key');
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const hasProperty = obj.hasOwnProperty('key');
 ```
@@ -237,14 +237,14 @@ const hasProperty = obj.hasOwnProperty('key');
 
 3.7 优先使用对象展开运算符 `...` 来进行浅拷贝，而不是 `Object.assign`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const original = { a: 1, b: 2 };
 const copy = { ...original, c: 3 };
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const original = { a: 1, b: 2 };
 const copy = Object.assign({}, original, { c: 3 });
@@ -255,13 +255,13 @@ const copy = Object.assign({}, original, { c: 3 });
 
 4.1 使用数组字面量 `[]` 创建数组。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const items: string[] = [];
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const items = new Array();
 ```
@@ -273,14 +273,14 @@ const items = new Array();
 
 4.4 使用展开运算符 `...` 进行数组浅拷贝。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const items = [1, 2, 3];
 const itemsCopy = [...items];
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const items = [1, 2, 3];
 const itemsCopy = [];
@@ -298,7 +298,7 @@ for (let i = 0; i < items.length; i += 1) {
 
 5.1 使用对象解构来访问和使用对象的多个属性。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function getFullName(user: { firstName: string; lastName: string }) {
   const { firstName, lastName } = user;
@@ -307,7 +307,7 @@ function getFullName(user: { firstName: string; lastName: string }) {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 function getFullName(user: { firstName: string; lastName: string }) {
   const firstName = user.firstName;
@@ -319,7 +319,7 @@ function getFullName(user: { firstName: string; lastName: string }) {
 
 5.2 对数组也使用解构。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const numbers = [1, 2, 3, 4, 5];
 const [first, second] = numbers;
@@ -328,7 +328,7 @@ const [first, second] = numbers;
 
 5.3 在函数参数中，当需要对象的多个属性时，使用解构。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function sayHi({ name, age }: { name: string, age: number }) {
   console.log(`Hello, ${name}. You are ${age} years old.`);
@@ -340,13 +340,13 @@ function sayHi({ name, age }: { name: string, age: number }) {
 
 6.1 字符串统一使用单引号 `''`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const name = 'Alice';
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const name = "Alice";
 ```
@@ -354,14 +354,14 @@ const name = "Alice";
 
 6.2 优先使用模板字符串进行字符串拼接，而不是 `+` 操作符。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const name = 'Alice';
 const message = `Hello, ${name}!`;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const name = 'Alice';
 const message = 'Hello, ' + name + '!';
@@ -378,7 +378,7 @@ const message = 'Hello, ' + name + '!';
 
 7.3 为函数参数设置默认值，而不是在函数体内进行赋值。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function greet(name = 'Guest', punctuation = '!') {
   return `Hello, ${name}${punctuation}`;
@@ -386,7 +386,7 @@ function greet(name = 'Guest', punctuation = '!') {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 function greet(name: string | undefined, punctuation: string | undefined) {
   name = name || 'Guest';
@@ -402,7 +402,7 @@ function greet(name: string | undefined, punctuation: string | undefined) {
 
 7.6 优先使用剩余参数 `...` 语法，而不是 `arguments` 对象。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function log(...args: any[]) {
   console.log(args);
@@ -410,7 +410,7 @@ function log(...args: any[]) {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 function log() {
   const args = Array.prototype.slice.call(arguments);
@@ -421,13 +421,13 @@ function log() {
 
 7.7 函数调用的括号前不加空格。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 console.log('hello');
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 console.log ('hello');
 ```
@@ -439,13 +439,13 @@ console.log ('hello');
 
 8.2 如果函数体只有一条返回语句，并且没有副作用，可以省略花括号和 `return`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const square = (x: number) => x * x;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const square = (x: number) => {
   return x * x;
@@ -455,7 +455,7 @@ const square = (x: number) => {
 
 8.3 如果参数只有一个，可以省略括号。但为了保持一致性，推荐总是使用括号。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const log = (message: string) => console.log(message);
 ```
@@ -475,7 +475,7 @@ const log = (message: string) => console.log(message);
 
 9.6 优先使用接口（`interface`）来定义对象形状，而不是类型别名（`type`）。当需要联合类型或元组类型时，使用 `type`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 interface User {
   name: string;
@@ -484,7 +484,7 @@ interface User {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 type User = {
   name: string;
@@ -497,7 +497,7 @@ type User = {
 
 10.1 始终使用 ES6 模块 (`import`/`export`)。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 import { foo } from './foo';
 
@@ -505,7 +505,7 @@ export default foo;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const foo = require('./foo');
 
@@ -535,7 +535,7 @@ module.exports = foo;
 
 12.1 访问属性时，优先使用点 `.` 操作符。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const person = { name: 'Alice' };
 console.log(person.name);
@@ -544,7 +544,7 @@ console.log(person.name);
 
 12.2 只有当属性是变量时，才使用 `[]` 访问。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const person = { name: 'Alice' };
 const propName = 'name';
@@ -562,7 +562,7 @@ console.log(person[propName]);
 
 14.1 如果 `if` 块中包含 `return` 语句，则后续的 `else` 块是不必要的。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function check(value: number) {
   if (value > 10) {
@@ -573,7 +573,7 @@ function check(value: number) {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 function check(value: number) {
   if (value > 10) {
@@ -591,13 +591,13 @@ function check(value: number) {
 
 14.4 避免不必要的三元表达式。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const isAdult = age >= 18;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const isAdult = age >= 18 ? true : false;
 ```
@@ -613,7 +613,7 @@ const isAdult = age >= 18 ? true : false;
 
 15.4 在函数声明或表达式的参数列表括号前不加空格。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 function greet(name: string) {
   // ...
@@ -651,7 +651,7 @@ const greet = function(name: string) {
 
 17.1 为所有可导出的函数、类和方法编写 JSDoc 注释。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 /**
  * 根据给定的名字和年龄生成问候语。
@@ -667,7 +667,7 @@ function createGreeting(name: string, age: number): string {
 
 17.2 JSDoc 注释必须包含对参数 (`@param`) 和返回值 (`@returns`) 的描述和类型。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```js
 /**
   * Greets a user.
@@ -682,7 +682,7 @@ function greet(name: string): string {
     
 17.3 在 TypeScript 项目中，避免在 JSDoc 中重复声明类型，因为类型已经由代码本身定义。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 /**
  * Greets a user.
@@ -695,7 +695,7 @@ function greet(name: string): string {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 /**
  * @param {string} name
@@ -713,14 +713,14 @@ function greet(name: string): string { // 类型重复
 
 18.1 当需要禁用某条 ESLint 规则时，必须指定要禁用的具体规则名称。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 // eslint-disable-next-line no-console
 console.log('Special log for debugging');
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 // eslint-disable-next-line
 console.log('Which rule is disabled?');
@@ -729,14 +729,14 @@ console.log('Which rule is disabled?');
 
 18.2 在禁用规则时，应提供明确的注释说明原因。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 // eslint-disable-next-line no-param-reassign -- This is a legacy API that requires parameter mutation.
 acc.total += item.value;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 // eslint-disable-next-line no-param-reassign
 acc.total += item.value;
@@ -759,7 +759,7 @@ acc.total += item.value;
 
 19.5 TypeScript 中，使用 `as` 进行类型断言。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const value: unknown = 'hello world';
 const len = (value as string).length;
@@ -798,7 +798,7 @@ const len = (value as string).length;
 
 22.5 避免不必要的 `await`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 async function fetchData() {
   return fetch('/api/data');
@@ -806,7 +806,7 @@ async function fetchData() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 async function fetchData() {
   return await fetch('/api/data');
@@ -840,7 +840,7 @@ async function fetchData() {
 
 24.4 在将用户输入的内容插入到 DOM 之前，必须进行清理或转义，以防止 XSS 攻击。禁止直接使用 `innerHTML`, `outerHTML` 等属性来插入未经验证的内容。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const element = document.getElementById('container');
 const userInput = '<img src=x onerror=alert(1)>';

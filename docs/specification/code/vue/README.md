@@ -18,7 +18,7 @@ import TOCInline from '@theme/TOCInline';
 
 组件名应始终由多个单词组成，以避免与现有和未来的 HTML 元素冲突。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 // components/BaseButton.vue
 export default {
@@ -28,7 +28,7 @@ export default {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 // components/Button.vue
 export default {
@@ -47,7 +47,7 @@ export default {
 
 Prop 定义应尽可能详细，至少指定其类型、默认值，并按需提供校验。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 import type { PropType } from 'vue';
 
@@ -64,7 +64,7 @@ defineProps({
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 // props: ['status']
 defineProps({
@@ -77,7 +77,7 @@ defineProps({
 
 在使用 `v-for` 时，必须为每个元素提供唯一的、稳定的 `key` 属性。绝对不能使用数组的 `index` 作为 `key`，因为这会在列表项顺序改变时导致不必要的 DOM 操作和状态混乱。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <template>
   <ul>
@@ -89,7 +89,7 @@ defineProps({
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <template>
   <ul>
@@ -111,7 +111,7 @@ defineProps({
 
 永远不要在同一个元素上同时使用 `v-if` 和 `v-for`。`v-for` 的优先级高于 `v-if`，这意味着 `v-if` 会在每次循环中都执行一次，导致不必要的性能开销。
 
-:::tip 建议 👍 通过计算属性预先过滤列表，或将 `v-if` 移至外层容器元素
+:::tip[建议 👍 通过计算属性预先过滤列表，或将 `v-if` 移至外层容器元素]
 ```vue
 <template>
   <ul>
@@ -139,7 +139,7 @@ const activeUsers = computed(() => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <template>
   <ul>
@@ -155,7 +155,7 @@ const activeUsers = computed(() => {
 
 对于组件来说，样式应该是有作用域的 (`scoped`)，以避免一个组件的样式泄露并意外地影响到另一个组件。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <style scoped>
 .button {
@@ -165,7 +165,7 @@ const activeUsers = computed(() => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <style>
 .button {
@@ -179,7 +179,7 @@ const activeUsers = computed(() => {
 
 插件、mixin 等提供的非公共的自定义属性，应使用 `$_` 或 `_` 作为前缀，以明确表示其为私有属性，避免与组件自身状态或官方 API 冲突。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 const myPlugin = {
   install(app) {
@@ -190,7 +190,7 @@ const myPlugin = {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 const myPlugin = {
   install(app) {
@@ -208,7 +208,7 @@ const myPlugin = {
 
 一个文件应该只包含一个组件定义。这使得组件更容易查找、理解和测试。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 // MyComponents.vue
 export default {
@@ -223,7 +223,7 @@ export const ComponentB = {
 ```
 :::
 
-:::tip 建议 👍
+:::tip[建议 👍]
 将每个组件拆分到单独的文件中：`ComponentA.vue` 和 `ComponentB.vue`。
 :::
 
@@ -240,7 +240,7 @@ export const ComponentB = {
 
 > **为什么？** HTML 属性名是不区分大小写的，所以浏览器会把所有大写字符解释为小写。camelCase 的 prop 名需要转换为 kebab-case 才能在 DOM 模板中正确匹配。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 // prop 定义
 defineProps({
@@ -252,7 +252,7 @@ defineProps({
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 // prop 定义
 defineProps({
@@ -295,7 +295,7 @@ defineProps({
 
 > **为什么？** 将复杂逻辑放在模板中会使其变得臃肿且难以维护。计算属性和方法更易于测试和复用。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <template>
   <p>{{ reversedMessage }}</p>
@@ -310,7 +310,7 @@ const reversedMessage = computed(() => message.value.split('').reverse().join(''
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <template>
   <p>
@@ -324,7 +324,7 @@ const reversedMessage = computed(() => message.value.split('').reverse().join(''
 
 指令应始终使用缩写形式 (`:` 用于 `v-bind:`, `@` 用于 `v-on:` 和 `#` 用于 `v-slot`)，以保持代码简洁。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <input :value="value" @input="onInput">
 <template #header>
@@ -333,7 +333,7 @@ const reversedMessage = computed(() => message.value.split('').reverse().join(''
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <input v-bind:value="value" v-on:input="onInput">
 <template v-slot:header>
@@ -364,7 +364,7 @@ const reversedMessage = computed(() => message.value.split('').reverse().join(''
 
 `v-html` 可能会导致 XSS (跨站脚本) 攻击，应该谨慎使用。只在受信任的内容上使用，并且永远不要用于用户提交的内容。
 
-:::tip 建议 👍 总是对用户输入内容进行清理和转义
+:::tip[建议 👍 总是对用户输入内容进行清理和转义]
 ```vue
 <template>
   <div v-html="sanitizedContent"></div>
@@ -379,7 +379,7 @@ const sanitizedContent = DOMPurify.sanitize(userInputContent);
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <div v-html="userInputContent"></div>
 ```
@@ -391,7 +391,7 @@ const sanitizedContent = DOMPurify.sanitize(userInputContent);
 
 > **为什么？** 将 `<script>` 放在首位，可以让你在打开文件时首先看到组件的逻辑和依赖，这通常是最重要的部分。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <script setup lang="ts">
 // ...
@@ -415,7 +415,7 @@ const sanitizedContent = DOMPurify.sanitize(userInputContent);
 
 在 `scoped` 样式中使用 `:deep()` 或 `::v-deep` 等深度选择器应谨慎，因为它会破坏样式的封装性，使得样式规则变得难以追踪和维护。
 
-:::tip 建议 👍 优先通过 prop 控制子组件样式。如果必须覆盖，请添加一个外层 class 来约束范围，以减少影响
+:::tip[建议 👍 优先通过 prop 控制子组件样式。如果必须覆盖，请添加一个外层 class 来约束范围，以减少影响]
 ```vue
 <template>
   <div class="custom-wrapper">
@@ -431,7 +431,7 @@ const sanitizedContent = DOMPurify.sanitize(userInputContent);
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <style scoped>
 :deep(.child-component-class) {
@@ -445,7 +445,7 @@ const sanitizedContent = DOMPurify.sanitize(userInputContent);
 
 在 Composition API (`<script setup>`) 中，`this` 不再指向组件实例 (其值为 `undefined`)。应避免使用 `this`。
 
-:::tip 建议 👍 直接访问 `ref` 或 `reactive` 对象。对于 `ref`，记得使用 `.value`。
+:::tip[建议 👍 直接访问 `ref` 或 `reactive` 对象。对于 `ref`，记得使用 `.value`。]
 ```vue
 import { ref } from 'vue';
 
@@ -457,7 +457,7 @@ function handleClick() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 // 在 <script setup> 中，this 是 undefined
 function handleClick() {
@@ -473,7 +473,7 @@ function handleClick() {
 
 单文件组件中的 `<style>` 标签必须使用 `scoped` 或 `module` 属性，以防止样式污染全局。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <style scoped>
 /* 仅作用于当前组件 */
@@ -482,7 +482,7 @@ function handleClick() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <style>
 /* 污染全局 */
@@ -495,7 +495,7 @@ function handleClick() {
 
 定义的 CSS 选择器或关键帧 (`keyframes`) 必须在模板中被使用。这有助于保持代码库的轻量和整洁。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <template>
   <div class="active"></div>
@@ -507,7 +507,7 @@ function handleClick() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <template>
   <div class="active"></div>
@@ -524,7 +524,7 @@ function handleClick() {
 
 不要使用 `>>>` 或 `/deep/`，它们已被废弃。请使用 Vue 3 推荐的 `:deep()` 伪类。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <style scoped>
 .a :deep(.b) { /* ... */ }
@@ -532,7 +532,7 @@ function handleClick() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <style scoped>
 .a >>> .b { /* ... */ }
@@ -545,7 +545,7 @@ function handleClick() {
 
 伪类 `:deep`, `:global`, 和 `:slotted` 必须包含选择器参数。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```vue
 <style scoped>
 :deep(.a) { /* ... */ }
@@ -553,7 +553,7 @@ function handleClick() {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```vue
 <style scoped>
 .:deep { /* ... */ }
@@ -567,7 +567,7 @@ function handleClick() {
 
 永远不要将不可信的数据直接传递给可能执行代码的指令或属性，例如 `v-html` 或 `:href`。
 
-:::tip 建议 👍 对数据进行严格的验证和清理
+:::tip[建议 👍 对数据进行严格的验证和清理]
 ```vue
 <template>
   <a :href="validatedUrl">Click me</a>
@@ -588,7 +588,7 @@ const sanitizedHtml = computed(() => DOMPurify.sanitize(userHtml.value));
 ```
 :::
 
-:::danger 不建议 👎 潜在的 XSS 风险
+:::danger[不建议 👎 潜在的 XSS 风险]
 ```vue
 <template>
   <a :href="userProvidedUrl">Click me</a>

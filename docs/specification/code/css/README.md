@@ -41,7 +41,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 为了保持代码的可读性和一致性，所有 classname 必须遵循一个固定的、合乎逻辑的顺序。推荐的顺序是先布局、再盒模型、然后是排版和视觉效果。
 
 
-:::tip 建议 👍 classes有组织、有顺序
+:::tip[建议 👍 classes有组织、有顺序]
 ```html
 <button class="flex items-center justify-center w-full p-4 font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-600">
   Click me
@@ -49,7 +49,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 ```
 :::
 
-:::danger 不建议 👎 classes顺序混乱
+:::danger[不建议 👎 classes顺序混乱]
 ```html
 <button class="text-white justify-center w-full hover:bg-blue-600 items-center bg-blue-500 flex font-bold rounded-lg p-4">
   Click me
@@ -61,13 +61,13 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 当 Tailwind 提供简写形式的 class 时，应当优先使用简写。这有助于减少 HTML 文件的大小和复杂性。
 
-:::tip 建议 👍 使用 mx-4 代替 ml-4 和 mr-4
+:::tip[建议 👍 使用 mx-4 代替 ml-4 和 mr-4]
 ```html
 <div class="mx-4">...</div>
 ```
 :::
 
-:::danger 不建议 👎 分别使用 margin-left 和 margin-right
+:::danger[不建议 👎 分别使用 margin-left 和 margin-right]
 ```html
 <div class="ml-4 mr-4">...</div>
 ```
@@ -77,19 +77,19 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 为了贯彻 "Utility-First" 的原则，应避免在组件中添加自定义的、语义化的 classname。所有样式都应通过组合原子化的 utility class 来实现。如果需要复用，应通过组件化或 `@apply` 指令来解决。
 
-:::tip 建议 👍 完全使用 utility classes
+:::tip[建议 👍 完全使用 utility classes]
 ```html
 <div class="flex items-center p-4 bg-gray-100 rounded-lg">...</div>
 ```
 :::
 
-:::danger 不建议 👎 混入自定义 class，这会破坏 utility-first 的原则
+:::danger[不建议 👎 混入自定义 class，这会破坏 utility-first 的原则]
 ```html
 <div class="flex items-center user-profile-card">...</div>
 ```
 :::
 
-:::tip 建议 👍 若确实需要，应在CSS中使用 `@apply`
+:::tip[建议 👍 若确实需要，应在CSS中使用 `@apply`]
 ```css
 .user-profile-card {
   @apply p-4 bg-gray-100 rounded-lg;
@@ -102,25 +102,25 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 - **负数任意值**：当需要使用一个负数的任意值时，负号 `-` 应该放在方括号 `[]` 的外面。
 - **避免不必要的任意值**：如果 Tailwind 已经提供了对应的 utility class，则不应再使用任意值。
 
-:::tip 建议 👍 正确使用负数任意值
+:::tip[建议 👍 正确使用负数任意值]
 ```html
 <div class="-top-[-10px]">...</div>
 ```
 :::
 
-:::tip 建议 👍 避免不必要的任意值
+:::tip[建议 👍 避免不必要的任意值]
 ```html
 <div class="w-10">...</div>
 ```
 :::
 
-:::danger 不建议 👎 错误的负数任意值语法
+:::danger[不建议 👎 错误的负数任意值语法]
 ```html
 <div class="top-[-10px]">...</div>
 ```
 :::
 
-:::danger 不建议 👎 当存在 w-10 时，这是不必要的
+:::danger[不建议 👎 当存在 w-10 时，这是不必要的]
 ```html
 <div class="w-[2.5rem]">...</div>
 ```
@@ -132,7 +132,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 使用 2 个空格进行缩进。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .card {
   color: #fff;
@@ -141,7 +141,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .card {
     color: #fff;
@@ -154,7 +154,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 所有代码均使用小写，包括选择器、属性、值（字符串除外）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .btn {
   display: block;
@@ -163,7 +163,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .BTN {
   DISPLAY: BLOCK;
@@ -176,7 +176,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 统一使用双引号（`""`）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element::before {
   content: "some text";
@@ -185,7 +185,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element::before {
   content: 'some text';
@@ -207,7 +207,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 命名统一使用 kebab-case (短横线连接式)。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .user-profile {
   /* ... */
@@ -221,7 +221,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 @custom-media --viewport-medium (width >= 50rem);
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .userProfile {
   /* ... */
@@ -242,7 +242,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 
 属性选择器的值必须使用双引号包裹。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 [type="submit"] {
   /* ... */
@@ -250,7 +250,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 [type=submit] {
   /* ... */
@@ -266,7 +266,7 @@ A[项目开始] --> B{需要快速开发与<br>基础交互组件?}
 - 伪类使用单冒号（`:`），伪元素使用双冒号（`::`）。
 - 伪类和伪元素本身使用小写。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 a:hover {
   color: #f00;
@@ -277,7 +277,7 @@ p::first-line {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 a:HOVER {
   color: #f00;
@@ -292,7 +292,7 @@ p:first-line { /* 应使用双冒号 */
 
 在组合器（`>`、`+`、`~`）前后各保留一个空格。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .parent > .child {
   /* ... */
@@ -303,7 +303,7 @@ p:first-line { /* 应使用双冒号 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .parent>.child {
   /* ... */
@@ -319,7 +319,7 @@ p:first-line { /* 应使用双冒号 */
 - 多个选择器在多行书写时，每个选择器占一行。
 - 单行书写时，逗号后保留一个空格。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .class1,
 .class2 {
@@ -333,7 +333,7 @@ p:first-line { /* 应使用双冒号 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .class1, .class2 { /* 多行时应换行 */
   color: black;
@@ -358,7 +358,7 @@ p:first-line { /* 应使用双冒号 */
 - 一个选择器中最多使用 2 个类型选择器 (如 `div`, `p`)。
 - 禁止在 class 或 id 选择器前添加类型选择器进行限定（如 `div.my-class`）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .card .header .title {
   font-size: 1.5rem;
@@ -370,7 +370,7 @@ p:first-line { /* 应使用双冒号 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 #main-content { /* 禁止使用 ID */
   padding: 1rem;
@@ -403,7 +403,7 @@ div.my-class { /* 禁止限定类型 */
 - 禁止使用颜色名称。
 - 色相（Hue）值使用角度单位（`deg`）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   color: #fff;
@@ -413,7 +413,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   color: #FFFFFF;
@@ -430,7 +430,7 @@ div.my-class { /* 禁止限定类型 */
 - 小数值如果小于1，省略小数点前的 `0`。
 - 禁止数值末尾出现多余的 `0`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   padding: 0;
@@ -440,7 +440,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   padding: 0px;
@@ -454,7 +454,7 @@ div.my-class { /* 禁止限定类型 */
 
 字体权重应使用数值（如 `400`, `700`），而不是关键字（`normal`, `bold`）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   font-weight: 700;
@@ -462,7 +462,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   font-weight: bold;
@@ -475,7 +475,7 @@ div.my-class { /* 禁止限定类型 */
 - 避免使用冗余的值。
 - 禁止使用简写属性覆盖已声明的完整属性。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   margin: 10px 20px;
@@ -483,7 +483,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   margin: 10px 20px 10px 20px; /* 冗余 */
@@ -500,7 +500,7 @@ div.my-class { /* 禁止限定类型 */
 
 禁止为属性、值、`@`规则和媒体查询特性名称添加厂商前缀，除非有特殊需要（如 `-webkit-line-clamp`）。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   display: flex;
@@ -509,7 +509,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   display: -webkit-flex;
@@ -522,7 +522,7 @@ div.my-class { /* 禁止限定类型 */
 
 禁止使用 `!important`。
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   color: red !important;
@@ -536,7 +536,7 @@ div.my-class { /* 禁止限定类型 */
 - 注释前通常需要一个空行（除非位于代码块的起始位置）。
 - SCSS中推荐使用 `//` 进行单行注释。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 .element {
   // 这是个好注释
@@ -545,7 +545,7 @@ div.my-class { /* 禁止限定类型 */
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 .element {
 //这是个坏注释
@@ -562,7 +562,7 @@ color: #333;
 - 每条声明以分号（`;`）结尾，且分号后在多行模式下必须换行。
 - 单行规则集最多只包含一条声明。
 
-:::tip 建议 👍 多行
+:::tip[建议 👍 多行]
 ```css
 .card {
   display: block;
@@ -571,13 +571,13 @@ color: #333;
 ```
 :::
 
-:::tip 建议 👍 单行
+:::tip[建议 👍 单行]
 ```css
 .hidden { display: none; }
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .card{ /* `{` 前缺少空格 */
   display:block; /* 冒号后缺少空格 */
@@ -595,7 +595,7 @@ color: #333;
 - 多行函数中，括号内和参数后需要换行。
 - 禁止出现空的函数。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   transform: translate(10px, 20px);
@@ -608,7 +608,7 @@ color: #333;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   transform: translate (10px, 20px); /* 函数名后有空格 */
@@ -623,7 +623,7 @@ color: #333;
 - 括号内与内容之间没有空格。
 - 范围操作符（`=`、`<`、`>`）前后各有一个空格。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 @media (max-width: 600px) {
   /* ... */
@@ -634,7 +634,7 @@ color: #333;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 @media ( max-width: 600px ) {
   /* ... */
@@ -676,7 +676,7 @@ color: #333;
 16. 过渡和动画 (transition, animation, transform等)
 17. 分页媒体 (break-*, orphans, widows)
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```css
 .element {
   /* 定位 */
@@ -706,7 +706,7 @@ color: #333;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```css
 .element {
   color: #333;
@@ -733,7 +733,7 @@ color: #333;
 
 SCSS 中的变量 (`$variable`)、函数 (`@function`)、混合 (`@mixin`) 和占位符 (`%placeholder`) 命名统一使用 kebab-case (短横线连接式)。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 $variable-name: #000;
 %placeholder-name { /* ... */ }
@@ -749,7 +749,7 @@ $variable-name: #000;
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 $variableName: #000;
 %placeholderName { /* ... */ }
@@ -769,7 +769,7 @@ $variableName: #000;
 - 变量声明时，冒号 (`:`) 前面不能有空格，冒号后必须有至少一个空格。
 - 在选择器或属性名中使用变量时，必须使用插值 `#{}`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 $my-color: #f00;
 $my-property: margin;
@@ -781,7 +781,7 @@ $my-selector: ".foo";
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 $my-color : #f00; // 冒号前有空格
 $my-font-size:#f00; // 冒号后无空格
@@ -797,7 +797,7 @@ $my-font-size:#f00; // 冒号后无空格
 - 在数学操作符 (`+`, `-`, `*`, `/`) 两侧必须保留一个空格。
 - 操作符前后禁止换行。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 .element {
   width: 100% - 20px;
@@ -806,7 +806,7 @@ $my-font-size:#f00; // 冒号后无空格
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 .element {
   width: 100%-20px;
@@ -825,7 +825,7 @@ $my-font-size:#f00; // 冒号后无空格
 - 调用无参数的混合时，必须在混合名称后加上括号 `()`。
 - 调用函数时，禁止使用命名参数。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 @mixin my-mixin() { /* ... */ }
 @function my-function($a, $b) { /* ... */ }
@@ -837,7 +837,7 @@ $my-font-size:#f00; // 冒号后无空格
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 @mixin my-mixin () { /* ... */ }
 @function my-function ($a, $b) { /* ... */ }
@@ -854,7 +854,7 @@ $my-font-size:#f00; // 冒号后无空格
 - 禁止使用不必要的父选择器引用 `&`。
 - 对于嵌套属性（如 `font`），其子属性之间不能有空行。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 .element {
   .child {
@@ -869,7 +869,7 @@ $my-font-size:#f00; // 冒号后无空格
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 .element {
   & .child { // & 是多余的
@@ -891,7 +891,7 @@ $my-font-size:#f00; // 冒号后无空格
 - 必须使用字符串形式导入。
 - 禁止 @extend 一个普通的 class、id 或元素选择器，只允许继承占位符选择器 (`%`)。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 @import "variables";
 @import "mixins/buttons";
@@ -905,7 +905,7 @@ $my-font-size:#f00; // 冒号后无空格
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 @import "_variables";
 @import "mixins/buttons.scss";
@@ -926,7 +926,7 @@ $my-font-size:#f00; // 冒号后无空格
 - `@else if` 语句的括号前必须有一个空格。
 - `@else` 语句的花括号换行和空格规则与普通规则块一致。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```scss
 @if $condition {
   // ...
@@ -938,7 +938,7 @@ $my-font-size:#f00; // 冒号后无空格
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```scss
 @if $condition {
   // ...

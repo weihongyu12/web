@@ -31,7 +31,7 @@ Jest 是我们进行单元测试和集成测试的基础框架。以下规范确
 
 测试套件（`describe`）和测试用例（`it` 或 `test`）的标题应该是明确的字符串，不应包含插值或模板字符串。标题需要清晰地描述测试的目标。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 describe('sum', () => {
   it('should return the sum of two numbers', () => {
@@ -41,7 +41,7 @@ describe('sum', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const componentName = 'sum';
 describe(componentName, () => {
@@ -56,7 +56,7 @@ describe(componentName, () => {
 
 在同一个测试套件中，测试用例的标题不应重复。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 describe('auth service', () => {
   it('should allow login with correct credentials', () => { /* ... */ });
@@ -65,7 +65,7 @@ describe('auth service', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 describe('auth service', () => {
   it('should handle login', () => { /* ... */ });
@@ -78,7 +78,7 @@ describe('auth service', () => {
 
 `describe` 块的回调函数应该是无参数的，并且不能是 `async` 的。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 describe('my component', () => {
   // ...
@@ -86,7 +86,7 @@ describe('my component', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 describe('my component', async (done) => { // 错误：不能是 async 或带参数
   // ...
@@ -98,7 +98,7 @@ describe('my component', async (done) => { // 错误：不能是 async 或带参
 
 测试文件（例如 `*.test.ts`）应只包含测试逻辑，不应 `export`任何值。`__mocks__` 目录下的文件除外。
 
-:::tip 建议 👍 (user.test.ts)
+:::tip[建议 👍 (user.test.ts)]
 ```ts
 import { getUser } from './user';
 
@@ -108,7 +108,7 @@ it('should return a user object', () => {
 ```
 :::
 
-:::danger 不建议 👎 (user.test.ts)
+:::danger[不建议 👎 (user.test.ts)]
 ```ts
 export const testUser = { id: 1, name: 'John Doe' }; // 错误
 
@@ -122,7 +122,7 @@ it('should return a user object', () => { /* ... */ });
 
 确保每个 `it` 或 `test` 块中都执行了至少一个 `expect` 断言。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 it('should be true', () => {
   expect(true).toBe(true);
@@ -130,7 +130,7 @@ it('should be true', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 it('should run without errors', () => {
   // 没有断言，即使代码不抛出错误，测试也无意义
@@ -143,13 +143,13 @@ it('should run without errors', () => {
 
 `expect` 应该包裹断言的目标值，而不是断言本身。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 expect(myFunction()).toBe(true);
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 expect(myFunction() === true); // 错误
 ```
@@ -173,7 +173,7 @@ expect(myFunction() === true); // 错误
 
 当处理 Promise 时，确保断言在 `then` 或 `async/await` 结构中被正确 `return` 或 `await`。
 
-:::tip 建议 👍 (`async/await`):
+:::tip[建议 👍 (`async/await`):]
 ```ts
 it('should resolve with data', async () => {
   await expect(fetchData()).resolves.toEqual({ data: 'success' });
@@ -181,7 +181,7 @@ it('should resolve with data', async () => {
 ```
 :::
 
-:::tip 建议 👍 (`then`):
+:::tip[建议 👍 (`then`):]
 ```ts
 it('should resolve with data', () => {
   return fetchData().then(data => {
@@ -191,7 +191,7 @@ it('should resolve with data', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 it('should resolve with data', () => {
   fetchData().then(data => { // 错误：没有 return
@@ -216,7 +216,7 @@ it('should resolve with data', () => {
 
 测试应该是确定性的。在 `it` 块中避免使用 `if/else` 或三元表达式来决定是否执行断言。如果需要测试多种情况，应该拆分为多个测试用例。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 it('should return true for positive numbers', () => {
   expect(isPositive(5)).toBe(true);
@@ -228,7 +228,7 @@ it('should return false for negative numbers', () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 it('should handle numbers correctly', () => {
   const num = 5;
@@ -245,7 +245,7 @@ expect(isPositive(num)).toBe(false);
 
 优先使用 `async/await` 或返回 Promise 的方式来处理异步测试。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 it('works with async/await', async () => {
   const result = await doSomethingAsync();
@@ -254,7 +254,7 @@ it('works with async/await', async () => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 it('works with done', (done) => { // 避免
   doSomethingAsync().then(result => {
@@ -275,7 +275,7 @@ React Testing Library (RTL) 鼓励我们像用户一样测试组件。
 
 总是从 `screen` 对象上调用查询函数，这能确保你测试的是用户实际看到的内容。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```tsx
 import { render, screen } from '@testing-library/react';
 
@@ -284,7 +284,7 @@ const button = screen.getByRole('button', { name: /submit/i });
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```tsx
 import { render } from '@testing-library/react';
 
@@ -312,7 +312,7 @@ const button = getByRole('button', { name: /submit/i });
 - `queryBy*`: 用于断言元素 **不存在**，如果不存在会返回 `null`。
 - `findBy*`: 用于断言元素 **最终会出现**（异步），它会等待元素出现，超时则抛出错误。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 // 断言元素存在
 expect(screen.getByText('Welcome')).toBeInTheDocument();
@@ -331,14 +331,14 @@ await expect(screen.findByText('Loaded Data')).resolves.toBeInTheDocument();
 
 所有 `findBy*` 查询和 `waitFor` 工具都返回 Promise，必须使用 `await`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const loadedItem = await screen.findByText(/loaded/i);
 expect(loadedItem).toBeInTheDocument();
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 // 错误：没有 await，测试会在元素出现前就执行断言
 const loadedItem = screen.findByText(/loaded/i);
@@ -349,7 +349,7 @@ const loadedItem = screen.findByText(/loaded/i);
 
 `waitFor` 的回调函数应该只包含一个最终状态的断言。它会不断重试直到成功或超时。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 await waitFor(() => {
   expect(screen.getByText('Success')).toBeInTheDocument();
@@ -357,7 +357,7 @@ await waitFor(() => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 await waitFor(() => {
   // 错误：waitFor 应该只用于等待状态变化，而不是执行多个断言
@@ -373,7 +373,7 @@ await waitFor(() => {
 
 使用 `@testing-library/user-event` 模拟的用户交互是异步的，必须使用 `await`。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 import userEvent from '@testing-library/user-event';
 
@@ -381,7 +381,7 @@ await userEvent.click(screen.getByRole('button'));
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 userEvent.click(screen.getByRole('button')); // 错误：交互可能未完成
 ```
@@ -393,14 +393,14 @@ userEvent.click(screen.getByRole('button')); // 错误：交互可能未完成
 
 测试应该模拟用户行为，而不是直接访问和操作组件内部的 DOM 结构。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 // 通过用户可见的文本来定位
 const element = screen.getByText('Hello World');
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const { container } = render(<MyComponent />);
 // 错误：依赖于内部 DOM 结构，很脆弱
@@ -430,7 +430,7 @@ Playwright 用于端到端（E2E）测试，模拟真实用户在浏览器中的
 
 与 Jest 类似，`test` 和 `describe` 的标题应为静态字符串，清晰描述测试场景。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 import { test, expect } from '@playwright/test';
 
@@ -454,14 +454,14 @@ test('should allow a user to log in and see the dashboard', async ({ page }) => 
 
 几乎所有的 Playwright API 调用（如 `page.goto`, `locator.click`）都是异步的，必须使用 `await` 等待其完成。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 await page.goto('[https://example.com](https://example.com)');
 await page.getByRole('button', { name: 'Sign in' }).click();
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 page.goto('[https://example.com](https://example.com)'); // 错误：页面可能还未加载完成
 ```
@@ -471,14 +471,14 @@ page.goto('[https://example.com](https://example.com)'); // 错误：页面可�
 
 使用 `expect(locator).toBeVisible()` 而不是 `expect(await locator.isVisible()).toBe(true)`。Web-First 断言内置了自动等待机制，使测试更稳定。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 const button = page.getByRole('button');
 await expect(button).toBeEnabled();
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const button = page.getByRole('button');
 const isEnabled = await button.isEnabled();
@@ -494,7 +494,7 @@ expect(isEnabled).toBe(true);
 
 `expect` 调用必须在 `test` 函数的回调函数内部，而不能在 `describe` 层级。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 test('should show title', async ({ page }) => {
   await page.goto('/');
@@ -503,7 +503,7 @@ test('should show title', async ({ page }) => {
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 test.describe('Homepage', () => {
   // 错误：expect 不能在这里
@@ -524,13 +524,13 @@ test.describe('Homepage', () => {
 
 优先使用 `locator` API 和 Web-First断言，它们会自动等待元素出现。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 await expect(page.locator('#my-element')).toBeVisible();
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 await page.waitForSelector('#my-element'); // 避免
 ```
@@ -540,13 +540,13 @@ await page.waitForSelector('#my-element'); // 避免
 
 `ElementHandle` API 不会自动等待，且更冗长。优先使用 `Locator` API (`page.locator`, `page.getBy`...)。
 
-:::tip 建议 👍
+:::tip[建议 👍]
 ```ts
 await page.locator('.submit-button').click();
 ```
 :::
 
-:::danger 不建议 👎
+:::danger[不建议 👎]
 ```ts
 const handle = await page.$('.submit-button'); // 避免
 await handle?.click();
