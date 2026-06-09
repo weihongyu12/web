@@ -168,10 +168,10 @@ import TOCInline from '@theme/TOCInline';
   </TabItem>
 </Tabs>
 
-## RSbuild
+## Rsbuild
 
 :::tip
-[RSbuild](https://rsbuild.rs/zh/) 是基于 [Rspack](https://rspack.rs/zh/) 的现代化构建工具，提供开箱即用的配置和最佳实践，Rspack 基于 Rust 编写，具有极快的构建速度和优秀的性能表现。它支持现代 JavaScript 和 TypeScript 特性，并且与 Webpack 兼容，可以无缝迁移现有项目。
+[Rsbuild](https://rsbuild.rs/zh/) 是基于 [Rspack](https://rspack.rs/zh/) 的现代化构建工具，提供开箱即用的配置和最佳实践，Rspack 基于 Rust 编写，具有极快的构建速度和优秀的性能表现。它支持现代 JavaScript 和 TypeScript 特性，并且与 Webpack 兼容，可以无缝迁移现有项目。
 :::
 
 ```ts

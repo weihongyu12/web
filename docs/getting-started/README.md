@@ -13,7 +13,7 @@ description: 架构指南和总览
 | 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
 |---------------|-----------------------|-----------------------|------------------------|-----------------------|
 | 框架            | Next.js               | Next.js               | Vue                    | React                 |
-| 打包工具          | RSpack                | RSpack                | Vite                   | RSbuild                |
+| 打包工具          | Rspack                | Rspack                | Vite                   | Rsbuild                |
 | UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
 | 路由            | -                     | -                     | Vue Router             | React Router          |
 | 路由模式          | history               | history               | hash                   | hash                  |
@@ -37,7 +37,7 @@ description: 架构指南和总览
 
 - **场景导向**：根据C端/B端不同需求特点，选择合适的框架和工具链
 - **性能优先**：C端项目普遍支持 SSR 和 PWA，注重 SEO 和用户体验
-- **开发效率**：统一采用 TypeScript、现代化打包工具（RSpack/RSbuild/Vite）和代码规范工具
+- **开发效率**：统一采用 TypeScript、现代化打包工具（Rspack/Rsbuild/Vite）和代码规范工具
 - **质量保障**：全面的测试覆盖（单元测试、E2E 测试）和代码检查工具链
 - **跨平台能力**：支持桌面应用（Electron）和移动应用（Capacitor）扩展
 
@@ -81,8 +81,8 @@ description: 架构指南和总览
 
 ### 构建工具
 
-- **[RSpack](https://rspack.rs/zh/)**：基于 Rust 的高性能打包工具，兼容 Webpack 生态
-- **[RSbuild](https://rsbuild.rs/zh/)**：基于 Rspack 的构建工具，提供开箱即用的配置和最佳实践
+- **[Rspack](https://rspack.rs/zh/)**：基于 Rust 的高性能打包工具，兼容 Webpack 生态
+- **[Rsbuild](https://rsbuild.rs/zh/)**：基于 Rspack 的构建工具，提供开箱即用的配置和最佳实践
 - **[Vite](https://cn.vite.dev/)**：现代前端构建工具，提供极速的开发服务器和构建速度
 
 ### 开发工具链
@@ -105,7 +105,7 @@ description: 架构指南和总览
 | 评估维度          | Capacitor + 标准 Web 方案                                        | uni-app 方案                                   |
 |---------------|--------------------------------------------------------------|----------------------------------------------|
 | 多端转译与碎片化      | 专注于提供纯粹、高性能的标准 Web 容器，完全避免了平台差异带来的特异性代码                      | 为兼容大量底层差异极大的小程序，充斥各种条件编译与平台限制，后期维护成本呈指数级上升   |
-| 工具链与开发体验 (DX) | 拥抱标准 Web，可自由配置 Vite/RSpack 构建，现代 IDE 生态友好，报错链路清晰             | 深度绑定 HBuilderX 或特定脚手架，构建流程属于黑盒工程，异常排查与定制门槛极高 |
+| 工具链与开发体验 (DX) | 拥抱标准 Web，可自由配置 Vite/Rspack 构建，现代 IDE 生态友好，报错链路清晰             | 深度绑定 HBuilderX 或特定脚手架，构建流程属于黑盒工程，异常排查与定制门槛极高 |
 | 生态纯粹性         | 无缝支持 100% 的 npm 开源包 及主流原生 Cordova 插件                         | 严重依赖其专属插件市场，大量标准 npm 库在多端转译时存在严重的运行时报错风险     |
 | 测试与质量保障       | 应用即标准网页，可完美集成 Jest、Playwright 进行高标准的单元与 E2E 自动化测试            | 由于存在专有的非标准运行时限制，很难引入现代化的测试工具链进行深度质量保障        |
 | 原生扩展能力        | 提供极简、标准的原生桥接设计，编写及接入原生 iOS (Swift) / Android (Kotlin) 插件十分直观 | 原生插件开发门槛高，离线打包及依赖版本管理繁琐且不规范                  |
