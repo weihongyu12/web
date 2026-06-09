@@ -92,6 +92,11 @@ description: 架构指南和总览
 - **[stylelint](https://stylelint.io/)**：CSS 代码检查工具，确保样式代码质量
 - **[Tailwind CSS](https://tailwindcss.com/)**：实用优先的 CSS 框架，通过组合原子类快速构建界面
 
+### 跨平台框架
+
+- **[Electron](https://www.electronjs.org/zh/)**：使用 Web 技术构建跨平台桌面应用，支持 Windows、macOS、Linux
+- **[Capacitor](https://capacitorjs.com/)**：将 Web 应用打包为原生 iOS 和 Android 应用
+
 ### React 框架
 
 | 特性          | 框架                                                           | 说明                                    |
