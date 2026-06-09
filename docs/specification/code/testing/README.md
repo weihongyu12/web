@@ -233,9 +233,9 @@ it('should return false for negative numbers', () => {
 it('should handle numbers correctly', () => {
   const num = 5;
   if (num > 0) {
-expect(isPositive(num)).toBe(true);
+    expect(isPositive(num)).toBe(true);
   } else {
-expect(isPositive(num)).toBe(false);
+    expect(isPositive(num)).toBe(false);
   }
 });
 ```

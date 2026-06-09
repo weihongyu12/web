@@ -17,7 +17,7 @@ import TOCInline from '@theme/TOCInline';
 ```json
 {
   "scripts": {
-     "dev": "rsbuild dev --open",
+    "dev": "rsbuild dev --open",
     "build": "run-p type-check build-only",
     "analyze": "cross-env RSDOCTOR=true rsbuild build",
     "preview": "rsbuild preview",
