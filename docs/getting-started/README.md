@@ -100,7 +100,7 @@ description: 架构指南和总览
 <details>
   <summary>为什么不选用 uni-app？</summary>
 
-我们在移动端多端方案评估中，坚决放弃了 uni-app，选择 Capacitor + 标准 Web。uni-app 宣称的“一次编写、多端发布”在实际大型项目中极易沦为“一处编写、到处调试”的兼容陷阱。以下为核心维度对比：
+在移动端多端方案评估中，坚决放弃了 uni-app，选择 Capacitor + 标准 Web。uni-app 宣称的“一次编写、多端发布”在实际大型项目中极易沦为“一处编写、到处调试”的兼容陷阱。以下为核心维度对比：
 
 | 评估维度          | Capacitor + 标准 Web 方案                                        | uni-app 方案                                   |
 |---------------|--------------------------------------------------------------|----------------------------------------------|
@@ -118,16 +118,17 @@ description: 架构指南和总览
 
 对于“重度原生依赖型”或“极致性能需求”的 App 项目，Capacitor 方案在交互流畅度及系统底层功能对接上可能会遇到瓶颈。在此类场景下，应根据具体的团队背景及业务特征，选择以下更深层次的跨平台或纯原生方案：
 
-| 技术方案                      | 编程语言                    | 适用场景与技术特点                                                                                                                                                               |
-|---------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Flutter                   | Dart                    | 自依托自研 Skia/Impeller 渲染引擎独立于系统进行图形渲染，实现多平台 UI 像素级一致。适合高频复杂动效、精细手势交互的多端应用                                                                                                 |
-| React Native              | JavaScript / TypeScript | 基于 **React 声明式组件、Hooks 范式及虚拟 DOM 思想**，通过原生组件映射渲染，支持 JS 桥接或 JSI 直接调用。在逻辑层可完整复用标准 React 生态（状态管理 Zustand、TanStack Query 等），并原生适配动态热更新（CodePush）。但在复杂长列表和高负载动画场景下需进行专门的原生调优 |
-| Kotlin Multiplatform      | Kotlin / Swift          | 核心理念是 **“共享逻辑，保留 100% 纯原生 UI”**。仅在底层（数据、网络、算法、业务逻辑）实现多端代码共享，而 UI 层分别使用原生平台的 SwiftUI (iOS) 与 Jetpack Compose (Android) 自行构建                                              |
-| Compose Multiplatform     | Kotlin                  | **基于 Jetpack Compose 延伸的跨平台声明式 UI 框架。** 不仅逻辑共享，UI 同样由 Kotlin 编写并通过 Compose 跨端图形引擎统一在 Android/iOS/Desktop 等平台上独立渲染                                                       |
-| SwiftUI (iOS)             | Swift                   | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation / Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
-| Jetpack Compose (Android) | Kotlin                  | **Google 官方现代声明式 UI 框架。** 基于 Kotlin 语言构建，彻底抛弃传统的 XML 布局。具有优秀的局部刷新与重组（Recomposition）优化，与 Android Studio 及 Jetpack 工具链无缝契合                                                |
-| 传统纯原生开发                   | Kotlin/Swift            | 采用基于 XML (Android) 与 UIKit (iOS) 的传统命令式 UI 开发模式。对于全新启动的项目，更推崇以 SwiftUI 与 Jetpack Compose 组成的现代原生开发模式定性                                                                  |
-| MAUI                      | C#                      | .NET 生态跨平台方案。使用 C# and XAML 驱动，适合企业级 B 端内部移动端，通常不作推荐，仅在特定企业内网移动化场景作为备选                                                                                                  |
+| 技术方案                      | 编程语言                  | 适用场景与技术特点                                                                                                                                                               |
+|---------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Flutter                   | Dart                  | 自依托自研 Skia/Impeller 渲染引擎独立于系统进行图形渲染，实现多平台 UI 像素级一致。适合高频复杂动效、精细手势交互的多端应用                                                                                                 |
+| React Native              | JavaScript/TypeScript | 基于 **React 声明式组件、Hooks 范式及虚拟 DOM 思想**，通过原生组件映射渲染，支持 JS 桥接或 JSI 直接调用。在逻辑层可完整复用标准 React 生态（状态管理 Zustand、TanStack Query 等），并原生适配动态热更新（CodePush）。但在复杂长列表和高负载动画场景下需进行专门的原生调优 |
+| Kotlin Multiplatform      | Kotlin/Swift          | 核心理念是 **“共享逻辑，保留 100% 纯原生 UI”**。仅在底层（数据、网络、算法、业务逻辑）实现多端代码共享，而 UI 层分别使用原生平台的 SwiftUI (iOS) 与 Jetpack Compose (Android) 自行构建                                              |
+| Compose Multiplatform     | Kotlin                | **基于 Jetpack Compose 延伸的跨平台声明式 UI 框架。** 不仅逻辑共享，UI 同样由 Kotlin 编写并通过 Compose 跨端图形引擎统一在 Android/iOS/Desktop 等平台上独立渲染                                                       |
+| SwiftUI (iOS)             | Swift                 | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation / Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
+| Jetpack Compose (Android) | Kotlin                | **Google 官方现代声明式 UI 框架。** 基于 Kotlin 语言构建，彻底抛弃传统的 XML 布局。具有优秀的局部刷新与重组（Recomposition）优化，与 Android Studio 及 Jetpack 工具链无缝契合                                                |
+| 传统纯原生开发                   | Kotlin/Swift          | 采用基于 XML (Android) 与 UIKit (iOS) 的传统命令式 UI 开发模式。对于全新启动的项目，更推崇以 SwiftUI 与 Jetpack Compose 组成的现代原生开发模式定性                                                                  |
+| HarmonyOS 原生              | ArkTS/TypeScript      | **华为官方推出的声明式 UI 框架（ArkUI）与开发语言（ArkTS）。** 依托底层 ArkCompiler 编译为原生机器码高效执行，直接对接鸿蒙原生分布式软总线，深度适配多端设备流转、元服务（卡片级应用）等 HarmonyOS NEXT 专有系统特性                                      |
+| MAUI                      | C#                    | .NET 生态跨平台方案。使用 C# 和 XAML 驱动，适合企业级 B 端内部移动端，通常不作推荐，仅在特定企业内网移动化场景作为备选                                                                                                    |
 </details>
 
 ### React 框架
