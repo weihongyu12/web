@@ -4,241 +4,26 @@ sidebar_position: 3
 
 # 用户名/密码登录
 
-用户名/密码登录作为**传统的身份验证方式**，为需要明确密码管理的用户提供完整的登录体验，集成了现代 Web 应用所需的所有关键功能：
+用户名/密码登录作为**传统的身份验证方式**，为需要明确密码管理的用户提供了完整的登录体验。该模块集成了现代 Web 应用所需的所有关键功能，包括灵活的账号识别、安全的凭据管理以及无障碍设计。
 
-- 灵活的身份验证（支持邮箱和手机号）
-- 增强的密码安全性与用户体验
-- 智能的凭据管理与自动登录功能
-- 完整的表单验证与错误处理
-- 无障碍设计与移动设备优化
+## 适用群体与场景
 
-## 适用用户群体
+### 🔐 适用用户群体
 
-### 🔐 安全意识较强的用户
+- **习惯密码管理：** 习惯使用浏览器或第三方密码管理器的用户。 
+- **企业与组织：** 有统一密码策略和合规要求的企业环境。 
+- **传统偏好：** 更信任或偏好传统密码登录方式的群体。
 
-- **密码管理习惯** - 习惯使用密码管理器的用户
-- **企业用户** - 有统一密码策略要求的企业环境
-- **传统习惯** - 偏好传统登录方式的用户群体
+### 💼 特定应用场景
 
-### 💼 特定场景需求
+- **多账户切换：** 需要频繁切换和管理多个不同账户的环境。 
+- **离线与兼容：** 希望在本地保存凭据，或需要兼容不支持新式免密登录的老旧系统。
 
-- **多账户管理** - 需要管理多个不同账户的用户
-- **离线记录** - 希望在本地保存登录凭据的场景
-- **兼容性要求** - 需要兼容不支持新技术的环境
+## 推荐使用优先级
 
-## 推荐使用顺序
-
-1. **首选** - [手机验证码登录](/docs/features/authentication/smscode/) - 最便捷安全
-2. **次选** - [微信登录](/docs/features/authentication/wechat/) - 移动端友好
-3. **备选** - 用户名密码登录 - 传统可靠方式
-
-## 代码实现
-
-```tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { z } from 'zod';
-
-// 定义验证规则
-const loginSchema = z.object({
-  username: z.string()
-    .required('请输入邮箱或手机号')
-    .refine(value => {
-      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      const isPhone = /^1[3-9]\d{9}$/.test(value);
-      return isEmail || isPhone;
-    }, {
-      message: '请输入有效的邮箱或手机号'
-    }),
-  password: z.string()
-    .required('请输入密码')
-    .min(6, '密码至少 6 位')
-    .max(32, '密码最多 32 位'),
-  remember: z.boolean()
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-const LoginForm: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
-    username: '',
-    password: '',
-    remember: false
-  });
-  const [errors, setErrors] = useState<Partial<LoginFormData>>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const passwordRef = useRef<HTMLInputElement>(null);
-
-  const validateField = <K extends keyof LoginFormData>(
-    field: K,
-    value: LoginFormData[K]
-  ) => {
-    try {
-      loginSchema.pick({ [field]: true }).parse({ [field]: value });
-      setErrors(prev => ({ ...prev, [field]: '' }));
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors(prev => ({
-          ...prev,
-          [field]: error.errors[0].message
-        }));
-      }
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      loginSchema.parse(formData);
-      setErrors({});
-      setIsSubmitting(true);
-
-      // 实际登录逻辑
-      console.log('登录信息:', formData);
-
-      // 使用 Credential Management API
-      if (formData.remember && 'credentials' in navigator) {
-        try {
-          const cred = new PasswordCredential({
-            id: formData.username,
-            password: formData.password,
-          });
-          await navigator.credentials.store(cred);
-        } catch (err) {
-          console.error('保存凭据失败:', err);
-        }
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Partial<LoginFormData> = {};
-        error.errors.forEach(err => {
-          const field = err.path[0] as keyof LoginFormData;
-          newErrors[field] = err.message;
-        });
-        setErrors(newErrors);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: fieldValue
-    }));
-
-    // 清除当前字段的错误
-    if (errors[name as keyof LoginFormData]) {
-      validateField(name as keyof LoginFormData, fieldValue);
-    }
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-    validateField(name as keyof LoginFormData, fieldValue);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-    passwordRef.current?.focus();
-  };
-
-  // 自动登录尝试
-  useEffect(() => {
-    if (formData.remember && 'credentials' in navigator) {
-      navigator.credentials.get({ password: true, mediation: 'optional' })
-        .then(cred => {
-          if (cred && 'password' in cred) {
-            const autoLoginData = {
-              username: cred.id,
-              password: cred.password,
-              remember: true
-            };
-            setFormData(autoLoginData);
-            loginSchema.parseAsync(autoLoginData).catch(() => {});
-          }
-        })
-        .catch(err => console.error('自动登录失败:', err));
-    }
-  }, [formData.remember]);
-
-  return (
-    <div className="login-container">
-      <h2>用户登录</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">邮箱/手机号</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            inputMode="email"
-            autoComplete="username"
-            value={formData.username}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            aria-invalid={!!errors.username}
-          />
-          {errors.username && <p className="error-message">{errors.username}</p>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">密码</label>
-          <div className="password-input-wrapper">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              ref={passwordRef}
-              aria-invalid={!!errors.password}
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              aria-label={showPassword ? '隐藏密码' : '显示密码'}
-            >
-              {showPassword ? '🙈' : '👁️'}
-            </button>
-          </div>
-          {errors.password && <p className="error-message">{errors.password}</p>}
-        </div>
-
-        <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              name="remember"
-              checked={formData.remember}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-            自动登录
-          </label>
-        </div>
-
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? '登录中...' : '登录'}
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default LoginForm;
-```
+- 首选：[手机验证码登录](/docs/features/authentication/smscode/)——最便捷安全 
+- 次选：[微信登录](/docs/features/authentication/wechat/)——移动端友好 
+- 备选：用户名/密码登录——传统可靠，作为基础托底方案
 
 ## 交互流程
 
@@ -250,93 +35,229 @@ sequenceDiagram
     participant CredAPI as 凭据 API
     participant Server as 服务器 API
 
-    Note over Form: 组件初始化检查凭据
+    Note over Form: 组件初始化，检查浏览器凭据
 
     alt 存在已保存凭据
         CredAPI->>Form: 获取保存的凭据
         Form->>UI: 自动填充表单
     end
 
-    User->>UI: 输入凭据信息
-    UI->>Form: 更新表单状态
-    Form-->>UI: 验证输入
+    User->>UI: 输入账号与密码
+    UI->>Form: 触发实时校验
+    Form-->>UI: 返回字段错误提示（如有）
 
     User->>UI: 提交表单
-    UI->>Form: 处理提交
+    UI->>Form: 处理提交 (防抖/防止重复提交)
     
-    alt 验证失败
-        Form-->>UI: 显示错误信息
-    else 验证通过
+    alt 验证通过
         Form->>Server: 发送登录请求
-        Server-->>Form: 返回登录结果
+        Server-->>Form: 返回登录令牌/结果
         
-        alt 登录成功 & 勾选自动登录
-            Form->>CredAPI: 存储用户凭据
+        alt 登录成功 & 勾选"自动登录"
+            Form->>CredAPI: 浏览器安全存储凭据
         end
+    else 验证失败
+        Form-->>UI: 显示服务端错误信息
     end
 ```
 
-## 用户体验
+## 代码实现
 
-### 核心特性详解
+```tsx
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Eye, EyeOff } from 'lucide-react';
 
-1. **多格式账号验证** - 智能识别并验证邮箱或手机号格式，提供精确的错误提示
-2. **增强型密码字段** - 提供密码可见性切换，兼顾安全性与便捷性
-3. **凭据管理集成** - 利用浏览器的 Credential Management API 安全存储用户凭据
-4. **智能自动登录** - 检测到已保存凭据时自动填充并提交表单（可选）
-5. **移动体验优化** - 针对触摸设备优化的输入控件和自适应布局
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
-### 界面设计与交互
+const loginSchema = z.object({
+  username: z.string()
+    .min(1, { message: '请输入邮箱或手机号' })
+    .refine((value) => {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      const isPhone = /^1[3-9]\d{9}$/.test(value);
+      return isEmail || isPhone;
+    }, { message: '请输入有效的邮箱或手机号' }),
+  password: z.string()
+    .min(6, { message: '密码至少 6 位' })
+    .max(32, { message: '密码最多 32 位' }),
+  remember: z.boolean().default(false),
+});
 
-1. **实时反馈机制** - 字段验证在用户输入过程和失去焦点时触发，及时提供反馈而不打断用户体验
-2. **状态可视化** - 登录按钮状态变化反映表单提交过程，防止重复提交
-3. **密码可见性切换** - 允许用户在输入时查看密码，减少输入错误，同时保持安全性
-4. **焦点管理** - 切换密码可见性后保持输入焦点，提供流畅的键盘操作体验
+type LoginFormData = z.infer<typeof loginSchema>;
 
-### 错误处理与用户反馈
+function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
 
-1. **精确的错误提示** - 错误消息直接附加在相关字段下方，清晰指出问题所在
-2. **智能验证策略** - 用户名字段既支持邮箱也支持手机号，错误消息根据实际情况调整
-3. **防御性设计** - 处理 API 不可用或浏览器兼容性问题时优雅降级，确保核心功能可用
-4. **表单状态保持** - 验证失败后保留用户输入，减少重新填写的麻烦
-5. **安全考量** - 错误消息设计平衡了信息详尽性和安全性，避免泄露系统信息
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+      remember: false,
+    },
+    mode: 'onTouched',
+  });
 
-### 可访问性与包容性设计
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    formState: { isSubmitting },
+  } = form;
 
-1. **ARIA 属性支持** - 使用 `aria-invalid` 和 `aria-label` 标记表单控件状态，优化屏幕阅读器体验
-2. **键盘可访问性** - 所有交互元素可通过键盘完全操作，包括密码可见性切换
-3. **标签关联** - 每个输入字段都有明确关联的标签，提高表单清晰度
-4. **颜色对比度** - 错误信息和交互元素使用符合 WCAG 标准的颜色对比度
-5. **响应式文本** - 允许文本缩放而不破坏布局，适应视力障碍用户需求
+  useEffect(() => {
+    if ('credentials' in navigator) {
+      navigator.credentials.get({ password: true, mediation: 'optional' })
+        .then((cred) => {
+          if (cred && 'password' in cred) {
+            setValue('username', cred.id, { shouldValidate: true });
+            setValue('password', cred.password, { shouldValidate: true });
+            setValue('remember', true);
+          }
+        })
+        .catch((err) => {
+          console.error('自动读取凭据失败:', err);
+        });
+    }
+  }, [setValue]);
 
-### 移动设备优化
+  const onSubmit = async (values: LoginFormData) => {
+    try {
+      console.log('正在提交登录信息:', values);
 
-1. **触摸友好设计** - 输入控件和按钮尺寸适合触摸操作，减少误触机会
-2. **适当的输入类型** - 为用户名字段指定 `inputMode="email"` 优化虚拟键盘布局
-3. **自动完成支持** - 使用适当的 `autoComplete` 属性便于移动设备填充凭据
-4. **响应式布局** - 表单元素在小屏幕上自动调整布局，保持可用性
-5. **减少重定向** - 结合凭据管理 API 减少移动设备上的重复登录，提升体验
+      if (values.remember && 'credentials' in navigator) {
+        const cred = new PasswordCredential({
+          id: values.username,
+          password: values.password,
+        });
+        await navigator.credentials.store(cred);
+      }
+    } catch (error) {
+      console.error('登录失败:', error);
+    }
+  };
 
-### 性能与安全考量
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
-1. **轻量级验证** - 客户端验证即时响应，减少服务器往返
-2. **节流与防抖** - 优化实时验证触发频率，避免性能问题
-3. **渐进式增强** - 凭据管理 API 作为增强功能提供，不影响核心登录功能
-4. **状态管理优化** - 使用精确的状态更新减少不必要的渲染
-5. **隐私保护** - "记住我" 功能默认关闭，明确获得用户授权后再存储凭据
+  return (
+    <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+      <h2 className="mb-6 text-2xl font-bold text-center">用户登录</h2>
 
-## 凭据 API 集成说明
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>邮箱/手机号</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请输入邮箱或手机号"
+                    inputMode="email"
+                    autoComplete="username"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-本组件利用了浏览器的 Credential Management API 进行安全的用户凭据管理：
+          <FormField
+            control={control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>密码</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="请输入密码"
+                      autoComplete="current-password"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                      onClick={togglePasswordVisibility}
+                      aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-- **自动填充** - 组件初始化时检测并获取已保存的凭据
-- **安全存储** - 成功登录后，根据用户选择安全保存凭据
-- **隐私控制** - 用户可通过自动登录复选框控制凭据管理行为
-- **兼容性处理** - 包含 API 可用性检测，在不支持的浏览器中优雅降级
+          <FormField
+            control={control}
+            name="remember"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="font-normal cursor-pointer">
+                    自动登录
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
 
-### 实施注意事项
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? '登录中...' : '登录'}
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
+}
 
-- Credential Management API 仅在 HTTPS 环境下可用
-- 确保在生产环境中实现真实的后端认证逻辑
-- 可根据项目 UI 规范调整组件样式
-- 考虑添加更多安全措施如限制登录尝试次数、双因素认证等
+export default LoginForm;
+```
+
+## 体验与安全特性
+
+为了提供企业级的产品体验，该模块在交互、安全和无障碍设计上进行了深度优化：
+
+### 🎯 交互与表单校验
+
+- **智能账号识别：** 单个输入框支持邮箱与手机号混输，底层通过正则自动判断格式并给出精准的错误提示。
+- **实时且友好的反馈：** 采用“失去焦点校验 + 输入时消除错误”的策略，既防止打断用户输入，又能及时纠正错误。
+- **密码可见性控制：** 提供一键明/暗文切换功能，切换后自动保持输入框焦点，操作连贯。
+
+### 🛡️ 凭据管理与安全 (Credential API)
+
+- **原生安全存储：** 利用浏览器的 `Credential Management API`（需 HTTPS 环境），在获取用户授权（勾选记住密码）后，安全地将凭据交由系统底层管理。
+- **智能填充降级：** 页面初始化时自动检测已保存凭据。若浏览器不支持该 API，组件会优雅降级，依然可以依赖浏览器原生的 `<form>` 自动完成机制。
+- **防重复提交：** 登录按钮在请求期间处于 `disabled` 状态，防止网络延迟导致的多重提交。
+
+### ♿ 无障碍与移动端优化 (a11y)
+
+- **移动端键盘适配：** 为用户名输入框指定 `inputMode="email"`，为密码框提供正确的 `autoComplete` 属性，直接唤起移动端最适合的虚拟键盘。
+- **屏幕阅读器友好：** 全面支持 ARIA 属性（如 `aria-invalid`、`aria-label`、`role="alert"`），确保视障用户能准确获取表单状态和错误信息。
+- **全键盘操作：** 所有交互元素（包括密码显示切换按钮）均可通过 Tab 键聚焦并使用键盘回车触发。
