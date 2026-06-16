@@ -174,440 +174,366 @@ sequenceDiagram
 ## 邮箱注册代码实现
 
 ```tsx
-import React, { useState, useRef } from 'react';
+import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import PasswordStrength from 'tai-password-strength';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Eye, EyeOff } from 'lucide-react';
 
-// 密码强度类型定义
-type PasswordStrength = 'weak' | 'medium' | 'strong';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
-interface PasswordStrengthResult {
-  strength: PasswordStrength;
-  score: number;
-  feedback: string[];
-  isValid: boolean;
-}
+const registrationSchema = z
+  .object({
+    email: z.string().email('请输入有效的邮箱地址'),
+    password: z
+      .string()
+      .min(6, '密码至少 6 位')
+      .max(32, '密码最多 32 位')
+      .refine(
+        (password) => {
+          const passwordStrength = new PasswordStrength();
+          const result = passwordStrength.check(password);
 
-// 定义验证规则
-const registrationSchema = z.object({
-  email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string()
-    .min(6, '密码至少 6 位')
-    .max(32, '密码最多 32 位')
-    .refine((password) => {
-      const passwordStrength = new PasswordStrength();
-      const result = passwordStrength.check(password);
-      return result.strengthCode !== 'WEAK' && result.strengthCode !== 'VERY_WEAK';
-    }, {
-      message: '密码强度过弱，请设置更复杂的密码'
+          return (
+            result.strengthCode !== 'WEAK' && result.strengthCode !== 'VERY_WEAK'
+          );
+        },
+        { message: '密码强度过弱，请设置更复杂的密码' },
+      ),
+    confirmPassword: z.string(),
+    agreeTerms: z.boolean().refine((val) => val === true, {
+      message: '请同意服务条款和隐私政策',
     }),
-  confirmPassword: z.string(),
-  nickname: z.string().min(2, '昵称至少 2 位').max(20, '昵称最多 20 位').optional(),
-  agreeTerms: z.boolean().refine(val => val === true, {
-    message: '请同意服务条款和隐私政策'
   })
-}).refine(data => {
-  return data.password === data.confirmPassword;
-}, {
-  message: '两次输入的密码不一致',
-  path: ['confirmPassword']
-});
+  .refine((data) => data.password === data.confirmPassword, {
+    message: '两次输入的密码不一致',
+    path: ['confirmPassword'],
+  });
 
 type RegistrationData = z.infer<typeof registrationSchema>;
 
-const RegistrationForm: React.FC = () => {
-  const [formData, setFormData] = useState<RegistrationData>({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    nickname: '',
-    agreeTerms: false
-  });
-  
-  const [errors, setErrors] = useState<Partial<Record<keyof RegistrationData, string>>>({});
+const strengthBarVariants = cva(
+  'h-full transition-all duration-300 ease-in-out',
+  {
+    variants: {
+      strength: {
+        none: 'w-0 bg-gray-200',
+        weak: 'w-1/3 bg-red-500',
+        medium: 'w-2/3 bg-amber-500',
+        strong: 'w-full bg-emerald-500',
+      },
+    },
+    defaultVariants: {
+      strength: 'none',
+    },
+  },
+);
+
+const strengthTextVariants = cva('text-xs font-medium', {
+  variants: {
+    strength: {
+      none: 'text-gray-400',
+      weak: 'text-red-500',
+      medium: 'text-amber-500',
+      strong: 'text-emerald-500',
+    },
+  },
+  defaultVariants: {
+    strength: 'none',
+  },
+});
+
+type StrengthKey = VariantProps<typeof strengthBarVariants>['strength'];
+
+const STRENGTH_LABELS: Record<Exclude<StrengthKey, null>, string> = {
+  none: '',
+  weak: '弱',
+  medium: '中',
+  strong: '强',
+};
+
+const getPasswordStrengthKey = (password: string): StrengthKey => {
+  if (!password) return 'none';
+
+  const tester = new PasswordStrength();
+  const result = tester.check(password);
+
+  switch (result.strengthCode) {
+    case 'VERY_STRONG':
+    case 'STRONG':
+      return 'strong';
+    case 'REASONABLE':
+      return 'medium';
+    case 'WEAK':
+    case 'VERY_WEAK':
+    default:
+      return 'weak';
+  }
+};
+
+function RegistrationForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState<PasswordStrengthResult | null>(null);
-  
-  const passwordRef = useRef<HTMLInputElement>(null);
 
-  // 检查密码强度
-  const checkPasswordStrengthLevel = (password: string): PasswordStrengthResult => {
-    if (!password) {
-      return {
-        strength: 'weak',
-        score: 0,
-        feedback: ['请输入密码'],
-        isValid: false
-      };
-    }
+  const form = useForm<RegistrationData>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      agreeTerms: false,
+    },
+  });
 
-    const passwordStrength = new PasswordStrength();
-    const result = passwordStrength.check(password);
-    
-    let strength: PasswordStrength = 'weak';
-    let score = 0;
-    let isValid = false;
-    
-    // 只根据 tai-password-strength 的 strengthCode 确定等级
-    switch (result.strengthCode) {
-      case 'VERY_STRONG':
-      case 'STRONG':
-        strength = 'strong';
-        score = 90;
-        isValid = true;
-        break;
-      case 'REASONABLE':
-        strength = 'medium';
-        score = 65;
-        isValid = true;
-        break;
-      case 'WEAK':
-      case 'VERY_WEAK':
-      default:
-        strength = 'weak';
-        score = 30;
-        isValid = false;
-        break;
-    }
+  const watchPassword = form.watch('password');
+  const strengthKey = useMemo(
+    () => getPasswordStrengthKey(watchPassword),
+    [watchPassword],
+  );
 
-    return {
-      strength,
-      score,
-      feedback: [],
-      isValid
-    };
-  };
-
-  const validateField = <K extends keyof RegistrationData>(
-    field: K,
-    value: RegistrationData[K]
-  ) => {
-    try {
-      registrationSchema.pick({ [field]: true }).parse({ [field]: value });
-      setErrors(prev => ({ ...prev, [field]: '' }));
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors(prev => ({
-          ...prev,
-          [field]: error.errors[0].message
-        }));
+  const handleSubmitSuccess = async (data: RegistrationData) => {
+    if ('credentials' in navigator) {
+      try {
+        const cred = new PasswordCredential({
+          id: data.email,
+          password: data.password,
+        });
+        await navigator.credentials.store(cred);
+      } catch (err) {
+        console.error('保存凭据失败:', err);
       }
-      return false;
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: fieldValue
-    }));
-    
-    // 如果是密码字段，检查密码强度
-    if (name === 'password' && typeof fieldValue === 'string') {
-      const strengthResult = checkPasswordStrengthLevel(fieldValue);
-      setPasswordStrength(strengthResult);
-    }
-    
-    if (errors[name as keyof RegistrationData]) {
-      validateField(name as keyof RegistrationData, fieldValue);
-    }
-  };
+  const onSubmit = async (data: RegistrationData) => {
+    setIsSubmitting(true);
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-    validateField(name as keyof RegistrationData, fieldValue);
-  };
-
-  const handleRegistration = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // 检查密码强度
-    if (passwordStrength && !passwordStrength.isValid) {
-      setErrors(prev => ({
-        ...prev,
-        password: '密码强度不足，无法注册'
-      }));
-      return;
-    }
-    
     try {
-      registrationSchema.parse(formData);
-      setErrors({});
-      setIsSubmitting(true);
-      
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           method: 'email',
-          ...formData,
-          passwordStrength: passwordStrength ? {
-            strengthCode: new PasswordStrength().check(formData.password).strengthCode
-          } : null,
-          source: 'web'
-        })
+          source: 'web',
+          ...data,
+        }),
       });
 
-      if (!response.ok) throw new Error('注册失败');
+      if (!response.ok) {
+        throw new Error('注册失败');
+      }
 
       const result = await response.json();
-      
+
       if (result.success) {
-        // 注册成功，保存凭据
-        if ('credentials' in navigator) {
-          try {
-            const cred = new PasswordCredential({
-              id: formData.email,
-              password: formData.password,
-              name: formData.nickname || '新用户'
-            });
-            await navigator.credentials.store(cred);
-          } catch (err) {
-            console.error('保存凭据失败:', err);
-          }
-        }
-
-        // 保存用户信息和令牌
+        await handleSubmitSuccess(data);
         localStorage.setItem('auth_token', result.token);
-        localStorage.setItem('user_info', JSON.stringify({
-          userId: result.userId,
-          email: formData.email,
-          nickname: formData.nickname,
-          isNewUser: true,
-          registrationTime: new Date().toISOString()
-        }));
-
-        // 跳转到主页
         window.location.href = '/dashboard?welcome=true';
       } else {
         throw new Error(result.message || '注册失败');
       }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Partial<Record<keyof RegistrationData, string>> = {};
-        error.errors.forEach(err => {
-          const field = err.path[0] as keyof RegistrationData;
-          newErrors[field] = err.message;
-        });
-        setErrors(newErrors);
-      } else {
-        console.error('注册失败:', error);
-        setErrors({ email: error.message || '注册失败，请重试' });
-      }
+    } catch (error: any) {
+      console.error('注册错误:', error);
+      form.setError('root', {
+        message: error.message || '注册失败，请重试',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 获取密码强度样式类名
-  const getStrengthClassName = () => {
-    if (!passwordStrength) return '';
-    return `strength-${passwordStrength.strength}`;
-  };
-
-  // 获取密码强度文本
-  const getStrengthText = () => {
-    if (!passwordStrength) return '';
-    switch (passwordStrength.strength) {
-      case 'weak':
-        return '弱';
-      case 'medium':
-        return '中';
-      case 'strong':
-        return '强';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <div className="registration-container">
-      <h2>邮箱注册</h2>
-      <p className="subtitle">创建您的账户</p>
-      
-      <form onSubmit={handleRegistration}>
-        <div className="form-group">
-          <label htmlFor="email">邮箱地址</label>
-          <input
-            id="email"
+    <div className="w-full max-w-md mx-auto p-6 space-y-8 bg-white rounded-xl shadow-md">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900">邮箱注册</h2>
+        <p className="mt-2 text-sm text-gray-600">创建您的账户</p>
+      </div>
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          <FormField
+            control={form.control}
             name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="请输入邮箱地址"
-            value={formData.email}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            aria-invalid={!!errors.email}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>邮箱地址</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请输入邮箱地址"
+                    type="email"
+                    autoComplete="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.email && <p className="error-message">{errors.email}</p>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="password">登录密码</label>
-          <div className="password-input-wrapper">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="请设置登录密码"
-              value={formData.password}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              ref={passwordRef}
-              aria-invalid={!!errors.password}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? '隐藏密码' : '显示密码'}
-            >
-              {showPassword ? '🙈' : '👁️'}
-            </button>
-          </div>
-          
-          {/* 密码强度指示器 */}
-          {formData.password && passwordStrength && (
-            <div className="password-strength-indicator">
-              <div className="strength-meter">
-                <div className="strength-bar">
-                  <div 
-                    className={`strength-fill ${getStrengthClassName()}`}
-                    style={{ width: `${passwordStrength.score}%` }}
-                  ></div>
-                </div>
-                <span className={`strength-text ${getStrengthClassName()}`}>
-                  密码强度: {getStrengthText()}
-                </span>
-              </div>
-              
-              {/* 密码强度反馈 */}
-              {passwordStrength.feedback.length > 0 && (
-                <div className="strength-feedback">
-                  {passwordStrength.feedback.map((feedback, index) => (
-                    <p 
-                      key={index} 
-                      className={`feedback-item ${passwordStrength.strength === 'strong' ? 'success' : 'warning'}`}
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>登录密码</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="请设置登录密码"
+                      autoComplete="new-password"
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      className={cn(
+                        'absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700',
+                      )}
+                      onClick={() => setShowPassword(!showPassword)}
                     >
-                      {passwordStrength.strength === 'strong' ? '✓' : '•'} {feedback}
-                    </p>
-                  ))}
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </FormControl>
+
+                {watchPassword && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-1.5 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          strengthBarVariants({ strength: strengthKey }),
+                        )}
+                      />
+                    </div>
+                    <span
+                      className={cn(strengthTextVariants({ strength: strengthKey }))}
+                    >
+                      {strengthKey ? STRENGTH_LABELS[strengthKey] : ''}
+                    </span>
+                  </div>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>确认密码</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="请再次输入密码"
+                      autoComplete="new-password"
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="agreeTerms"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="font-normal text-sm text-gray-600">
+                    我已阅读并同意{' '}
+                    <a
+                      href="/terms"
+                      className="text-blue-600 hover:underline"
+                    >
+                      服务条款
+                    </a>{' '}
+                    和{' '}
+                    <a
+                      href="/privacy"
+                      className="text-blue-600 hover:underline"
+                    >
+                      隐私政策
+                    </a>
+                  </FormLabel>
+                  <FormMessage />
                 </div>
-              )}
+              </FormItem>
+            )}
+          />
+
+          {form.formState.errors.root && (
+            <div className="text-sm font-medium text-red-500 text-center">
+              {form.formState.errors.root.message}
             </div>
           )}
-          
-          {errors.password && <p className="error-message">{errors.password}</p>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="confirmPassword">确认密码</label>
-          <div className="password-input-wrapper">
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="请再次输入密码"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              aria-invalid={!!errors.confirmPassword}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              aria-label={showConfirmPassword ? '隐藏密码' : '显示密码'}
-            >
-              {showConfirmPassword ? '🙈' : '👁️'}
-            </button>
-          </div>
-          {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="nickname">用户昵称（可选）</label>
-          <input
-            id="nickname"
-            name="nickname"
-            type="text"
-            autoComplete="nickname"
-            placeholder="请输入昵称"
-            value={formData.nickname}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            aria-invalid={!!errors.nickname}
-          />
-          {errors.nickname && <p className="error-message">{errors.nickname}</p>}
-        </div>
-        
-        <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              name="agreeTerms"
-              checked={formData.agreeTerms}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-            />
-            我已阅读并同意 
-            <a href="/terms" target="_blank">服务条款</a> 和 
-            <a href="/privacy" target="_blank">隐私政策</a>
-          </label>
-          {errors.agreeTerms && <p className="error-message">{errors.agreeTerms}</p>}
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={isSubmitting || (passwordStrength && !passwordStrength.isValid)}
-          className={passwordStrength && !passwordStrength.isValid ? 'disabled-weak-password' : ''}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '注册中...' : '立即注册'}
+          </Button>
+        </form>
+      </Form>
+
+      <div className="text-center text-sm text-gray-600 mt-6">
+        已有账户？{' '}
+        <a
+          href="/auth/login"
+          className="font-medium text-blue-600 hover:underline"
         >
-          {isSubmitting ? '注册中...' : 
-           passwordStrength && !passwordStrength.isValid ? '密码强度不足' : '立即注册'}
-        </button>
-      </form>
-      
-      <div className="login-prompt">
-        <p>已有账户？<a href="/auth/login">立即登录</a></p>
+          立即登录
+        </a>
       </div>
-      
-      <div className="other-methods">
-        <p>您还可以选择：</p>
-        <div className="method-links">
-          <a href="/auth/sms">手机验证码登录</a>
-          <span>•</span>
-          <a href="/auth/wechat">微信登录</a>
-        </div>
-        <p className="auto-register-note">
-          📱 手机验证码登录和微信登录会自动为您创建账户
-        </p>
-      </div>
-      
-      {/* 密码强度样式说明
-      - .password-strength-indicator: 密码强度指示器容器
-      - .strength-meter: 进度条容器
-      - .strength-bar: 进度条背景，灰色 #e5e7eb
-      - .strength-fill: 进度条填充，根据强度显示不同颜色
-        - .strength-weak: 红色 #ef4444
-        - .strength-medium: 橙色 #f59e0b 
-        - .strength-strong: 绿色 #10b981
-      - .strength-text: 强度文本，颜色与进度条一致
-      - .strength-feedback: 反馈信息容器
-      - .feedback-item: 反馈项目样式
-        - .success: 成功状态 绿色 #10b981
-        - .warning: 警告状态 橙色 #f59e0b
-      - .disabled-weak-password: 弱密码时按钮禁用样式，灰色背景 #f3f4f6
-      */}
     </div>
   );
-};
+}
 
 export default RegistrationForm;
 ```
