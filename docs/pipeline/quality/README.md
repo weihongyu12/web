@@ -109,7 +109,7 @@ Linter 工具（如 ESLint）在静态检查环节的作用十分突出：
 
 Qodana 是 JetBrains 开发的代码质量平台，专为CI/CD管道设计，能无缝集成到自动化工作流中进行静态代码分析。
 
-![Qodana截图](./assets/qodana.png)
+![Qodana截图](./assets/qodana.avif)
 
 #### 主要特点
 

@@ -200,7 +200,7 @@ HTTPS 可防止入侵者被动地监听网站与用户之间的通信。
 
 #### 资源请求在网络上如何运作？
 
-![请求和响应](assets/request-response_1920.png)
+![请求和响应](./assets/request-response_1920.avif)
 
 浏览器和服务器可以使用超文本传输协议 (HTTP) 通过网络交换数据。HTTP 定义了请求方和响应方之间的通信规则，包括获取资源所需的信息。
 
@@ -319,7 +319,7 @@ Access-Control-Allow-Methods: GET, DELETE, HEAD, OPTIONS
 
 浏览上下文组是一组可以相互引用的窗口。例如，通过 `<iframe>` 嵌入的顶级文档及其子文档。如果某个网站 (`https://a.example`) 打开一个弹出式窗口 (`https://b.example`)，则打开窗口和弹出式窗口共享相同的浏览上下文，因此它们可以通过 DOM API（例如 `window.opener`）相互访问。
 
-![浏览情境组](assets/browsing-context-group_1920.png)
+![浏览情境组](./assets/browsing-context-group_1920.avif)
 
 ###### 2. 确保资源已启用 CORP 或 CORS
 
@@ -519,7 +519,7 @@ Content-Security-Policy:
   base-uri 'none';
 ```
 
-![基于 nonce 的严格 CSP](assets/nonce-based-strict-csp.png?as=webp)
+![基于 nonce 的严格 CSP](./assets/nonce-based-strict-csp.avif)
 
 - **基于哈希的严格 CSP**
 

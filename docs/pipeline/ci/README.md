@@ -10,7 +10,7 @@ sidebar_position: 6
 
 整个 Pipeline 由 **7 个阶段**顺序执行：
 
-![Gitlab CI 流水线总览](./gitlab-ci-pipeline.png)
+![Gitlab CI 流水线总览](./assets/gitlab-ci-pipeline.avif)
 
 阶段的顺序是刻意设计的：越早的阶段越轻量，发现问题的成本越低。lint 几秒内给出反馈，总比问题混进 main 分支后再排查要省力得多。
 

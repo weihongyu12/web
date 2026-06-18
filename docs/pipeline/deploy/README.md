@@ -170,7 +170,7 @@ title: 部署
 
 ## 服务器架构推荐
 
-![服务器架构](./server.svg)
+![服务器架构](./assets/server.svg)
 
 服务器产品推荐使用[阿里云](https://cn.aliyun.com/)产品
 
