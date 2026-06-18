@@ -31,7 +31,7 @@
 
 ## 容灾机制
 
-- [四级容灾策略](/docs/features/resilience#兜底容灾策略)
+- [四级容灾策略](/docs/features/recovery)
   - 主域名重试（指数退避）
   - 备用域名切换
   - IndexedDB缓存读取
