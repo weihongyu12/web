@@ -2,36 +2,35 @@
 
 ## 概述
 
-本指南将介绍如何使用 OpenAPI 规范、Orval 工具和 React Query 来构建类型安全的前端数据请求解决方案。通过这套工具链，您可以：
+本指南将介绍如何使用 OpenAPI 规范、Orval 工具、Axios 和 TanStack Query 来构建类型安全的前端数据请求解决方案。通过这套工具链，您可以：
 
-- 基于 OpenAPI 规范自动生成 TypeScript 类型定义
-- 自动生成 API 接口函数
-- 使用 React Query 进行高效的数据请求和状态管理
-- 保持前后端接口的一致性和类型安全
+- 基于 OpenAPI 规范自动生成 TypeScript 类型定义和 Zod 校验 Schema
+- 按业务模块（Tags）自动生成 API 接口函数
+- 使用 TanStack Query 进行高效的数据请求和状态管理
+- 严格遵循团队的 **RESTful API 规范**，保持前后端接口的一致性和类型安全
 
 :::tip
-[React Query](https://tanstack.com/query/latest/docs/framework/react/overview) 是一个用于管理、缓存和更新服务器状态的库。它可以帮助您在 React 应用中更高效地处理数据获取、分页、过滤等常见问题。通过使用 React Query，您可以轻松实现以下功能：
+[TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)（原 React Query）是一个用于管理、缓存和更新服务器状态的库。通过使用 TanStack Query，您可以轻松实现：
 
-- **数据获取**：利用 `useQuery` 和 `useMutation` 等 Hook 来简化 API 请求。
-- **缓存机制**：自动管理请求的数据缓存，减少不必要的重复请求。
-- **错误处理**：提供简单的方式来处理请求过程中的错误。
-- **实时更新**：支持订阅实时更新的数据源。
-
-React Query 提供了丰富的配置选项以及强大的数据管理能力，使得前端应用能够更加灵活高效地与后端服务交互。结合 Orval 工具自动生成的 API 接口，可以构建出既简洁又类型安全的数据请求解决方案。
+- **数据获取：** 利用 useQuery 和 useMutation 等 Hook 来简化 API 请求。
+- **缓存机制：** 自动管理请求的数据缓存，减少不必要的重复请求。
+- **错误处理：** 结合 axios 拦截器，优雅处理全局和局部的业务错误。
 :::
 
-## 使用方法
+## 核心配置与使用方法
 
-### 安装依赖
+### 1. 安装依赖
 
 ```bash
-pnpm install @tanstack/react-query @tanstack/react-query-devtools
-pnpm install -D orval
+pnpm add @tanstack/react-query @tanstack/react-query-devtools axios
+pnpm add -D orval biome
 ```
 
-### 配置 Orval
+_(注：根据配置使用了 Biome 作为代码格式化工具)_
 
-创建 `orval.config.ts`：
+### 2. 配置 Orval
+
+在项目根目录配置 `orval.config.ts`。我们采用 `tags-split` 模式将 API 按标签拆分为多个文件，并同时生成 Zod Schema 用于前端数据校验：
 
 ```typescript
 import { defineConfig } from 'orval';
@@ -39,94 +38,127 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   api: {
     input: {
-      target: './swagger.json',
-      // 或远程: 'http://localhost:3000/api/swagger.json'
+      target: './openapi.yaml', // 您的 OpenAPI 规范文件路径
     },
     output: {
-      target: 'src/api/index.ts',
+      mode: 'tags-split', // 按 Tag 拆分生成文件，适合大型项目
+      target: 'src/api',
+      schemas: 'src/api/model', // 生成的 TypeScript 接口类型
       client: 'react-query',
-      httpClient: 'fetch',
+      httpClient: 'axios',
       override: {
         mutator: {
-          path: 'src/api/fetch-instance.ts',
-          name: 'fetchInstance',
+          path: './src/api/mutator/axios.ts', // 自定义 Axios 实例
+          name: 'axios',
         },
       },
-      schemas: 'src/api/models',
+      formatter: 'biome',
+      mock: true, // 自动生成 MSW Mock 数据
+      allParamsOptional: true,
+      urlEncodeParameters: true,
     },
-  }, 
-  zod: {
+  },
+  apiZod: {
     input: {
-      target: './swagger.json',
-      // 或远程: 'http://localhost:3000/api/swagger.json'
+      target: './openapi.yaml',
     },
     output: {
-      target: 'src/api/zod-schemas',
+      mode: 'tags-split',
       client: 'zod',
+      target: 'src/api',
+      fileExtension: '.zod.ts',
+      formatter: 'biome',
     },
   },
 });
 ```
 
-### 创建 Fetch 实例
+### 3. 创建 Axios 拦截器与自定义 Mutator
 
-创建 `src/api/fetch-instance.ts`：
+深度结合我们的 **RESTful API 规范**，创建 `src/api/mutator/axios.ts`，定义标准的错误体结构并处理异常：
 
 ```typescript
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
+import Axios from 'axios';
+import type { AxiosError, AxiosRequestConfig } from 'axios';
 
-export const fetchInstance = async <T = any>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  // 构建完整 URL
-  const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
-  
-  // 默认请求头
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+// 结合 RESTful 规范定义的统一错误响应格式
+export interface ApiErrorResponse {
+  code: string;
+  message: string;
+  error: string;
+}
 
-  // 添加认证 token
-  const token = localStorage.getItem('token');
-  if (token) {
-    (headers as Record<string, string>).Authorization = `Bearer ${token}`;
-  }
+export const axiosInstance = Axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  adapter: 'fetch', // 默认使用 fetch adapter (Axios v1.7+)
+});
 
-  const response = await fetch(fullUrl, {
-    ...options,
-    headers,
-  });
+// 请求拦截器：自动携带 OAuth 2.0 Token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
 
-  // 处理错误
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    if (token) {
+      // 避免直接修改函数参数 (Airbnb)，但在 Axios 拦截器中通常通过合并或重新赋值属性处理
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    throw new Error(`HTTP ${response.status}`);
-  }
 
-  // 处理空响应
-  if (response.status === 204) {
-    return {} as T;
-  }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
-  return response.json();
-};
+// 响应拦截器：处理全局 HTTP 错误状态码
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError<ApiErrorResponse>) => {
+    if (error.response) {
+      const { status, data } = error.response;
 
-export default fetchInstance;
+      switch (status) {
+        case 401:
+          // 401 Unauthorized 处理
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          break;
+        case 403:
+          // 可以在此处集成全局 Toast 通知无权限
+          console.error('访问被拒绝:', data.message || '没有操作权限');
+          break;
+        case 500:
+          console.error('服务器内部错误:', data.error || '系统异常');
+          break;
+        default:
+          break;
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+// Orval 自定义请求函数
+export const axios = <T>(
+  config: AxiosRequestConfig,
+  options?: AxiosRequestConfig,
+): Promise<T> =>
+  axiosInstance({
+    ...config,
+    ...options,
+  }).then(({ data }) => data);
+
+// 覆盖 react-query 的返回错误类型，明确关联我们的 ApiErrorResponse
+export type ErrorType<Error = ApiErrorResponse> = AxiosError<Error>;
+export type BodyType<BodyData> = BodyData;
 ```
 
-### 配置 React Query
+### 4. 配置 TanStack Query 全局 Provider
 
-创建 `src/providers/QueryProvider.tsx`：
+创建 `src/providers/QueryProvider.tsx`
 
 ```tsx
-import { type FC, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type { ReactNode } from 'react';
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -135,32 +167,29 @@ interface QueryProviderProps {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: 1, // 失败默认重试 1 次
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5分钟
+      staleTime: 5 * 60 * 1000, // 数据 5 分钟内视为新鲜
     },
   },
 });
 
-const QueryProvider: FC<QueryProviderProps> = function QueryProvider({ children }) {
+export default function QueryProvider({ children }: QueryProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-};
-
-export default QueryProvider;
+}
 ```
 
 在 `src/App.tsx` 中使用：
 
 ```tsx
-import { type FC, type ReactNode } from 'react';
 import QueryProvider from '@/providers/QueryProvider';
 
-const App: FC = function App() {
+function App() {
   return (
     <QueryProvider>
       <div className="App">
@@ -169,284 +198,349 @@ const App: FC = function App() {
     </QueryProvider>
   );
 }
+
+export default App;
 ```
 
-### 生成 API 代码
+### 5. 生成代码
 
-在 `package.json` 中添加脚本：
+在 `package.json` 中配置脚本并运行：
 
 ```json
 {
   "scripts": {
-    "openapi": "orval"
+    "orval": "orval"
   }
 }
 ```
 
-运行生成命令：
+## 业务实战指南
 
-```bash
-npm run openapi
-```
-
-### 基本用法
-
-#### 查询数据
+### 1. 基础查询 (GET)
 
 ```tsx
-import { type FC } from 'react';
-import { useGetUsers, useGetUserById } from '@/api';
+import { AlertCircle } from 'lucide-react';
+import { useGetUserById } from '@/api/user/user';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-// 用户列表
-const UserList: FC = function UserList() {
-  const { data: users, isLoading, error } = useGetUsers();
+interface UserDetailProps {
+  userId: string;
+}
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+function UserDetail({ userId }: UserDetailProps) {
+  const { data: user, isLoading, error } = useGetUserById(userId);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-[100px] w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>加载失败</AlertTitle>
+        <AlertDescription>
+          {error.response?.data?.message || error.message}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <ul>
-      {users?.map(user => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
+    <Card>
+      <CardHeader>
+        <CardTitle>用户信息</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">姓名：{user?.name}</p>
+      </CardContent>
+    </Card>
   );
-};
+}
 
-// 用户详情
-const UserDetail = ({ userId }: { userId: string }) => {
-  const { data: user, isLoading } = useGetUserById(userId);
-
-  if (isLoading) return <div>Loading...</div>;
-  return <div>{user?.name}</div>;
-};
+export default UserDetail;
 ```
 
-#### 6.2 变更数据
+### 2. 标准分页查询与列表渲染
+
+使用 `page`（从 `0` 开始）和 `size` 请求，并接收 `{ content, meta }` 响应结构：
 
 ```tsx
-import { type FC } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useCreateUser, useUpdateUser, useDeleteUser } from '@/api';
+import { useState } from 'react';
+import { useGetProducts } from '@/api/product/product';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-const UserForm: FC = function UserForm() {
-  const queryClient = useQueryClient();
-  
-  const createUser = useCreateUser({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
+function ProductListWithPagination() {
+  const [page, setPage] = useState<number>(0);
+  const size = 20;
 
-  const updateUser = useUpdateUser({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
+  const { data, isLoading } = useGetProducts({ page, size });
 
-  const deleteUser = useDeleteUser({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
+  const handlePrevPage = () => {
+    setPage((prev) => Math.max(0, prev - 1));
+  };
 
-  return (
-    <div>
-      <button 
-        onClick={() => createUser.mutate({ data: { name: 'John' } })}
-        disabled={createUser.isPending}
-      >
-        {createUser.isPending ? 'Creating...' : 'Create User'}
-      </button>
-    </div>
-  );
-};
-```
+  const handleNextPage = () => {
+    setPage((prev) => prev + 1);
+  };
 
-#### 分页查询
+  const totalPages = data?.meta?.pages ?? 1;
+  const isNextDisabled = page >= totalPages - 1;
 
-```tsx
-import { useState, type FC } from 'react';
-import { useGetUsers } from '@/api';
-
-const UserListWithPagination: FC = function UserListWithPagination() {
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-
-  const { data, isLoading } = useGetUsers({ page, limit: pageSize });
+  if (isLoading) {
+    return (
+      <div className="p-4 text-center text-sm text-muted-foreground">
+        加载列表中...
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {data?.items?.map(user => (
-        <div key={user.id}>{user.name}</div>
-      ))}
-      
-      <div>
-        <button 
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-          disabled={page === 1}
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>产品名称</TableHead>
+              <TableHead className="text-right">库存</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data?.content?.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell className="text-right">{product.stock}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Button variant="outline" onClick={handlePrevPage} disabled={page === 0}>
+          上一页
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          当前页: {page + 1} / 共 {totalPages} 页
+        </span>
+        <Button
+          variant="outline"
+          onClick={handleNextPage}
+          disabled={isNextDisabled}
         >
-          Previous
-        </button>
-        <span>Page {page}</span>
-        <button 
-          onClick={() => setPage(p => p + 1)}
-          disabled={!data?.hasMore}
-        >
-          Next
-        </button>
+          下一页
+        </Button>
       </div>
     </div>
   );
-};
-```
-
-### 高级用法
-
-#### 数据转换和验证
-
-```tsx
-import { type FC } from 'react';
-import { z } from 'zod';
-import { UserSchema } from '@/api/zod-schemas';
-
-interface UserCardProps {
-    userId: string
 }
 
-// 扩展 schema 添加计算字段
-const UserWithComputedSchema = UserSchema.extend({
-  displayName: z.string(),
-  isActive: z.boolean(),
-}).transform(data => ({
-  ...data,
-  displayName: data.firstName ? `${data.firstName} ${data.lastName}` : data.email,
-  isActive: data.lastLoginAt ? new Date(data.lastLoginAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : false,
-}));
+export default ProductListWithPagination;
+```
 
-// 使用转换后的数据
-const UserCard: FC<UserCardProps> = ({ userId }) => {
+### 3. 数据变更 (POST / PUT / DELETE)
+
+```tsx
+import { useQueryClient } from '@tanstack/react-query';
+import { useCreateUser } from '@/api/user/user';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+function UserManager() {
+  const queryClient = useQueryClient();
+
+  const createUser = useCreateUser({
+    mutation: {
+      onSuccess: () => {
+        // 创建成功后，失效 user 相关的缓存以重新拉取
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        toast.success('操作成功', {
+          description: '新建用户已成功创建。',
+        });
+      },
+      onError: (error) => {
+        toast.error('操作失败', {
+          description: error.response?.data?.message || '发生未知错误',
+        });
+      },
+    },
+  });
+
+  const handleCreateSubmit = () => {
+    createUser.mutate({ data: { username: 'tarzan', password: '***' } });
+  };
+
+  return (
+    <div className="flex space-x-2">
+      <Button onClick={handleCreateSubmit} disabled={createUser.isPending}>
+        {createUser.isPending ? '创建中...' : '新建用户'}
+      </Button>
+    </div>
+  );
+}
+
+export default UserManager;
+```
+
+### 4. 结合 Zod 进行数据转换与防御性编程
+
+利用 Orval 自动生成的 Zod Schema 拦截脏数据，显示状态：
+
+```tsx
+import { z } from 'zod';
+import { getUserByIdResponseItem } from '@/api/user/user.zod';
+import { useGetUserById } from '@/api/user/user';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// 扩展自动生成的 Schema，添加前端特有的计算属性
+const UserWithComputedSchema = getUserByIdResponseItem
+  .extend({ isActive: z.boolean().optional() })
+  .transform((data) => ({
+    ...data,
+    isActive: data.lastLoginAt
+      ? new Date(data.lastLoginAt)
+        > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      : false,
+  }));
+
+interface UserCardProps {
+  userId: string;
+}
+
+function UserCard({ userId }: UserCardProps) {
   const { data: rawUser, isLoading } = useGetUserById(userId);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <Skeleton className="h-32 w-full" />;
+  }
 
-  // 验证和转换数据
+  // 严格校验和转换数据
   const userResult = UserWithComputedSchema.safeParse(rawUser);
+
   if (!userResult.success) {
-    return <div>Invalid user data</div>;
+    console.error('API 数据格式异常', userResult.error);
+    return (
+      <div className="p-4 text-red-500">数据格式异常，无法渲染卡片</div>
+    );
   }
 
   const user = userResult.data;
 
   return (
-    <div>
-      <h3>{user.displayName}</h3>
-      <p>Status: {user.isActive ? 'Active' : 'Inactive'}</p>
-      <p>Email: {user.email}</p>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>{user.username}</span>
+          <Badge variant={user.isActive ? 'default' : 'secondary'}>
+            {user.isActive ? '活跃' : '不活跃'}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">ID: {user.id}</p>
+      </CardContent>
+    </Card>
   );
-};
-```
-
-#### 错误处理
-
-```tsx
-import { type FC } from 'react';
-
-interface UserProfileProps {
-  userId: string
 }
 
-const UserProfile: FC<UserProfileProps> = function UserProfile({ userId }) {
-  const { data, error, isLoading } = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => getUserById(userId),
-    retry: (failureCount, error) => {
-      // 404 错误不重试
-      if (error instanceof Error && error.message.includes('404')) {
-        return false;
-      }
-      return failureCount < 3;
+export default UserCard;
+```
+
+### 5. 规范化错误处理
+
+基于 RESTful 规范提取精确的错误代码 (`code`) 来处理特定业务逻辑：
+
+```tsx
+import { AlertCircle } from 'lucide-react';
+import { useGetUserById } from '@/api/user/user';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+interface UserProfileProps {
+  userId: string;
+}
+
+function UserProfile({ userId }: UserProfileProps) {
+  const { data, error, isLoading } = useGetUserById(userId, {
+    query: {
+      retry: (failureCount, err) => {
+        // AxiosError 已经在 global types 被定义关联到了 ApiErrorResponse
+        if (err.response?.status === 404) {
+          return false; // 404 错误不进行重试
+        }
+        return failureCount < 3;
+      },
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  
-  if (error) {
-    if (error instanceof Error && error.message.includes('404')) {
-      return <div>User not found</div>;
-    }
-    return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return (
+      <div className="text-sm text-muted-foreground">加载配置中...</div>
+    );
   }
 
-  return <div>{data?.name}</div>;
-};
+  if (error) {
+    const apiCode = error.response?.data?.code;
+    const apiMessage = error.response?.data?.message || '未知服务错误';
+
+    // 基于业务状态码（来自 RESTful 规范）执行特定视图逻辑
+    if (apiCode === 'A0201') {
+      return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>账户异常</AlertTitle>
+          <AlertDescription>
+            检测到当前用户账户不存在，请联系管理员。
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>请求错误: {apiMessage}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  return <div>配置拥有者：{data?.name}</div>;
+}
+
+export default UserProfile;
 ```
 
-### 最佳实践
+## 推荐的目录架构
 
-#### 文件结构
+基于 `tags-split` 模式生成后，推荐的项目结构如下：
 
 ```
 src/
 ├── api/
-│   ├── models              # TS 类型定义
-│   │ ├── ..               
-│   │ └── index.ts          # Orval 生成 TS 类型定义文件
-│   ├── index.ts            # Orval 生成 API 接口函数的文件
-│   └── fetch-instance.ts   # Fetch 配置
-├── components/
+│   ├── mutator/
+│   │   └── axios.ts         # Axios 实例、ApiErrorResponse 及拦截器配置
+│   ├── model/               # Orval 生成的所有 TS Interface
+│   │   ├── user.ts
+│   │   └── index.ts
+│   └── user/                # 按 Tag 生成的接口目录
+│       ├── user.ts          # Hook 及请求方法
+│       └── user.zod.ts      # Zod 校验结构
 ├── providers/
-│   └── QueryProvider.tsx
+│   └── QueryProvider.tsx    # TanStack Query 全局配置
 └── pages/
 ```
-
-#### 类型安全
-
-```tsx
-import { type User, type CreateUserDto } from '@/api/models';
-
-interface UserFormProps {
-  user?: User;
-  onSubmit: (data: CreateUserDto) => void;
-}
-
-const UserForm: React.FC<UserFormProps> = function UserForm({ 
-  user = undefined, 
-  onSubmit
-}) {
-  // 组件实现
-};
-```
-
-#### 缓存策略
-
-```typescript
-// 不同数据不同缓存时间
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 用户数据 5 分钟
-    },
-  },
-});
-
-// 配置数据缓存更长时间
-const { data: config } = useQuery({
-  queryKey: ['config'],
-  queryFn: getConfig,
-  staleTime: 30 * 60 * 1000, // 30 分钟
-});
-```
-
-## 参考资源
-
-- [OpenAPI 规范](https://swagger.io/specification/)
-- [Orval 文档](https://orval.dev/)
-- [React Query 文档](https://tanstack.com/query/latest)
-- [Fetch API 文档](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
-
-:::tip
-- 如果是 Vue 项目，可以使用 [Vue Query](https://tanstack.com/query/latest/docs/framework/vue/overview) 替代 React Query
-- 在 Ant Design Pro 中，已经内置了[类似的功能](https://pro.ant.design/zh-CN/docs/openapi/)，可以直接使用
-:::
