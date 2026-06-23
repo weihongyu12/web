@@ -3105,6 +3105,11 @@ build_app:
   <<: *install_template
   script:
     - pnpm run build
+    - npx @sentry/cli releases new $CI_COMMIT_SHA
+    - npx @sentry/cli releases set-commits --auto $CI_COMMIT_SHA || true
+    - npx @sentry/cli releases files $CI_COMMIT_SHA upload-sourcemaps ./dist --rewrite
+    - npx @sentry/cli releases finalize $CI_COMMIT_SHA
+    - find ./dist -name "*.map" -type f -delete
   artifacts:
     paths:
       - dist/
@@ -3121,7 +3126,7 @@ build_docker:
     - docker push $LOCAL_REGISTRY/$IMAGE_NAME:latest
 
 # 单元测试
-unit tests:
+unit_tests:
   stage: test
   needs: ["setup"]
   <<: *install_template
@@ -3129,7 +3134,7 @@ unit tests:
     - pnpm run test:unit --watchAll=false --ci
 
 # 覆盖率测试
-coverage tests:
+coverage_tests:
   stage: test
   needs: ["setup"]
   <<: *install_template
@@ -3138,7 +3143,7 @@ coverage tests:
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
 
 # E2E 测试
-e2e tests:
+e2e_tests:
   stage: test
   image: mcr.microsoft.com/playwright:v1.58.2-noble
   needs: ["build_app"]
