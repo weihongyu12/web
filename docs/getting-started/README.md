@@ -6,7 +6,7 @@ description: 架构指南和总览
 
 # 架构
 
-![前端架构](./assets/architecture.webp)
+![前端架构](./assets/architecture.avif)
 
 ## 总览
 
