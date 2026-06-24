@@ -182,10 +182,6 @@ HTTP/2 新增的一个强大的新功能是，服务器可以对一个客户端�
 
 资源合并意味着把几个小文件合并成一个大文件，省掉那些加载外部资源的相应时间，以及解码/执行那些资源所消耗的 CPU 资源。因为 HTTP/2 采取了多路复用，加载多个文件已经不再是性能瓶颈，并且可以让文件更加快速的下载。
 
-:::tip
-如何处理？全部交给 Webpack 处理就行了！
-:::
-
 ##### 禁用 cookie 的域名
 
 禁用 cookie 的域名来提供静态资源是一项标准的性能优化实践。尤其是使用 HTTP/1.x 时，无法压缩首部，而 cookie 的大小又常常超过单个 TCP 数据包的限度。不过，在 HTTP/2 下，请求首部使用 HPACK 算法被压缩，会显著减少巨型 cookie 的字节数（尤其是当它在先后请求之间保持不变）。与此同时，禁用 cookie 的域名需要额外的域名，这意味着额外的链接。
@@ -253,6 +249,20 @@ CDN 可以将资源基于地理位置提供给临近的用户，以此提升性�
 #### 预加载JavaScript文件
 
 由于浏览器不执行预加载的文件，因此预加载对于将获取与执行分开是很有用的，这可以改善诸如“交互时间”之类的指标。如果您拆分 JavaScript 包并且仅预加载关键块，则预加载效果最好。
+
+#### 使用 modulepreload 预加载 ES 模块
+
+对于现代 JavaScript (ES Modules)，使用 `<link rel="modulepreload">` 是比标准 `<link rel="preload">` 更优越的选择。
+
+标准 `preload` 仅负责将文件下载到缓存中，当浏览器实际需要执行该文件时，仍需要进行耗时的脚本解析和编译。而 `modulepreload` 不仅会下载模块，还会在后台线程中解析并编译它，将其放入浏览器的模块映射表中。这样，当需要实际执行该模块时，浏览器就可以跳过解析阶段直接执行，从而大幅减少主线程的阻塞时间。
+
+```html
+<!-- 预加载、解析并编译 ES 模块 -->
+<link rel="modulepreload" href="app.mjs">
+<link rel="modulepreload" href="vendor.mjs">
+```
+
+对于支持 ES Module 输出的现代构建工具，它们通常会自动为动态导入的 chunk 注入 `modulepreload` 标签，极大地提升了现代网页的初始化性能。
 
 ### 尽早建立网络连接以提高感知的页面速度
 
@@ -341,11 +351,11 @@ DNS解析的启动类似于预连接：通过在文档的 `<head>` 中添加 `<l
 
 例如，在产品列表页面中，您可以预取列表中最受欢迎的产品页面。 在某些情况下，下一次导航甚至更容易预期-在购物车页面上，用户访问结帐页面的可能性通常很高，这使其成为预取的理想选择。
 
-#### 预取按需JavaScript块
+#### 预取按需 JavaScript 块
 
 通过代码拆分JavaScript bundle，可以最初仅加载应用程序的一部分，然后延迟加载其余部分。如果正在使用此技术，则可以将预取应用于不是立即需要但可能很快就会请求的路由或组件。
 
-例如，如果您的页面包含一个按钮，该按钮会打开一个包含表情符号选择器的对话框，则可以将其分为三个 JavaScript 块：主Home、Dialog 和 Picker。 Home 和 Dialog 可以最初加载，而 Picker 可以按需加载。 诸如 webpack 之类的工具可让您指示浏览器预取这些按需块。
+例如，如果您的页面包含一个按钮，该按钮会打开一个包含表情符号选择器的对话框，则可以将其分为三个 JavaScript 块：主Home、Dialog 和 Picker。 Home 和 Dialog 可以最初加载，而 Picker 可以按需加载。 诸如 Rsbuild / Vite 等现代构建工具可让您指示浏览器自动预取这些按需块。
 
 :::tip
 对于 React 项目来说，可以使用路由结合代码拆分，预取后续路由文件
@@ -542,11 +552,32 @@ After
 不要按比例缩小图像，请[提供响应图像](#提供响应图像)
 :::
 
-### 使用 WebP 图像
+### 使用 AVIF 和 WebP 图像
 
-WebP 图像比 JPEG 和 PNG 图像小（通常将文件大小减少 25-35％）。这样可以减小页面大小并提高性能。
+WebP 和 AVIF 都是新一代高质量的图像格式，由于更先进的压缩算法，它们比传统的 JPEG 和 PNG 图像小得多。WebP 通常能将文件大小减少 25-35％，**而 AVIF 的压缩率更加惊人**，通常比 WebP 还要小 20%，比 JPEG 小 50%。使用它们可以大幅减小页面尺寸并提升性能。
 
-WebP是 JPEG，PNG 和 GIF 图像的理想替代品。另外，WebP 提供无损压缩和有损压缩。在无损压缩中，不会丢失任何数据。有损压缩会减小文件大小，但会以降低图像质量为代价。
+#### 将图像转换为 AVIF / WebP
+
+在现代构建项目中，可以配置构建工具结合 `image-minimizer-webpack-plugin` 来自动将图像转换为 AVIF 或 WebP。在代码引用时，通过指定资源查询（Resource Query）即可应用，例如使用 `?as=avif`：
+
+```html
+<img src="picture.png?as=avif" alt="">
+
+```
+
+```css
+.picture {
+  background-image: url("picture.png?as=avif");
+}
+```
+
+```js
+import picture from './picture.png?as=avif';
+```
+
+在条件允许的情况下，还可以使用[图像CDN](#使用图像CDN优化图像)优化图像。
+
+参见[imagemin-图片压缩配置](/docs/reference/configuration#imagemin-图片压缩配置)
 
 #### 将图像转换为 WebP
 
@@ -563,18 +594,21 @@ WebP是 JPEG，PNG 和 GIF 图像的理想替代品。另外，WebP 提供无损
 ```
 
 ```js
-import picture from './picture.png?as=webp'
+import picture from './picture.png?as=webp';
 ```
 
-在条件允许的情况下，还可以使用[图像CDN](#使用图像CDN优化图像)优化图像。
 
-#### 使用 WebP 图片
+#### 使用现代图片格式并优雅降级
 
-将 WebP 提供给较新的浏览器，将备用图像提供给较旧的浏览器：
+因为各种浏览器对现代图像格式的支持存在差异（例如较老的浏览器可能不支持 AVIF 但支持 WebP），最佳实践是使用 `<picture>` 标签。浏览器会按定义的顺序尝试加载，直到找到其支持的格式：
 
 ```html
 <picture>
+  <!-- 浏览器优先尝试加载 AVIF -->
+  <source type="image/avif" srcset="flower.avif">
+  <!-- 兜底 1: 如果不支持 AVIF，尝试 WebP -->
   <source type="image/webp" srcset="flower.webp">
+  <!-- 兜底 2: 所有现代格式都不支持，加载传统 JPEG -->
   <source type="image/jpeg" srcset="flower.jpg">
   <img src="flower.jpg" alt="">
 </picture>
@@ -663,15 +697,13 @@ Preload 预加载是声明性的获取请求，它告诉浏览器尽快请求资
 
 通过预加载某种资源，就是在告诉浏览器要比其他方式发现它更快地获取它。
 
-#### 使用 webpack 预加载 JavaScript 模块
+#### 使用构建工具预加载 JavaScript 模块
 
-对于 Webpack 4.6.0 或更高版本，通过在 `import()` 中使用[魔术注释](https://webpack.js.org/api/module-methods/#magic-comments)来支持预加载：
+对于 Rsbuild/Rspack/Webpack 4.6.0 或更高版本，通过在 `import()` 中使用[魔术注释](https://webpack.js.org/api/module-methods/#magic-comments)来支持预加载：
 
 ```javascript
-import(/* webpackPreload: true */ "CriticalChunk");
+import(/* webpackPreload: true */ 'CriticalChunk');
 ```
-
-如果使用的是旧版的 webpack，可使用第三方插件，例如 [preload-webpack-plugin](https://github.com/GoogleChromeLabs/preload-webpack-plugin)。
 
 :::tip
 参见 [Preload/Prefetch 配置](/docs/reference/configuration#preloadprefetch-配置)
@@ -683,9 +715,9 @@ import(/* webpackPreload: true */ "CriticalChunk");
 
 拆分 JavaScript 包，以便仅在用户加载应用程序时发送初始路由所需的代码。这样可以最大程度地减少需要解析和编译的脚本的数量，从而缩短页面加载时间。
 
-流行的模块打包工具（例如 webpack）可以使用[动态导入](https://v8.dev/features/dynamic-import)来拆分 bundle 包。为了进一步提高页面性能，[请预先加载关键数据块](#预加载（Preload）关键资源以提高加载速度)，以便对它们进行优先级分配并更快地获取它们。
+流行的模块打包工具（例如 Rsbuild / Vite）可以使用[动态导入](https://v8.dev/features/dynamic-import)来拆分 bundle 包。为了进一步提高页面性能，[请预先加载关键数据块](#预加载（Preload）关键资源以提高加载速度)，以便对它们进行优先级分配并更快地获取它们。
 
-在大型应用程序中，延迟加载第三方依赖项并不是常见的模式。通常，由于第三方依赖项不经常更新，因此它们被拆分为一个单独的供应商 bundle 包，可以将其缓存。可以阅读有关 [SplitChunksPlugin](https://webpack.js.org/plugins/split-chunks-plugin/) 如何帮助完成此操作的更多信息。
+在大型应用程序中，延迟加载第三方依赖项并不是常见的模式。通常，由于第三方依赖项不经常更新，因此它们被拆分为一个单独的 vendor bundle 包，可以将其长期缓存。对于绝大多数的 Rsbuild 应用，框架默认的分包策略已经能够满足生产需求，无需进行大量手动优化。
 
 在路由或组件级别进行拆分是一种方法，可以延迟加载应用程序的不同部分。
 
@@ -695,18 +727,18 @@ npm 使向您的项目添加代码变得轻而易举。但是我们经常会包�
 
 #### 分析 bundle
 
-通过配置 `package.json` 为 Vue CLI 添加一行新命令，将使用 [Webpack Bundle Analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) 帮助查看构成 bundle 的因素。 与其他任何插件一样，将该插件包含在 webpack 配置文件中：
+借助分析工具可以查看构成 bundle 的因素。如果使用的是 Rsbuild，您可以直接引入 [Rsdoctor - 构建分析工具](https://rsdoctor.rs/zh/)。在执行分析命令后，系统会自动为您打开一个可视化的 HTML 页面：
 
 ```json
 {
   "scripts": {
-    "analyzer": "vue-cli-service build --report"
+    "analyze": "cross-env RSDOCTOR=true rsbuild build"
   }
 }
 ```
 
 ```bash
-npm run analyzer
+pnpm run analyze
 ```
 
 使用此可视化文件，可以检查 bundle 中哪些部分大于其他部分，并更好地了解要导入的所有库。这可以帮助确定是否正在使用任何未使用或不必要的库。
@@ -717,7 +749,9 @@ npm run analyzer
 
 ### 缩小和压缩网络负载
 
-压缩是删除空格和创建较小但完全有效的代码文件不需要的任何代码的过程。Terser 是一种流行的 JavaScript 压缩工具，默认情况下，webpack v4包含此库的插件，用于创建压缩的构建文件。如果使用的是 webpack v4 或更高版本，则最好不要进行任何其他工作。
+压缩是删除空格和代码中不需要的部分，以创建体积更小但完全等价的可执行文件的过程。
+
+过去通常使用 Terser 进行代码压缩。而在现代前端构建工具，默认采用了基于 Rust 编写的 SWC 进行极速的代码压缩。它的压缩速度比 Terser 快数十倍，且作为开箱即用的特性默认开启，开发者完全不需要进行任何额外繁杂的插件配置。
 
 ### 将现代代码提供给现代浏览器以加快页面加载速度
 
@@ -737,67 +771,56 @@ npm run analyzer
 
 较新版本的语言规范中的功能通常对现代浏览器的支持不太一致。例如，许多 ES2020 和 ES2021 功能仅在 70% 的浏览器市场上受支持——仍然是大多数浏览器，但还不足以直接依赖这些功能是安全的。
 
-#### 旧版 JavaScript
-
-旧版 JavaScript 是专门避免使用上述所有语言功能的代码。大多数开发人员使用现代语法编写源代码，但将所有内容编译为旧语法以增加浏览器支持。编译为旧语法确实会增加浏览器支持，但效果通常比我们意识到的要小。在许多情况下，支持率从 95% 左右增加到 98%，同时产生了大量成本：
-
-- 传统 JavaScript 通常比等效的现代代码大 20% 左右，速度也慢。
-- 已安装的库占旧版生产 JavaScript 代码的 90%。由于发布现代代码可以避免的 polyfill，库代码会导致更高的旧版 JavaScript 开销。
-
 #### 应用程序中的现代 JavaScript
 
-Vue CLI 提供了一个“现代模式”帮你解决这个问题。以如下命令为生产环境构建：
+现代构建工具如 Rsbuild 默认就会基于你项目中的 `browserslist` 配置来输出现代 JavaScript。你可以将目标游览器设置为支持 ES Modules 的现代浏览器，Rsbuild 底层的 SWC 会自动跳过不必要的 polyfill 和语法降级，生成体积更小、执行更快的现代代码包。
 
-```bash
-vue-cli-service build --modern
-```
+对于需要同时兼容旧版浏览器的场景，部分框架或构建工具也支持通过特殊配置生成现代和旧版两套产物。现代版的包会通过 `<script type="module">` 加载。
 
-Vue CLI 会产生两个应用的版本：一个现代版的包，面向支持 ES modules 的现代浏览器，另一个旧版的包，面向不支持的旧浏览器。
-
-最酷的是这里没有特殊的部署要求。其生成的 HTML 文件会自动使用 [Phillip Walton 精彩的博文中](https://philipwalton.com/articles/deploying-es2015-code-in-production-today/) 讨论到的技术：
-
-- 现代版的包会通过 `<script type="module">` 在被支持的浏览器中加载；它们还会使用 `<link rel="modulepreload">` 进行预加载。
-- 旧版的包会通过 `<script nomodule>` 加载，并会被支持 ES modules 的浏览器忽略。
-
-对于一个 Hello World 应用来说，现代版的包已经小了 16%。在生产环境下，现代版的包通常都会表现出显著的解析速度和运算速度，从而改善应用的加载性能。
+使用现代版产物对于应用加载来说收益巨大。在生产环境下，现代版的包通常都会表现出显著的解析速度和运算速度，从而显著改善应用的加载性能。
 
 ### 事件的防抖（debounce）和节流（throttle）
 
 频繁触发事件导致的大量计算会引发页面的抖动甚至卡顿。为了规避这种情况，我们需要一些手段来控制事件被触发的频率，防抖（debounce）和节流（throttle）就是在这种场景下出现的。
 
-[Lodash](https://lodash.com/) 已经为我们提供了 [debounce](https://lodash.com/docs/#debounce) 和 [throttle](https://lodash.com/docs/#throttle) 函数，我们可以安全的使用它们。
-
 #### 防抖-debounce
 
 防抖（debounce）允许我们将多个连续调用“分组”在一个调用中。
 
-防抖适用于将突然爆发的事件（如提交事件）分组为一个执行。
+防抖适用于将突然爆发的事件（如搜索框实时输入联想或窗口 Resize）分组为一个执行。
 
-```vue
-<template>
-  <form @submit="onSubmit">
-    <!-- ... -->
-  </form>
-<template>
+```tsx
+import { useState } from 'react';
+import { useDebounceFn } from 'ahooks';
 
-<script>
-import { debounce } from 'lodash';
+function Search() {
+  const [keyword, setKeyword] = useState('');
 
-export default {
-  setup() {
-    const fetchSubmit = async () => {
-      // ...
-    };
+  // 确保 run 在 500ms 内只能执行最后一次，防止输入过快发出大量无用请求
+  const { run: fetchSearchResults } = useDebounceFn(
+    (query) => {
+      console.log('Fetching results for:', query);
+      // 发起 API 请求...
+    },
+    { wait: 500 },
+  );
 
-    // 确保 fetchSubmit 在 200ms 内只能执行一次，防止重复提交
-    const onSubmit = debounce(fetchSubmit, 200);
+  return (
+    <div>
+      <input
+        value={keyword}
+        onChange={(e) => {
+          setKeyword(e.target.value);
+          // 用户的每一次输入都会触发 run，但真实的 API 调用会被防抖控制
+          fetchSearchResults(e.target.value);
+        }}
+        placeholder="请输入搜索关键词..."
+      />
+    </div>
+  );
+}
 
-    return {
-      onSubmit,
-    };
-  },
-};
-<script>
+export default Search;
 ```
 
 #### 节流-throttle
@@ -806,56 +829,42 @@ export default {
 
 这与去防抖（debounce）之间的主要区别在于，throttle 保证函数的执行有规律，至少每 X 毫秒一次。
 
-节流使用于每 X 毫秒有一个固定的执行。例如每 200 毫秒检查一次输入位置以触发 HTTP 请求。
+节流适用于高频触发但需要定期执行响应的场景。例如长页面滚动检测或表单自动保存（例如每 2 秒至少保存一次）。
 
-```vue
-<template>
-  <form>
-    <input v-model="keyword">
-    <ul>
-      <li
-        v-for="item of list"
-        :key="item.id"
-      >
-        {{ value }}
-      </li>
-    </ul>
-  </form>
-<template>
+```tsx
+import { useState } from 'react';
+import { useThrottleFn } from 'ahooks';
 
-<script>
-import { ref, watch } from 'vue';
-import { throttle } from 'lodash';
-import axios from 'axios';
+function AutoSaveDraft() {
+  const [draft, setDraft] = useState('');
+  const [saveCount, setSaveCount] = useState(0);
 
-export default {
-  setup() {
-    const keyword = ref('');
-    const list = ref([]);
+  // 防止因为输入过快导致的请求数量过于密集，但保证输入期间至少每 1000ms 执行一次保存
+  const { run: handleSave } = useThrottleFn(
+    (content) => {
+      console.log('Saving draft to server...', content);
+      setSaveCount((c) => c + 1);
+      // 发起 API 请求保存草稿...
+    },
+    { wait: 1000 },
+  );
 
-    const fetchList = async (query) => {
-      const response = await axios.get('/list', {
-        params: query,
-      });
+  return (
+    <div>
+      <p>草稿已保存次数：{saveCount}</p>
+      <textarea
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          handleSave(e.target.value);
+        }}
+        placeholder="在此输入内容，系统会自动触发节流保存..."
+      />
+    </div>
+  );
+}
 
-      list.value = [...response.data];
-    };
-
-    // 防止因为输入过快，导致的请求数量过于密集引起的页面卡顿
-    // 这里会使 HTTP 请求每 200ms 执行一次
-    const watchKeyword = throttle(fetchList, 200);
-
-    watch(keyword, (newValue) => {
-      watchKeyup(newValue);
-    });
-
-    return {
-      keyword,
-      list,
-    };
-  },
-};
-<script>
+export default AutoSaveDraft;
 ```
 
 ## CSS
@@ -864,9 +873,7 @@ export default {
 
 CSS 文件可以包含不必要的字符，例如注释、空格和缩进。在生产中，可以安全地删除这些字符，以减小文件大小，而不会影响浏览器处理样式的方式。
 
-默认情况下，webpack 生成的结果 JS bundle 将包含内联 CSS 文件的内容。由于我们要维护单独的 CSS 文件，因此我们使用了 [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) 提取 CSS 文件
-
-为了最小化生成的CSS，我们将使用 [optimize-css-assets-webpack-plugin](https://github.com/NMFR/optimize-css-assets-webpack-plugin)。
+在过去，这通常需要引入 [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) 和各种压缩插件来手动完成。但在现代构建工具中，CSS 文件的提取和压缩已经是开箱即用的特性。Rsbuild 默认会自动提取 CSS 到单独的文件中，并使用基于 Rust 的核心（如 SWC 或 Lightning CSS）来进行极速的 CSS 压缩，无需繁杂的配置即可获得最小化的 CSS 生产产物。
 
 ### 提取关键CSS
 
@@ -954,6 +961,79 @@ body {
 `image-set()` 并非所有浏览器都支持此功能，关于 `image-set()` 的兼容性可以查看 [CSS image-set](https://caniuse.com/css-image-set)
 :::
 
+### 使用 `content-visibility` 优化渲染性能
+
+`content-visibility` 是一个强大的 CSS 渲染优化属性，它允许浏览器主动跳过屏幕外元素的渲染工作（包括布局和绘制），直至用户滚动接近它们。这相当于对 DOM 元素进行了一次“懒渲染”，能极大缩短复杂页面的初始加载和渲染时间。
+
+在面对长列表、多组件面板或大部头文章时，利用 `content-visibility: auto;` 可以有效降低交互到下一次绘制（INP）并提升页面流畅度。
+
+```css
+.off-screen-section {
+  content-visibility: auto;
+  /* 必须指定合适的估算高度，防止元素在开始渲染时导致页面滚动条产生剧烈跳动 */
+  contain-intrinsic-size: 500px;
+}
+```
+
+- `auto`：元素在视口之外时，自动跳过其自身及其后代的布局和绘制。
+- `contain-intrinsic-size`：为脱离屏幕且尚未渲染的块级元素提供一个占位高度，确保滚动条的尺寸和位置计算是相对准确的。
+
+:::tip
+- [`content-visibility`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference/Properties/content-visibility)
+- [content-visible：可提升渲染性能的新 CSS 属性](https://web.dev/articles/content-visibility?hl=zh-cn)
+:::
+
+### 使用 `will-change` 优化动画性能
+
+现代浏览器在处理复杂的 CSS 动画或频繁的视图更新时，有时会出现掉帧或卡顿。`will-change` CSS 属性提供了一种方法，让开发者可以提前通知浏览器元素将要发生何种变化。
+
+这使得浏览器可以在真正发生变化之前，预先分配内存并开启 GPU 硬件加速（通常是将元素提取到独立的复合层），从而确保动画开始时能够立刻平滑、流畅地运行。
+
+```css
+/* 告诉浏览器该元素即将进行 transform 和 opacity 的改变 */
+.smooth-element {
+  will-change: transform, opacity;
+}
+```
+
+:::tip
+- [`will-change`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference/Properties/will-change)
+  :::
+
+:::warning
+`will-change` 是一把双刃剑，它被设计为最后的优化手段，而不是用来“过早优化”的。请务必遵循以下最佳实践：
+
+1. **不要过度滥用：** 给太多元素添加该属性会导致浏览器耗尽内存和系统资源，导致页面崩溃或变得异常卡顿。绝对不要写出 `* { will-change: transform; }` 这样的代码。 
+2. **给浏览器足够的准备时间：** 尝试在元素即将发生变化前的一瞬间添加它，给浏览器时间进行优化分配。 
+3. **用完即弃：** 如果是在执行复杂的 JavaScript 动画，请在动画开始前通过 JS 添加 `will-change`，在动画结束后及时移除它，以释放内存占用。
+:::
+
+**推荐的做法（配合伪类“预热”）：**
+
+:::danger[错误做法]
+```css
+/* 错误做法：直接写在默认状态下，浏览器会一直为其保留硬件资源 */
+.box {
+  will-change: transform;
+  transition: transform 0.3s;
+}
+```
+:::
+
+:::tip[推荐做法]
+在父元素 hover 预热时告诉浏览器准备，真正交互时触发动画
+```css
+/* 推荐做法：在父元素 hover 预热时告诉浏览器准备，真正交互时触发动画 */
+.box-container:hover .box {
+  will-change: transform;
+}
+
+.box:active {
+  transform: scale(1.1);
+}
+```
+:::
+
 ## 第三方资源
 
 第三方 JavaScript 通常是指嵌入网站的脚本：
@@ -990,14 +1070,14 @@ body {
 在 `async` 和 `defer` 属性告诉浏览器，它可以继续解析 HTML，同时在后台加载脚本，然后将其加载后执行脚本。这样，脚本下载不会阻止 DOM 构建和页面渲染。结果是用户可以在所有脚本加载完成之前看到页面。
 
 ```html
-<script async src="third-party-script.js">
-<script defer src="third-party-script.js">
+<script async src="third-party-script.js"></script>
+<script defer src="third-party-script.js"></script>
 ```
 
 - 如果在加载过程中更早地运行脚本很重要，请使用 `async`。
 - 对不太重要的资源使用 `defer`。 例如，低于不在首屏的视频播放器。
--
-  `async` 和 `defer` 之间的区别在于它们何时开始执行脚本。
+
+`async` 和 `defer` 之间的区别在于它们何时开始执行脚本。
 
 ###### `async`
 
@@ -1252,3 +1332,148 @@ if (connection?.effectiveType === 'slow-2g') {
 :::warning
 这是一个实验中的功能，此功能某些浏览器尚在开发中，可以在 caniuse.com 上查看哪些浏览器支持 [Network Information API](https://caniuse.com/netinfo)。由于该功能对应的标准文档可能被重新修订，所以在未来版本的浏览器中该功能的语法和行为可能随之改变。
 :::
+
+## 框架
+
+### React 性能优化
+
+在 React 中，优化的核心思想是减少不必要的重渲染 (Re-render) 和 避免主线程的长时间阻塞。
+
+#### `memo` / `useMemo` / `useCallback`
+
+React 默认在组件状态更新时递归地重新渲染它的所有子组件。我们可以通过以下手段进行手动控制：
+
+- [`memo`](https://zh-hans.react.dev/reference/react/memo)：一个高阶组件 (HOC)。如果你的组件在相同的 props 下总是渲染相同的结果，你可以用 `memo` 包裹它。React 将会缓存渲染结果，跳过不必要的重新渲染。
+- [`useMemo`](https://zh-hans.react.dev/reference/react/useMemo)：用于缓存（Memoize）昂贵的计算结果。只在依赖项改变时才重新计算。
+- [`useCallback`](https://zh-hans.react.dev/reference/react/useCallback)：用于缓存函数引用。将其作为 props 传递给已被 `memo` 优化的子组件时尤其有用，这能防止因子组件接收到新的函数引用而引发额外的渲染。
+
+```tsx
+import { useState, useMemo, useCallback, memo } from 'react';
+
+interface ListItem {
+  id: number;
+  name: string;
+}
+
+interface ExpensiveListProps {
+  items: ListItem[];
+  onItemClick: (id: number) => void;
+}
+
+// 使用 memo 优化子组件
+const ExpensiveList = memo(function ExpensiveList({ items, onItemClick }: ExpensiveListProps) {
+  console.log('ExpensiveList 渲染了');
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item.id} onClick={() => onItemClick(item.id)}>{item.name}</li>
+      ))}
+    </ul>
+  );
+});
+
+function App() {
+  const [count, setCount] = useState(0);
+  const [list, setList] = useState<ListItem[]>([
+    { id: 1, name: 'Apple' },
+    { id: 2, name: 'Banana' },
+  ]);
+
+  // 使用 useMemo 缓存复杂的计算结果
+  const sortedList = useMemo(() => {
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  }, [list]);
+
+  // 使用 useCallback 缓存函数，防止 ExpensiveList 进行无意义重渲染
+  const handleItemClick = useCallback((id: number) => {
+    console.log('Clicked Item:', id);
+  }, []);
+
+  return (
+    <div>
+      <button type="button" onClick={() => setCount((c) => c + 1)}>Count: {count}</button>
+      <ExpensiveList items={sortedList} onItemClick={handleItemClick} />
+    </div>
+  );
+}
+
+export default App;
+```
+
+#### React Compiler
+
+过去，前端开发者花费大量时间编写 `useMemo` 和 `useCallback` 进行性能调优。从 React 19 开始引入的 [React Compiler](https://zh-hans.react.dev/learn/react-compiler) 是一项革命性的技术。
+
+React Compiler 会在构建时自动分析你的代码，**自动完成所有状态和函数的 Memoization (记忆化)**。这意味着开发者在未来可以减少手动书写 `useMemo` 或 `useCallback`，代码不仅变得更加干净，且默认具备最佳的渲染性能。
+
+#### 长列表优化
+
+如果 React 应用中需要一次性渲染数百、数千个 DOM 节点，这会严重拖慢页面渲染时间。可以使用“虚拟列表”技术（如 [TanStack Virtual](https://tanstack.com/virtual/) 或 [React Virtuoso](https://virtuoso.dev/)），它只渲染当前屏幕可视区域内出现的 DOM 节点，极大地降低了渲染和内存开销。
+
+### Vue 性能优化
+
+在 Vue 中，响应式系统本身已经能够很精确地追踪到哪些组件需要更新。不过，我们仍然有很多方式来进一步提升性能。
+
+#### 使用 `<keep-alive>`
+
+当我们在不同的组件间频繁切换（比如标签页或动态路由配置）时，Vue 默认会销毁并重新创建组件。
+
+通过内置的 `<keep-alive>` 组件，我们可以将被切换掉的组件**缓存在内存中**，从而保留它的内部状态（比如滚动条位置或表单输入）。这省去了重新渲染组件和执行重复的 API 请求的昂贵开销。
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import TabA from './TabA.vue';
+import TabB from './TabB.vue';
+
+const currentTab = shallowRef(TabA);
+</script>
+
+<template>
+  <div>
+    <button type="button" @click="currentTab = TabA">A</button>
+    <button type="button" @click="currentTab = TabB">B</button>
+
+    <keep-alive>
+      <component :is="currentTab" />
+    </keep-alive>
+  </div>
+</template>
+```
+
+结合 `<keep-alive>` 使用时，组件会多出两个生命周期钩子：`activated` 和 `deactivated`。可以在这里触发特定的数据刷新逻辑，而不是在常规的 mounted 阶段。
+
+#### 区分 `v-show` 和 `v-if`
+
+- `v-if` 是“真正的”条件渲染：它会确保在切换过程中条件块内的组件真正的被销毁和重建。
+- `v-show` 无论初始条件如何元素都会被渲染，只是简单的进行 CSS display 属性的切换。
+
+:::tips[优化建议]
+如果一个组件需要被非常频繁地切换显示与隐藏，使用 `v-show` 会带来更好的性能表现；如果条件在运行时很少改变，则使用 `v-if`。
+:::
+
+#### 减少大型数据的响应式开销 (`shallowRef` / `shallowReactive`)
+
+在 Vue 中，当把一个庞大的嵌套对象传递给 `ref` 或 `reactive` 时，Vue 会递归地遍历所有的层级将它们转换成响应式属性。如果有一个包含数万条数据的复杂列表（并且不会去修改列表某一项内部的深层字段），这种深层代理会带来巨大的性能负担。
+
+使用 [`shallowRef`](https://cn.vuejs.org/api/reactivity-advanced.html#shallowref) 或 [`shallowReactive`](https://cn.vuejs.org/api/reactivity-advanced.html#shallowreactive) 来跳过对象的深度响应式转换，只在顶层属性发生改变时触发更新。
+
+```vue
+import { shallowRef } from 'vue';
+
+// data 的深层属性改变不会触发视图更新，这极大地降低了性能损耗
+const bigData = shallowRef([
+  /* 数以万计的对象 */
+]);
+```
+
+#### 编译时优化 (`v-once` / `v-memo`)
+
+- [`v-once`](https://cn.vuejs.org/api/built-in-directives.html#v-once)：仅渲染元素和组件一次，随后的重新渲染中将跳过此节点，视为静态内容。适用于不再发生任何变化的纯静态展示模块。 
+- [`v-memo`](https://cn.vuejs.org/api/built-in-directives.html#v-memo)：Vue 3.2 引入。类似于 React 的 useMemo 理念，可以跳过一整个子树的虚拟 DOM 更新，除非数组内的依赖发生变化。这在渲染大量元素的 v-for 长列表中尤其管用。
+
+```vue
+<div v-memo="[item.id === selectedId, item.updatedAt]">
+  <!-- 只有当 selectedId 或 updatedAt 改变时才会更新这个子树 -->
+</div>
+```
