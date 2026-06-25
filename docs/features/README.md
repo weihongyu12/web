@@ -12,22 +12,22 @@
 
 - **敏感数据加密**
   - [AES双向加密传输](/docs/features/encrypt)
-  - [数据脱敏处理](/docs/features/encrypt#数据脱敏处理)
-  - [自动敏感字段识别](/docs/features/encrypt#敏感数据识别)
+  - [数据脱敏处理](/docs/features/encrypt#3-表现层数据脱敏处理)
+  - [自动敏感字段识别](/docs/features/encrypt#敏感数据治理与识别)
 - **文件安全上传**
-  - [分片上传](/docs/features/file-upload#分片上传)
-  - [断点续传](/docs/features/file-upload#断点续传)
-  - [多层校验](/docs/features/file-upload#文件上传安全性)
+  - [分片上传](/docs/features/file-upload#21-分片并发上传)
+  - [断点续传](/docs/features/file-upload#22-断点续传与网络重试)
+  - [多层校验](/docs/features/file-upload#3-安全防护体系)
 
 ## 系统集成
 
 - **OpenAPI 前端集成**
-  - [自动生成TS类型定义](/docs/features/openapi#类型安全)
-  - [React Query状态管理](/docs/features/openapi#基本用法)
-  - [分页查询/错误处理](/docs/features/openapi#分页查询)
+  - [自动生成TS类型定义](/docs/features/openapi#概述)
+  - [React Query状态管理](/docs/features/openapi#核心配置与使用方法)
+  - [分页查询/错误处理](/docs/features/openapi#2-标准分页查询与列表渲染)
 - **支付系统**
   - [微信/支付宝/云闪付集成](/docs/features/payment)
-  - [订单状态自动同步](/docs/features/payment#支付流程)
+  - [订单状态自动同步](/docs/features/payment#通用接入流程)
 
 ## 容灾机制
 
@@ -44,4 +44,4 @@
 - 音视频处理：
   - [格式兜底（MP4/WebM）](/docs/features/media/video)
   - [字幕生成](/docs/features/media/video#无障碍性考虑)
-  - [自适应比特率](/docs/features/media/video#自适应码率流)
+  - [自适应比特率](/docs/features/media/video#性能优化)

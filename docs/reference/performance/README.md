@@ -372,7 +372,7 @@ Imagemin 是图像压缩的绝佳选择，因为它支持多种图像格式，�
 [imagemin-webpack-plugin](https://github.com/Klathmon/imagemin-webpack-plugin) 是一个简单 Webpack 的插件，使用 Imagemin 压缩项目中的所有图像。
 
 :::tip
-参见 [Imagemin 图片压缩配置](/docs/reference/configuration#imagemin-图片压缩配置)
+参见 [Imagemin 图片压缩配置](/docs/reference/configuration#imagemin-图片压缩配置--图片格式转换配置)
 :::
 
 ### 用视频替换 GIF 动画，以加快页面加载速度
@@ -575,28 +575,9 @@ WebP 和 AVIF 都是新一代高质量的图像格式，由于更先进的压缩
 import picture from './picture.png?as=avif';
 ```
 
-在条件允许的情况下，还可以使用[图像CDN](#使用图像CDN优化图像)优化图像。
+在条件允许的情况下，还可以使用[图像CDN](#使用图像cdn优化图像)优化图像。
 
-参见[imagemin-图片压缩配置](/docs/reference/configuration#imagemin-图片压缩配置)
-
-#### 将图像转换为 WebP
-
-通常使用[Imagemin WebP plugin](https://github.com/imagemin/imagemin-webp)插件自动将图像转换为 WebP。参见[参考配置](/docs/reference/configuration/#imagemin-图片压缩配置)
-
-```html
-<img src="picture.png?as=webp" alt="">
-```
-
-```css
-.picture {
-  background-image: url("picture.png?as=webp");
-}
-```
-
-```js
-import picture from './picture.png?as=webp';
-```
-
+参见[imagemin-图片压缩配置](/docs/reference/configuration#imagemin-图片压缩配置--图片格式转换配置)
 
 #### 使用现代图片格式并优雅降级
 
@@ -715,7 +696,7 @@ import(/* webpackPreload: true */ 'CriticalChunk');
 
 拆分 JavaScript 包，以便仅在用户加载应用程序时发送初始路由所需的代码。这样可以最大程度地减少需要解析和编译的脚本的数量，从而缩短页面加载时间。
 
-流行的模块打包工具（例如 Rsbuild / Vite）可以使用[动态导入](https://v8.dev/features/dynamic-import)来拆分 bundle 包。为了进一步提高页面性能，[请预先加载关键数据块](#预加载（Preload）关键资源以提高加载速度)，以便对它们进行优先级分配并更快地获取它们。
+流行的模块打包工具（例如 Rsbuild / Vite）可以使用[动态导入](https://v8.dev/features/dynamic-import)来拆分 bundle 包。为了进一步提高页面性能，[请预先加载关键数据块](#预加载preload关键资源以提高加载速度)，以便对它们进行优先级分配并更快地获取它们。
 
 在大型应用程序中，延迟加载第三方依赖项并不是常见的模式。通常，由于第三方依赖项不经常更新，因此它们被拆分为一个单独的 vendor bundle 包，可以将其长期缓存。对于绝大多数的 Rsbuild 应用，框架默认的分包策略已经能够满足生产需求，无需进行大量手动优化。
 
