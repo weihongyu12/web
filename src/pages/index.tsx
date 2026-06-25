@@ -29,11 +29,10 @@ function HomepageHeader() {
 }
 
 export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title="老魏的工作笔记 - 前端架构与开发最佳实践"
+      description="前端架构与开发最佳实践文档，涵盖 Next.js、React、Vue 技术栈、代码规范、性能优化、安全防护、CI/CD 流水线与功能设计">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

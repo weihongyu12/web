@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: 手机验证码登录方案，支持自动注册、60秒倒计时防刷、多场景复用与 Credential Management API 集成
 ---
 
 # 手机验证码登录

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: HTML 开发规范，遵循 Web 标准，提升代码可维护性、可访问性与跨浏览器兼容性
 ---
 
 import TOCInline from '@theme/TOCInline';

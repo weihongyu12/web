@@ -1,5 +1,6 @@
 ---
 sidebar_position: 6
+description: Jest 测试框架 ESLint 规则，基于 eslint-plugin-jest 插件，确保测试代码符合最佳实践
 ---
 
 # Jest 规则

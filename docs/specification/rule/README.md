@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: 项目代码规则集合，定义所有编程语言与框架的 ESLint、Stylelint 规则，保障代码质量与一致性
 ---
 
 # 代码规则

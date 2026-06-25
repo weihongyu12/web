@@ -1,5 +1,6 @@
 ---
 sidebar_position: 6
+description: GitLab CI/CD 流水线配置，包含 7 个阶段的自动化构建、测试、质量检查与部署流程
 ---
 
 # CI/CD

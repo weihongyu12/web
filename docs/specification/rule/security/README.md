@@ -1,5 +1,6 @@
 ---
 sidebar_position: 8
+description: 前端安全 ESLint 规则，基于 eslint-plugin-no-unsanitized 插件，防止 XSS 攻击
 ---
 
 # 安全规则

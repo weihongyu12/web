@@ -1,7 +1,6 @@
 ---
-lang: zh-cmn-Hans-CN
 title: 指南
-description: 架构指南和总览
+description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多端技术栈选型、打包工具、UI 框架、路由及状态管理方案
 ---
 
 # 架构

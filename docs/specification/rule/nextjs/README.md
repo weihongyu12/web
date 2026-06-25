@@ -1,5 +1,6 @@
 ---
 sidebar_position: 5
+description: Next.js 框架 ESLint 规则，基于 @next/eslint-plugin-next 官方推荐规则集
 ---
 
 # Next.js 规则

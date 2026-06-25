@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: JavaScript 与 TypeScript 编码规范，基于 Airbnb 风格指南，集成 ESLint 插件规则
 ---
 
 # JavaScript/TypeScript 规范

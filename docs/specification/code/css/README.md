@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: CSS 与 SCSS 代码规范，统一团队样式代码风格，集成 Tailwind CSS 与 UI 组件库的最佳实践
 ---
 
 # CSS 规范

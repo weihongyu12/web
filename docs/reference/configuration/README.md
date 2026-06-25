@@ -2,6 +2,7 @@
 sidebar_position: 5
 toc_min_heading_level: 2
 toc_max_heading_level: 5
+description: 前端项目参考配置，包含 package.json、构建工具、ESLint、Stylelint 等核心配置文件示例
 ---
 
 import Tabs from '@theme/Tabs';

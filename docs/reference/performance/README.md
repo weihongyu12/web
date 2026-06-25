@@ -2,6 +2,7 @@
 sidebar_position: 1
 toc_min_heading_level: 2
 toc_max_heading_level: 5
+description: 前端性能优化指南，涵盖 HTTP 缓存、CDN、资源预加载、懒加载与 Core Web Vitals 指标优化
 ---
 
 # 性能优化

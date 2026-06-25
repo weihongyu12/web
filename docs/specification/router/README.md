@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: 前端路由规范，针对 CRUD 业务模式定义页面分类与 URL 设计标准
 ---
 
 # 路由规范

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: HTML Validate 规则参考，基于 html-validate:recommended 规则集，涵盖语法与概念检查
 ---
 
 

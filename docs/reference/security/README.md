@@ -2,6 +2,7 @@
 sidebar_position: 2
 toc_min_heading_level: 2
 toc_max_heading_level: 5
+description: 前端安全指南，涵盖安全 Headers、CSP 内容安全策略、XSS 防护与浏览上下文隔离
 ---
 
 # 安全

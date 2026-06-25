@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: TypeScript ESLint 规则，基于 eslint-config-airbnb-typescript 与 @typescript-eslint 插件
 ---
 
 # TypeScript 规则

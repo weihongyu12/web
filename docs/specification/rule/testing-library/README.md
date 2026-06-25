@@ -1,5 +1,6 @@
 ---
 sidebar_position: 6
+description: Testing Library ESLint 规则，基于 eslint-plugin-testing-library 插件，编写符合用户行为的测试
 ---
 
 # Testing Library 规则

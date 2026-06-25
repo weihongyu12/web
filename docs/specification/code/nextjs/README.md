@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: Next.js 项目开发规范，基于 App Router、Image 与 Font Optimization 等框架特性的最佳实践
 ---
 
 # Next.js 规范

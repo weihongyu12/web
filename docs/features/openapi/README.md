@@ -1,3 +1,7 @@
+---
+description: OpenAPI 前端集成方案，使用 Orval、Axios 与 TanStack Query 构建类型安全的 API 请求与状态管理
+---
+
 # OpenAPI 前端集成
 
 ## 概述

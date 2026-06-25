@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: Vue 项目代码风格与开发规范，结合 Vue 官方风格指南与 Airbnb JavaScript 最佳实践
 ---
 
 # Vue 规范

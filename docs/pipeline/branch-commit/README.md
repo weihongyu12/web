@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: Git 分支管理与提交规范，采用 GitLab Flow 工作流，支持持续发布与环境隔离
 ---
 
 # 分支管理和提交

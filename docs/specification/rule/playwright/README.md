@@ -1,5 +1,6 @@
 ---
 sidebar_position: 7
+description: Playwright E2E 测试 ESLint 规则，基于 eslint-plugin-playwright 插件，确保测试代码符合最佳实践
 ---
 
 # Playwright 规则

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 7
+description: 前端监控方案，集成 Sentry 错误监控、LogRocket 会话回放与 Google Analytics 用户行为分析
 ---
 
 import Tabs from '@theme/Tabs';

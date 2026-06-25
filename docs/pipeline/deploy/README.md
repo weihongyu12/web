@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
-lang: zh-cmn-Hans-CN
 title: 部署
+description: 项目构建与部署流程，基于 GitLab CI 自动化流水线保障交付产物的质量与安全性
 ---
 
 # 部署

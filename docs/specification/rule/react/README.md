@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: React ESLint 规则配置，集成 airbnb、airbnb/hooks、airbnb-typescript 等规则集
 ---
 
 # React 规则

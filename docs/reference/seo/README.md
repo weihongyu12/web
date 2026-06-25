@@ -2,6 +2,7 @@
 sidebar_position: 3
 toc_min_heading_level: 2
 toc_max_heading_level: 5
+description: 前端 SEO 优化指南，基于 Google 搜索机制，涵盖爬虫渲染索引、重定向与结构化数据
 ---
 
 # SEO

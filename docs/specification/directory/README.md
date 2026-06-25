@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: 前端项目目录结构规范，统一项目组织方式，提升代码可维护性与团队协作效率
 ---
 
 import Tabs from '@theme/Tabs';

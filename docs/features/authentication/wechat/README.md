@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: 微信登录接入指南，涵盖 PC 端扫码登录与微信内 H5 授权登录，支持 OpenID 集成与自动获取用户资料
 ---
 
 # 微信登录

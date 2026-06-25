@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: Lint 静态代码分析工具指南，集成 ESLint、Stylelint 等工具保障代码质量与风格一致性
 ---
 
 # Lint

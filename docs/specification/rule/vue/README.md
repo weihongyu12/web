@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: Vue ESLint 规则，基于 eslint-plugin-vue 与 @vue/eslint-config-airbnb-with-typescript 插件
 ---
 
 # Vue 规则

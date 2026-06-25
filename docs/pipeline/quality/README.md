@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: 前端代码质量保障方案，涵盖代码审查、静态检查与 Qodana 自动化质量分析
 ---
 
 # 代码质量保障

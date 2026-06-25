@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: SCSS Stylelint 规则配置，基于 stylelint-config-twbs-bootstrap 规则集
 ---
 
 # SCSS 规则

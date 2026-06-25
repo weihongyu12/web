@@ -2,6 +2,7 @@
 sidebar_position: 5
 toc_min_heading_level: 2
 toc_max_heading_level: 5
+description: RESTful API 设计规范，统一前后端接口标准，支持 Spring Boot、Laravel、Django 等主流框架
 ---
 
 # RESTful API 规范

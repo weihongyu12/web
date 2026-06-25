@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: JavaScript ESLint 规则配置，基于 Airbnb 风格指南，强制代码风格与最佳实践
 ---
 
 # JavaScript 规则

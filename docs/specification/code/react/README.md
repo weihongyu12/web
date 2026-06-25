@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: React 项目编码规范，结合 Airbnb React/JSX 风格指南与 ESLint 规则，保障代码质量与性能
 ---
 
 # React 规范

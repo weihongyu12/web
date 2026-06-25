@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: Tailwind CSS ESLint 规则，基于 eslint-plugin-tailwindcss 插件，强制类名排序与最佳实践
 ---
 
 # Tailwind CSS 规则

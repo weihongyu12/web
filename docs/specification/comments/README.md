@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: 前端代码注释规范，涵盖 JavaScript、CSS 等语言的注释格式与最佳实践
 ---
 
 # 注释规范
