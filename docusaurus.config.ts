@@ -108,6 +108,11 @@ const config: Config = {
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
+          href: 'https://weihongyu12.github.io/miniprogram/',
+          label: '小程序版',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/weihongyu12',
           label: 'GitHub',
           position: 'right',
