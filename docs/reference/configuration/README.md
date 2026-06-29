@@ -178,10 +178,9 @@ import TOCInline from '@theme/TOCInline';
 ```ts
 // rsbuild.config.ts
 
-// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-babel @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss -D
+// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss -D
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
 
@@ -197,15 +196,12 @@ const isDev = process.env.NODE_ENV === 'development';
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [
-    pluginReact(),
-    pluginBabel({
-      include: /\.[jt]sx?$/,
-      exclude: [/[\\/]node_modules[\\/]/],
-      babelLoaderOptions: {
-        configFile: true,
-      },
+    pluginReact({
+      reactCompiler: true,
     }),
-    pluginSvgr(),
+    pluginSvgr({
+      parallel: true,
+    }),
     pluginTailwindcss(),
   ],
   server: {
@@ -220,6 +216,11 @@ export default defineConfig({
     manifest: isProd,
     polyfill: 'usage',
     dataUriLimit: 0,
+    // ⚠️ 注意：不要将 .map 文件部署到公网服务器或 CDN ，否则会暴露源码！！
+    sourceMap: {
+      js: isDev ? 'cheap-module-source-map' : 'hidden-source-map',
+      css: isDev,
+    },
   },
   html: isProd ? { crossorigin: 'anonymous' } : undefined,
   security: isProd ? { sri: { enable: 'auto' } } : undefined,
@@ -616,25 +617,6 @@ export default defineConfig({
 ```
   </TabItem>
 </Tabs>
-
-## Babel
-
-:::warning
-现代化工具链通常不需要 Babel 转译。但是目前 React Compiler 只支持 Babel 来处理 JSX 转译，所以需要安装并配置 Babel。
-:::
-
-```js
-// babel.config.js
-
-// $ pnpm add babel-loader @babel/preset-typescript babel-plugin-react-compiler @babel/plugin-syntax-jsx --save-dev
-module.exports = {
-  presets: ['@babel/preset-typescript'],
-  plugins: [
-    'babel-plugin-react-compiler', 
-    '@babel/plugin-syntax-jsx',
-  ],
-};
-```
 
 ## Nginx
 
@@ -1511,7 +1493,6 @@ const typescriptConfig = defineConfig([
 const nodeConfig = defineConfig([
   {
     files: [
-      'babel.config.cjs',
       'rspack.config.ts',
       'jest.config.ts',
       '*.config.js',
