@@ -497,13 +497,13 @@ export default RegistrationForm;
 ### 1. 核心交互策略
 
 - **优先级原则**：首屏优先推荐手机/微信自动注册，大幅降低门槛。
-- **渐进式引导**：遵循"最小化起步"策略，初始只获取必要信息，利用价值驱动适时引导完善资料。
+- **渐进式引导**：遵循“最小化起步”策略，初始只获取必要信息，利用价值驱动适时引导完善资料。
 - **一致性体验**：无论采用哪种注册方式，后续的登录、主页跳转和用户画像逻辑需完全统一。
 
-### 2. 前端表单最佳实践（基于 Web.dev 规范）
+### 2. 前端表单最佳实践
 
-- **移除"确认密码"**：摒弃传统的确认密码输入框，通过提供"显示密码（Show password）"切换按钮，在保障正确率的同时减少 50% 的输入负担。
-- **前置规则提示**：不要等到点击"提交"才提示错误，应在密码输入框下方提前写明密码规则（如长度、字符要求）。
+- **移除“确认密码”**：摒弃传统的确认密码输入框，通过提供“显示密码（Show password）”切换按钮，在保障正确率的同时减少 50% 的输入负担。
+- **前置规则提示**：不要等到点击“提交”才提示错误，应在密码输入框下方提前写明密码规则（如长度、字符要求）。
 - **完善的 Autocomplete 支持**：
   - 邮箱使用 `autocomplete="username email"`
   - 新密码使用 `autocomplete="new-password"` 以唤起内置密码生成器
@@ -521,3 +521,15 @@ export default RegistrationForm;
 - **场景智能化**：根据设备（移动端/PC端）智能切换推荐的注册方式。
 - **数据驱动改进**：定期分析转化率，识别注册流失点（如表单填写耗时、验证码失败率等），持续迭代 UI 交互。
 - **用户信任构建**：在自动注册环节做好充分的权限说明，明确信息的使用范围与安全保障措施。
+
+## 参考资料
+
+- [有关注册表单的最佳做法](https://web.dev/articles/sign-up-form-best-practices?hl=zh-cn)
+- [`autocomplete`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Attributes/autocomplete)
+- [`autocapitalize`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/autocapitalize)
+- [`autocorrect`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/autocorrect)
+- [`inputmode`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inputmode)
+- [`required`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Attributes/required)
+- [`spellcheck`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/spellcheck)
+- [`aria-label`](https://developer.mozilla.org/zh-CN/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label)
+- [`aria-pressed`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-pressed)

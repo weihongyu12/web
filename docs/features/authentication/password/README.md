@@ -266,8 +266,8 @@ export default LoginForm;
 
 - **移动端输入防干扰**：明确设置 `autoCapitalize="none"`、`autoCorrect="off"` 和 `spellCheck={false}`，彻底解决移动端输入邮箱时首字母大写或被系统错误纠正的痛点
 - **智能账号识别**：单个输入框支持邮箱与手机号混输，底层通过正则自动判断格式并给出精准的错误提示
-- **流失路径兜底**：表单内嵌了"忘记密码"和"立即注册"的入口，对于密码验证失败的用户，提供清晰的找回路径可有效提高留存率
-- **实时且友好的反馈**：采用"失去焦点校验 + 输入时消除错误"的策略，既防止打断用户输入，又能及时纠正错误
+- **流失路径兜底**：表单内嵌了“忘记密码”和“立即注册”的入口，对于密码验证失败的用户，提供清晰的找回路径可有效提高留存率
+- **实时且友好的反馈**：采用“失去焦点校验 + 输入时消除错误”的策略，既防止打断用户输入，又能及时纠正错误
 - **密码可见性控制**：提供一键明/暗文切换功能，切换后自动保持输入框焦点，操作连贯
 
 ### 🛡️ 凭据管理与安全 (Credential API)
@@ -285,3 +285,11 @@ export default LoginForm;
 ## 参考资料
 
 - [有关登录表单的最佳做法](https://web.dev/articles/sign-in-form-best-practices?hl=zh-cn)
+- [`autocomplete`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Attributes/autocomplete)
+- [`autocapitalize`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/autocapitalize)
+- [`autocorrect`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/autocorrect)
+- [`inputmode`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inputmode)
+- [`required`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Attributes/required)
+- [`spellcheck`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Global_attributes/spellcheck)
+- [`aria-label`](https://developer.mozilla.org/zh-CN/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label)
+- [`aria-pressed`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-pressed)
