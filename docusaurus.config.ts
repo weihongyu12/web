@@ -136,11 +136,11 @@ const config: Config = {
             },
             {
               label: '规范',
-              to: '/docs/specification/code/',
+              to: '/docs/specification/code/html/',
             },
             {
               label: '代码规则',
-              to: '/docs/specification/rule/',
+              to: '/docs/specification/rule/html/',
             },
           ],
         },
@@ -169,7 +169,7 @@ const config: Config = {
             },
             {
               label: '功能设计',
-              to: '/docs/features/',
+              to: '/docs/features/authentication/smscode/',
             },
           ],
         },
