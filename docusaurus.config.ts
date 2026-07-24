@@ -113,6 +113,11 @@ const config: Config = {
           position: 'right',
         },
         {
+          href: 'https://weihongyu12.github.io/node/',
+          label: 'Node.js 版',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/weihongyu12',
           label: 'GitHub',
           position: 'right',
@@ -171,6 +176,14 @@ const config: Config = {
         {
           title: 'More',
           items: [
+            {
+              label: '小程序版',
+              href: 'https://weihongyu12.github.io/miniprogram/',
+            },
+            {
+              label: 'Node.js 版',
+              href: 'https://weihongyu12.github.io/node/',
+            },
             {
               label: 'Blog',
               href: 'https://weihongyu.com/',
