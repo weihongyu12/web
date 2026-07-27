@@ -23,14 +23,14 @@ import TOCInline from '@theme/TOCInline';
     "analyze": "cross-env RSDOCTOR=true rsbuild build",
     "preview": "rsbuild preview",
     "build-only": "rsbuild build",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --build --noEmit",
     "format": "biome format --write",
     "lint": "run-p lint:js lint:css",
-    "lint:js": "eslint . --cache",
-    "lint:css": "stylelint . --cache",
+    "lint:js": "eslint --cache",
+    "lint:css": "stylelint \"./src/**/*.{css,scss,sass,less}\" --cache",
     "fix": "run-s fix:js fix:css",
-    "fix:js": "eslint . --cache --fix",
-    "fix:css": "stylelint . --cache --fix",
+    "fix:js": "eslint --cache --fix",
+    "fix:css": "stylelint \"./src/**/*.{css,scss,sass,less}\" --cache --fix",
     "test": "run-p test:unit test:e2e",
     "test:unit": "jest",
     "test:coverage": "jest --coverage",
@@ -68,9 +68,10 @@ import TOCInline from '@theme/TOCInline';
   ```json
   {
     "compilerOptions": {
-      "lib": ["DOM", "ES2020"],
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+      "lib": ["DOM", "ES2023"],
       "jsx": "react-jsx",
-      "target": "ES2020",
+      "target": "ES2023",
       "noEmit": true,
       "skipLibCheck": true,
       "useDefineForClassFields": true,
@@ -106,6 +107,7 @@ import TOCInline from '@theme/TOCInline';
     /* $ pnpm add @tsconfig/node24 --save-dev */
     "extends": "@tsconfig/node24/tsconfig.json",
     "compilerOptions": {
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
       "noEmit": true,
       "module": "ESNext",
       "moduleResolution": "Bundler",
@@ -137,6 +139,7 @@ import TOCInline from '@theme/TOCInline';
   {
     "extends": "./tsconfig.app.json",
     "compilerOptions": {
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
       "strict": true,
       "strictNullChecks": true,
       "noImplicitAny": true,
@@ -178,17 +181,21 @@ import TOCInline from '@theme/TOCInline';
 ```ts
 // rsbuild.config.ts
 
-// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss -D
+// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss @rsbuild/plugin-assets-retry @rsbuild/plugin-node-polyfill @rsbuild/plugin-check-syntax @rsbuild/plugin-eslint @rsbuild/plugin-type-check -D
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
+// import { pluginAssetsRetry } from '@rsbuild/plugin-assets-retry';
+import { pluginNodePolyfill } from '@rsbuild/plugin-node-polyfill';
+import { pluginCheckSyntax } from '@rsbuild/plugin-check-syntax';
+// import { pluginEslint } from '@rsbuild/plugin-eslint';
+// import { pluginTypeCheck } from '@rsbuild/plugin-type-check';
 
-// pnpm add compression-webpack-plugin @aaroon/workbox-rspack-plugin image-minimizer-webpack-plugin node-polyfill-webpack-plugin -D
+// pnpm add compression-webpack-plugin @aaroon/workbox-rspack-plugin image-minimizer-webpack-plugin -D
 import CompressionPlugin from 'compression-webpack-plugin';
 import { InjectManifest } from '@aaroon/workbox-rspack-plugin';
 import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 const isProd = process.env.NODE_ENV === 'production';
 const isDev = process.env.NODE_ENV === 'development';
@@ -203,6 +210,27 @@ export default defineConfig({
       parallel: true,
     }),
     pluginTailwindcss(),
+    
+    // 用于注入 Node 核心模块在浏览器端的 polyfills
+    pluginNodePolyfill(),
+    
+    // 用于在编译过程中运行 ESLint 检查，需要在构建/开发过程中实时输出 ESLint 错误时开启
+    // ⚠️ 构建时运行 ESLint 会显著增加构建时间，建议使用独立的 `pnpm run lint` 命令
+    // pluginEslint(),
+    
+    // 用于在单独的进程中运行 TypeScript 类型检查，需要在 dev server 错误覆盖层中显示类型错误时开启
+    // pluginTypeCheck(),
+    
+    // 静态资源加载失败自动重试，适用于 CDN 部署/多域名容灾场景
+    // pluginAssetsRetry({
+    //   test: /cdn\.example\.com/,
+    //   domain: ['cdn.example.com', 'cdn-backup.example.com'],
+    // }),
+    
+    // 检查构建产物的语法兼容性，判断是否存在导致兼容性问题的高级语法
+    pluginCheckSyntax({
+      ecmaVersion: 2023,
+    }),
   ],
   server: {
     publicDir: [
@@ -321,8 +349,6 @@ export default defineConfig({
             }),
           ]
           : []),
-
-        new NodePolyfillPlugin(),
       ],
     },
   },
