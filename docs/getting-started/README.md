@@ -13,7 +13,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 |---------------|-----------------------|-----------------------|------------------------|-----------------------|
 | 框架            | Next.js               | Next.js               | Vue                    | React                 |
 | 打包工具          | Rspack                | Rspack                | Vite                   | Rsbuild                |
-| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
+| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | shadcn/ui             |
 | 路由            | -                     | -                     | Vue Router             | React Router          |
 | 路由模式          | history               | history               | hash                   | hash                  |
 | 状态管理          | -                     | -                     | Pinia                  | Zustand               |
@@ -43,7 +43,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 **技术选型逻辑**
 
 - **框架选择**：根据 SSR 需求选择 Next.js 或传统 SPA 框架
-- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用成熟的 Ant Design Pro
+- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用可定制的 shadcn/ui
 - **状态管理**：轻量化策略，React 生态使用 Zustand，Vue 生态使用 Pinia
 - **代码规范**：统一的 ESLint 配置和 stylelint 规范，确保代码质量一致性
 
@@ -63,7 +63,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 **技术选型说明**
 - B端项目用户群体相对固定，对系统稳定性要求更高
 - 如非面向客户的产品，建议采用成熟的组件库而非定制UI设计
-- 本架构中的 Ant Design Pro 已优化：移除 umi 依赖，仅保留核心的 Ant Design 和 Pro Components
+- 本架构采用 shadcn/ui：基于 Radix UI 无头组件与 Tailwind CSS 构建，组件代码直接复制至项目中，支持完全自定义与按需调整
 :::
 
 ## 技术运用
