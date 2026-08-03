@@ -1399,8 +1399,6 @@ import regexp from 'eslint-plugin-regexp';
 import jsdoc from 'eslint-plugin-jsdoc';
 
 import reactHooks from 'eslint-plugin-react-hooks';
-// @ts-ignore
-import reactPerf from 'eslint-plugin-react-perf';
 import tanstackQuery from '@tanstack/eslint-plugin-query';
 import reactRefresh from 'eslint-plugin-react-refresh';
 // @ts-ignore
@@ -1459,7 +1457,6 @@ const reactConfig = defineConfig([
   ...configs.react.recommended,
 
   reactHooks.configs.flat['recommended-latest'],
-  reactPerf.configs.flat.recommended,
   ...tanstackQuery.configs['flat/recommended'],
   reactRefresh.configs.recommended,
 
@@ -1565,7 +1562,7 @@ module.exports = {
       './tsconfig.json',
     ],
   },
-  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc @eslint-community/eslint-plugin-eslint-comments
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc @eslint-community/eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb-typescript',
@@ -1574,7 +1571,6 @@ module.exports = {
     'plugin:react-hooks/recommended-latest',
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:react-perf/recommended',
     'plugin:@tanstack/query/recommended',
     'plugin:promise/recommended',
     'plugin:regexp/recommended',
