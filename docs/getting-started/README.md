@@ -9,28 +9,32 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 
 ## 总览
 
-| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
-|---------------|-----------------------|-----------------------|------------------------|-----------------------|
-| 框架            | Next.js               | Next.js               | Vue                    | React                 |
-| 打包工具          | Rspack                | Rspack                | Vite                   | Rsbuild                |
-| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | shadcn/ui             |
-| 路由            | -                     | -                     | Vue Router             | React Router          |
-| 路由模式          | history               | history               | hash                   | hash                  |
-| 状态管理          | -                     | -                     | Pinia                  | Zustand               |
-| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                |
-|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript     |
-|               | next/recommended      | next/recommended      |                        |                       |
-| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap             |
-| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                     |
-| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                     |
-| Electron      | ❌                     | ❌                     | ❌                      | ✔️                    |
-| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                     |
-| 单元测试          | Jest                  | Jest                  | Vitest                 | Jest                  |
-| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library |
-| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright            |
+| 特性/平台     | C端 - PC端                                                  | C端 - 移动端（React）                                       | C端 - 移动端（Vue）                                         | B端 - PC端                                                  |
+|---------------|-------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------|
+| 框架          | Next.js                                                     | Next.js                                                     | Vue                                                         | React                                                       |
+| 打包工具      | Rspack                                                      | Rspack                                                      | Vite                                                        | Rsbuild                                                     |
+| UI 组件/框架  | Tailwind CSS                                                | Tailwind CSS                                                | Tailwind CSS                                                | shadcn/ui                                                   |
+| 路由          | -                                                           | -                                                           | Vue Router                                                  | React Router                                                |
+| 路由模式      | history                                                     | history                                                     | hash                                                        | hash                                                        |
+| 状态管理      | -                                                           | -                                                           | Pinia                                                       | Zustand                                                     |
+| TypeScript    | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| ESLint        | `airbnb-extend`                                             | `airbnb-extend`                                             | `@vue/airbnb-typescript`                                    | `airbnb-extend`                                             |
+|               | `unicorn`                                                   | `unicorn`                                                   | `unicorn`                                                   | `unicorn`                                                   |
+|               | `typescript-eslint`                                         | `typescript-eslint`                                         | `typescript-eslint`                                         | `typescript-eslint`                                         |
+|               | `next/recommended`                                          | `next/recommended`                                          | `vue3/recommended`                                          |                                                             |
+|               | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` |
+|               | `security`<br />`risxss`<br />`no-unsanitized`              | `security`<br />`risxss`<br />`no-unsanitized`              | `risxss`<br />`no-unsanitized`                              | `risxss`<br />`no-unsanitized`                              |
+|               | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />` tailwindcss`                       |
+| Sass          | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| stylelint     | Bootstrap                                                   | Bootstrap                                                   | Bootstrap                                                   | Bootstrap                                                   |
+| HTML Validate | ✔️                                                          | ✔️                                                          | ✔️                                                          | ❌                                                          |
+| PWA           | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| SSR           | ✔️                                                          | ✔️                                                          | ❌                                                          | ❌                                                          |
+| Electron      | ❌                                                          | ❌                                                          | ❌                                                          | ✔️                                                          |
+| Capacitor     | ❌                                                          | ❌                                                          | ✔️                                                          | ❌                                                          |
+| 单元测试      | Jest                                                        | Jest                                                        | Vitest                                                      | Jest                                                        |
+| 组件挂载库    | React Testing Library                                       | React Testing Library                                       | Vue Test Utils                                              | React Testing Library                                       |
+| E2E测试       | Playwright                                                  | Playwright                                                  | Playwright                                                  | Playwright                                                  |
 
 **核心特点**
 
@@ -107,7 +111,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 | 工具链与开发体验 (DX) | 拥抱标准 Web，可自由配置 Vite/Rspack 构建，现代 IDE 生态友好，报错链路清晰             | 深度绑定 HBuilderX 或特定脚手架，构建流程属于黑盒工程，异常排查与定制门槛极高 |
 | 生态纯粹性         | 无缝支持 100% 的 npm 开源包 及主流原生 Cordova 插件                         | 严重依赖其专属插件市场，大量标准 npm 库在多端转译时存在严重的运行时报错风险     |
 | 测试与质量保障       | 应用即标准网页，可完美集成 Jest、Playwright 进行高标准的单元与 E2E 自动化测试            | 由于存在专有的非标准运行时限制，很难引入现代化的测试工具链进行深度质量保障        |
-| 原生扩展能力        | 提供极简、标准的原生桥接设计，编写及接入原生 iOS (Swift) / Android (Kotlin) 插件十分直观 | 原生插件开发门槛高，离线打包及依赖版本管理繁琐且不规范                  |
+| 原生扩展能力        | 提供极简、标准的原生桥接设计，编写及接入原生 iOS (Swift)<br />Android (Kotlin) 插件十分直观 | 原生插件开发门槛高，离线打包及依赖版本管理繁琐且不规范                  |
 
 **关于小程序的开发策略：** 针对小程序业务（如微信小程序、支付宝小程序等），更倾向于使用**原生小程序开发**。由于各渠道小程序的使用场景、业务定位、交互设计和核心心智完全不同，在实际业务演进中并不存在强烈的“万能代码通配跨端”诉求。使用原生开发，能够 100% 释放特定平台的专有 API 和原生性能，彻底免除多端框架带来的语法折损和抹平维护黑洞。
 </details>
@@ -123,7 +127,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 | React Native              | JavaScript/TypeScript | 基于 **React 声明式组件、Hooks 范式及虚拟 DOM 思想**，通过原生组件映射渲染，支持 JS 桥接或 JSI 直接调用。在逻辑层可完整复用标准 React 生态（状态管理 Zustand、TanStack Query 等），并原生适配动态热更新（CodePush）。但在复杂长列表和高负载动画场景下需进行专门的原生调优 |
 | Kotlin Multiplatform      | Kotlin/Swift          | 核心理念是 **“共享逻辑，保留 100% 纯原生 UI”**。仅在底层（数据、网络、算法、业务逻辑）实现多端代码共享，而 UI 层分别使用原生平台的 SwiftUI (iOS) 与 Jetpack Compose (Android) 自行构建                                              |
 | Compose Multiplatform     | Kotlin                | **基于 Jetpack Compose 延伸的跨平台声明式 UI 框架。** 不仅逻辑共享，UI 同样由 Kotlin 编写并通过 Compose 跨端图形引擎统一在 Android/iOS/Desktop 等平台上独立渲染                                                       |
-| SwiftUI (iOS)             | Swift                 | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation / Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
+| SwiftUI (iOS)             | Swift                 | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation<br />Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
 | Jetpack Compose (Android) | Kotlin                | **Google 官方现代声明式 UI 框架。** 基于 Kotlin 语言构建，彻底抛弃传统的 XML 布局。具有优秀的局部刷新与重组（Recomposition）优化，与 Android Studio 及 Jetpack 工具链无缝契合                                                |
 | 传统纯原生开发                   | Kotlin/Swift          | 采用基于 XML (Android) 与 UIKit (iOS) 的传统命令式 UI 开发模式。对于全新启动的项目，更推崇以 SwiftUI 与 Jetpack Compose 组成的现代原生开发模式定性                                                                  |
 | HarmonyOS 原生              | ArkTS/TypeScript      | **华为官方推出的声明式 UI 框架（ArkUI）与开发语言（ArkTS）。** 依托底层 ArkCompiler 编译为原生机器码高效执行，直接对接鸿蒙原生分布式软总线，深度适配多端设备流转、元服务（卡片级应用）等 HarmonyOS NEXT 专有系统特性                                      |
