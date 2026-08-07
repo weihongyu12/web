@@ -1688,58 +1688,41 @@ module.exports = {
 :::
 
 <Tabs>
-  <TabItem value="react" label="React/Next.js" default>
-:::warning
-关于 CSS-in-JS 仍在整理中
-:::
+  <TabItem value="css" label="CSS" default>
+:::tip
+**OOCSS**（面向对象 CSS）主张将样式按「结构」与「外观」分离，把重复的视觉模式抽象为可复用的独立类，避免冗余与层级过深的选择器。
 
+**BEM**（Block Element Modifier）在 OOCSS 的复用思想基础上，进一步规定了类名的命名规范：`block__element--modifier`，通过 `__`（元素）和 `--`（修饰符）明确表达选择器的层级与用途，可读性高且便于组件化开发。
+:::
 
 ```js
 // stylelint.config.js
 
-// $ npm install stylelint stylelint-config-twbs-bootstrap --save-dev
+// $ pnpm add stylelint stylelint-config-twbs-bootstrap stylelint-selector-bem-pattern --save-dev
 module.exports = {
   extends: [
     'stylelint-config-twbs-bootstrap',
   ],
-  rules: {
-    // 允许在 CSS-in-JS 中使用 JS 变量或主题属性 (通常为 camelCase)
-    'value-keyword-case': null,
-    'function-name-case': null,
-    'selector-class-pattern': null, // 在 CSS-in-JS 中不适用
-    'selector-id-pattern': null, // 在 CSS-in-JS 中不适用
-  },
-  overrides: [
-    {
-      files: ['**/*.{js,jsx,ts,tsx}'],
-      // 使用可以从 JS/TS 文件中提取样式的自定义语法
-      customSyntax: 'postcss-styled-syntax',
-      // 针对 CSS-in-JS 的特定规则
-      rules: {
-        'no-empty-source': null, // 在 styled-components 中常见空样式块
-        'property-no-unknown': [ // 允许组件 props 作为 CSS 属性
-          true,
-          {
-            ignoreProperties: ['composes'],
-          }
-        ],
-        'selector-type-no-unknown': [ // 允许 styled-components/emotion 的组件作为选择器
-          true,
-          {
-            ignore: ['custom-elements', 'default-namespace'],
-          },
-        ],
-      },
-    },
+  plugins: [
+    'stylelint-selector-bem-pattern',
   ],
+  rules: {
+    // BEM 命名规范 (via postcss-bem-linter)
+    // 格式: .block, .block__element, .block--modifier, .block__element--modifier
+    // 示例: .card, .card__title, .card--featured, .card__title--large
+    'plugin/selector-bem-pattern': {
+      // BEM 预设: block__element--modifier，kebab-case
+      preset: 'bem',
+    },
+  },
 };
 ```
   </TabItem>
-  <TabItem value="vue" label="Vue" default>
+  <TabItem value="vue" label="Vue">
 ```js
 // stylelint.config.js
 
-// $ npm install stylelint stylelint-config-twbs-bootstrap stylelint-config-recommended-vue postcss-html --save-dev
+// $ pnpm add stylelint stylelint-config-twbs-bootstrap stylelint-config-recommended-vue postcss-html --save-dev
 module.exports = {
   extends: [
     'stylelint-config-twbs-bootstrap',
@@ -2340,7 +2323,7 @@ export default Configuration;
 // $ pnpm add lint-staged @biomejs/biome eslint stylelint --save-dev
 export default {
   '**/*.{js,ts,jsx,tsx,vue}': ['biome format --write', 'eslint --fix --cache'],
-  '**/*.{css,scss,sass,tsx,jsx}': ['biome format --write', 'stylelint --fix --cache'],
+  '**/*.{css,scss,sass,less}': ['biome format --write', 'stylelint --fix --cache'],
 };
 ```
 
@@ -2504,7 +2487,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// $ npm install dotenv --save-dev
+// $ pnpm add dotenv --save-dev
 // require('dotenv').config();
 
 /**
