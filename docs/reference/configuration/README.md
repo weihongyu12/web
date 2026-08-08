@@ -565,7 +565,7 @@ module.exports = {
             },
           },
           {
-            // 可以使用“?as=avif”生成器，生成 WebP 图片格式
+            // 可以使用“?as=avif”生成器，生成 AVIF 图片格式
             preset: 'avif',
             implementation: ImageMinimizerPlugin.sharpGenerate,
             options: {
@@ -1689,7 +1689,7 @@ module.exports = {
 
 <Tabs>
   <TabItem value="css" label="CSS" default>
-:::tip
+:::info
 **OOCSS**（面向对象 CSS）主张将样式按「结构」与「外观」分离，把重复的视觉模式抽象为可复用的独立类，避免冗余与层级过深的选择器。
 
 **BEM**（Block Element Modifier）在 OOCSS 的复用思想基础上，进一步规定了类名的命名规范：`block__element--modifier`，通过 `__`（元素）和 `--`（修饰符）明确表达选择器的层级与用途，可读性高且便于组件化开发。
@@ -2725,9 +2725,15 @@ deploy_production:
 
 ## Orval
 
+:::info
+[Orval](https://orval.dev/) 是一个根据 OpenAPI/Swagger 规范自动生成 TypeScript 类型定义、 API 客户端代码和 Zod 校验层的工具，可减少手写样板代码并保证类型与后端契约一致。
+
+TypeScript 类型仅保证编译期静态安全，运行时数据可能不符合约定，Zod 则通过在运行时校验并转换接口返回数据，校验失败时可安全降级，且 Schema 与类型同源，确保前后端契约一致。
+:::
+
 <Tabs>
   <TabItem value="orval.config.ts" label="orval.config.ts" default>
-  ```
+  ```ts
   // orval.config.ts
   import { defineConfig } from 'orval';
 
@@ -2735,24 +2741,89 @@ deploy_production:
     api: {
       output: {
         mode: 'tags-split',
-        target: 'src/api/service.ts',
+        target: 'src/api/',
         schemas: 'src/api/model',
         client: 'react-query',
+        httpClient: 'axios',
         mock: true,
         override: {
           mutator: {
-          path: 'src/api/mutator/fetchInstance.ts',
-          name: 'fetchInstance',
+          path: 'src/api/mutator/axiosInstance.ts',
+          name: 'axiosInstance',
         },
+        allParamsOptional: true,
+        urlEncodeParameters: true,
+        indexFiles: true,
+        tagsSplitDeduplication: true,
+        clean: true,
       },
       input: {
-        target: 'https://openapi-v3-specification.exaple.com',
+        target: 'https://openapi-v3-specification.example.com',
+      },
+    },
+    apiZod: {
+      output: {
+        mode: 'tags-split',
+        target: 'src/api/zod',
+        client: 'zod',
+        indexFiles: true,
+        tagsSplitDeduplication: true,
+        clean: true,
+      },
+      input: {
+        target: 'https://openapi-v3-specification.example.com',
       },
     },
   });
    ```
   </TabItem>
-  <TabItem value="fetchInstance.ts" label="fetchInstance.ts">
+  <TabItem value="axiosInstance.ts" label="axiosInstance.ts">
+  ```ts
+  import Axios from 'axios';
+  import type { AxiosRequestConfig, AxiosError } from 'axios';
+
+  export const AXIOS_INSTANCE = Axios.create({
+    baseURL: import.meta.env.BASE_API_URL,
+    adapter: 'fetch'
+  });
+
+  // Request interceptor for auth
+  AXIOS_INSTANCE.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
+
+  // Response interceptor for error handling
+  AXIOS_INSTANCE.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        // Handle unauthorized
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    },
+  );
+
+  export const axiosInstance = <T>(
+    config: AxiosRequestConfig,
+    options?: AxiosRequestConfig,
+  ): Promise<T> => {
+    return AXIOS_INSTANCE({
+      ...config,
+      ...options,
+    }).then(({ data }) => data);
+  };
+
+  export type ErrorType<Error> = AxiosError<Error>;
+  export type BodyType<BodyData> = BodyData;
+  ```
   </TabItem>
 </Tabs>
 
