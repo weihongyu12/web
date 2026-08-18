@@ -188,7 +188,7 @@ export default function Page() {
       <head>
         <title>My Page</title>
       </head>
-    <div>Content</div>
+      <div>Content</div>
     </>
   );
 }
@@ -248,7 +248,7 @@ export default function NavigationBar() {
       <Link href="/dashboard">Dashboard</Link>
       
       {/* ✅ 外部链接带安全属性 */}
-      <a href="[https://example.com](https://example.com)" target="_blank" rel="noopener noreferrer">
+      <a href="https://example.com" target="_blank" rel="noopener noreferrer">
         External Site
       </a>
 
