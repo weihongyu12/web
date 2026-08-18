@@ -130,7 +130,7 @@ export default function RootLayout({ children }) {
     <>
       {/* ✅ 策略加载，不阻塞 UI */}
       <Script
-        src="[https://example.com/analytics.js](https://example.com/analytics.js)"
+        src="https://example.com/analytics.js"
         strategy="lazyOnload"
       />
 
