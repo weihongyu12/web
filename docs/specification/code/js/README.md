@@ -371,6 +371,21 @@ const message = 'Hello, ' + name + '!';
 
 6.3 避免不必要的转义字符。
 
+6.4 优先使用 Unicode 代码点转义 (`\u{...}`) 代替十六进制转义 (`\x...`)，以获得更好的代码一致性和可读性，并且能够表示更广的字符范围。
+
+:::tip[建议 👍]
+```ts
+const escape = '\u{1B}'; // 替代 \x1B
+const char = '\u{1F984}'; // 🦄
+```
+:::
+
+:::danger[不建议 👎]
+```ts
+const escape = '\x1B';
+```
+:::
+
 ## 7. 函数 (Functions)
 
 7.1 使用函数声明或函数表达式，而不是 `new Function` 构造函数。
@@ -819,6 +834,25 @@ async function fetchData() {
 
 22.7 避免 `Promise` 的嵌套。
 
+22.8 在处理 `Promise.allSettled()` 的结果时，必须先检查状态是否为 `'fulfilled'`，然后再提取其 `.value` 属性，避免因 rejected 状态而获取到未定义的空值或隐藏错误。
+
+:::tip[建议 👍]
+```ts
+const results = await Promise.allSettled(promises);
+const values = results
+  .filter(result => result.status === 'fulfilled')
+  .map(result => result.value);
+```
+:::
+
+:::danger[不建议 👎]
+```ts
+const results = await Promise.allSettled(promises);
+// 危险！如果有 promise 被 rejected，会导致其 value 为 undefined 被静默映射
+const values = results.map(result => result.value);
+```
+:::
+
 ## 23. 正则表达式 (Regular Expressions)
 
 23.1 优先使用正则表达式字面量，而不是 `new RegExp()`。
@@ -849,5 +883,60 @@ const userInput = '<img src=x onerror=alert(1)>';
 if (element) {
   element.innerHTML = userInput;
 }
+```
+:::
+
+## 25. 集合与数据结构 (Collections & Data Structures)
+
+25.1 在检查 `Map`、`WeakMap`、`URLSearchParams` 等数据结构中是否存在某个键时，优先使用专门的 `.has()` 方法，而不是通过 `.get()` 获取值后判断其是否等同于 `undefined` 或 `null`。
+
+:::tip[建议 👍]
+```ts
+const map = new Map();
+if (map.has('key')) {
+  // ...
+}
+
+const params = new URLSearchParams(window.location.search);
+const hasName = params.has('name');
+```
+:::
+
+:::danger[不建议 👎]
+```ts
+const map = new Map();
+if (map.get('key') !== undefined) {
+  // ...
+}
+
+const params = new URLSearchParams(window.location.search);
+const hasName = params.get('name') !== null;
+```
+:::
+
+## 26. DOM 操作 (DOM Manipulation)
+
+26.1 在访问或修改 DOM 元素的自定义数据属性 (`data-*`) 时，优先使用元素的 `.dataset` 属性，避免使用 `getAttribute`、`setAttribute`、`removeAttribute` 或 `hasAttribute`。
+
+:::tip[建议 👍]
+```ts
+const element = document.getElementById('my-el');
+
+// 更清晰的 dataset 访问方式
+const { unicorn } = element.dataset;
+element.dataset.unicorn = '🦄';
+delete element.dataset.unicorn;
+const hasUnicorn = Object.hasOwn(element.dataset, 'unicorn');
+```
+:::
+
+:::danger[不建议 👎]
+```ts
+const element = document.getElementById('my-el');
+
+const unicorn = element.getAttribute('data-unicorn');
+element.setAttribute('data-unicorn', '🦄');
+element.removeAttribute('data-unicorn');
+const hasUnicorn = element.hasAttribute('data-unicorn');
 ```
 :::

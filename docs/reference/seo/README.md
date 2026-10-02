@@ -393,7 +393,58 @@ Link: <http://www.example.com/downloads/white-paper.pdf>; rel="canonical"
 - **永久重定向**：在搜索结果中显示新的重定向目标。
 - **临时重定向**：在搜索结果中显示源网页。
 
-![重定向类型](./assets/redirects.avif)
+```mermaid
+graph LR
+    A[重定向类型] --> B[永久重定向]
+    A --> C[临时重定向]
+    
+    B --> D[服务器端重定向]
+    B --> E[meta refresh 重定向]
+    B --> F[JavaScript 重定向]
+    B --> G[Crypto 重定向]
+    
+    C --> H[服务器端重定向]
+    C --> I[meta refresh 重定向]
+    
+    D --> D1[HTTP 301]
+    D --> D2[HTTP 308]
+    
+    E --> E1[meta refresh （0秒）]
+    E --> E2[HTTP 刷新 （0秒）]
+    
+    F --> F1[JavaScript location]
+    
+    H --> H1[HTTP 302]
+    H --> H2[HTTP 303]
+    H --> H3[HTTP 307]
+    
+    I --> I1[meta refresh （大于0秒）]
+    I --> I2[HTTP refresh （大于0秒）]
+    
+    style B fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style C fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    
+    style D fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style E fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style F fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style G fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    
+    style H fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    style I fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    
+    style D1 fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style D2 fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style E1 fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style E2 fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    style F1 fill:#e6f3ff,stroke:#4a90e2,stroke-width:1px,color:#333
+    
+    style H1 fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    style H2 fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    style H3 fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    
+    style I1 fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+    style I2 fill:#fff0e6,stroke:#f5a623,stroke-width:1px,color:#333
+```
 
 ###### 服务器端重定向
 

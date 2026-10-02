@@ -113,6 +113,11 @@ const config: Config = {
           position: 'right',
         },
         {
+          href: 'https://weihongyu12.github.io/node/',
+          label: 'Node.js 版',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/weihongyu12',
           label: 'GitHub',
           position: 'right',
@@ -131,11 +136,11 @@ const config: Config = {
             },
             {
               label: '规范',
-              to: '/docs/specification/code/',
+              to: '/docs/specification/code/html/',
             },
             {
               label: '代码规则',
-              to: '/docs/specification/rule/',
+              to: '/docs/specification/rule/html/',
             },
           ],
         },
@@ -164,13 +169,21 @@ const config: Config = {
             },
             {
               label: '功能设计',
-              to: '/docs/features/',
+              to: '/docs/features/authentication/smscode/',
             },
           ],
         },
         {
           title: 'More',
           items: [
+            {
+              label: '小程序版',
+              href: 'https://weihongyu12.github.io/miniprogram/',
+            },
+            {
+              label: 'Node.js 版',
+              href: 'https://weihongyu12.github.io/node/',
+            },
             {
               label: 'Blog',
               href: 'https://weihongyu.com/',

@@ -426,15 +426,22 @@ module.exports = {
 
 | 规则名称 | 错误级别 | 配置选项 | 描述 |
 |--------|----------|----------|------|
-| [unicorn/better-regex](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/better-regex.md) | off | - | 强制正则表达式更加优化和简洁 |
+| [unicorn/better-dom-traversing](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/better-dom-traversing.md) | error | - | 建议使用更好的 DOM 遍历 API |
 | [unicorn/catch-error-name](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/catch-error-name.md) | error | - | 强制错误变量在 `catch` 子句中命名为 error |
 | [unicorn/consistent-assert](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-assert.md) | error | - | 强制使用一致的断言方法（例如 `assert.strictEqual` 而不是 `assert.equal`） |
 | [unicorn/consistent-date-clone](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-date-clone.md) | error | - | 强制使用一致的方法来克隆日期（例如 `new Date(date)`） |
-| [unicorn/consistent-destructuring](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-destructuring.md) | off | - | 强制使用一致的结构分配方式 |
+| [unicorn/consistent-destructuring](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-destructuring.md) | off | - | 强制使用一致的解构分配方式 |
 | [unicorn/consistent-empty-array-spread](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-empty-array-spread.md) | error | - | 强制空数组展开时使用一致的方式 |
 | [unicorn/consistent-existence-index-check](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-existence-index-check.md) | error | - | 强制使用一致的索引存在性检查（例如 `index in array` 而不是 `array[index] !== undefined`） |
+| [unicorn/consistent-export-decorator-position](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-export-decorator-position.md) | error | - | 强制导出类上的装饰器位置一致 |
 | [unicorn/consistent-function-scoping](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-function-scoping.md) | error | - | 强制将没有依赖外部变量的函数提升到更高作用域 |
+| [unicorn/consistent-json-file-read](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-json-file-read.md) | error | - | 强制在 JSON.parse() 之前一致地读取 JSON 文件 |
+| [unicorn/consistent-optional-chaining](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-optional-chaining.md) | error | - | 强制同一基础成员访问时使用一致的可选链 |
+| [unicorn/consistent-template-literal-escape](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-template-literal-escape.md) | error | - | 强制模板字面量中 `${` 的转义风格一致 |
+| [unicorn/consistent-tuple-labels](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/consistent-tuple-labels.md) | error | - | 强制元组类型元素使用一致的标签 |
 | [unicorn/custom-error-definition](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/custom-error-definition.md) | off | - | 强制自定义错误必须继承自 error |
+| [unicorn/default-export-style](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/default-export-style.md) | error | - | 强制一致的默认导出声明风格 |
+| [unicorn/dom-node-dataset](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/dom-node-dataset.md) | error | - | 强制使用 dataset 来访问和设置 data-* 属性 |
 | [unicorn/empty-brace-spaces](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/empty-brace-spaces.md) | error | - | 强制在花括号内使用一致的空格 |
 | [unicorn/error-message](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/error-message.md) | error | - | 强制在 `throw` 语句中提供错误信息 |
 | [unicorn/escape-case](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/escape-case.md) | error | - | 强制转义序列使用大写或小写（例如 `\n` 而不是 `\N`） |
@@ -447,18 +454,21 @@ module.exports = {
 | [unicorn/no-accessor-recursion](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-accessor-recursion.md) | error | - | 禁止在访问器中递归调用自身（会导致栈溢出） |
 | [unicorn/no-anonymous-default-export](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-anonymous-default-export.md) | error | - | 禁止匿名默认导出 |
 | [unicorn/no-array-callback-reference](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-callback-reference.md) | error | - | 禁止在数组方法中传递回调函数的引用（应使用内联函数） |
-| [unicorn/no-array-for-each](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-for-each.md) | error | - | 禁止使用 `Array.prototype.forEach`，推荐使用 `for...of` |
+| [unicorn/no-array-from-fill](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-from-fill.md) | error | - | 禁止在 Array.from 中使用 fill() |
 | [unicorn/no-array-method-this-argument](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-method-this-argument.md) | error | - | 禁止在数组方法中使用 `this` 参数（应使用箭头函数） |
 | [unicorn/no-array-reduce](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-reduce.md) | error | - | 尽量避免使用 `Array.prototype.reduce`，除非有特定需求 |
 | [unicorn/no-array-reverse](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-reverse.md) | error | - | 禁止使用 `Array.prototype.reverse`，除非非常必要 |
 | [unicorn/no-array-sort](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-sort.md) | error | - | 禁止使用 `Array.prototype.sort` 而不带比较函数（对数字排序会出错） |
 | [unicorn/no-await-expression-member](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-await-expression-member.md) | error | - | 禁止在 `await` 表达式后直接使用成员表达式（可能导致意外行为） |
 | [unicorn/no-await-in-promise-methods](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-await-in-promise-methods.md) | error | - | 禁止在 Promise 方法（如 `then`、`catch`）中使用 `await` |
+| [unicorn/no-confusing-array-with](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-confusing-array-with.md) | error | - | 禁止在数组上使用容易混淆的 with() |
 | [unicorn/no-console-spaces](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-console-spaces.md) | error | - | 禁止在 `console.log` 等方法的参数中添加多余空格 |
+| [unicorn/no-declarations-before-early-exit](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-declarations-before-early-exit.md) | error | - | 禁止在提早退出的条件之前进行不需要的变量声明 |
 | [unicorn/no-document-cookie](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-document-cookie.md) | error | - | 禁止直接使用 `document.cookie`，应使用封装好的方法 |
+| [unicorn/no-duplicate-set-values](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-duplicate-set-values.md) | error | - | 禁止在 Set 构造函数中使用重复的值 |
 | [unicorn/no-empty-file](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-empty-file.md) | error | - | 禁止空文件 |
+| [unicorn/no-for-each](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-for-each.md) | error | - | 禁止使用 forEach 方法，推荐使用 for...of 等更清晰的循环 |
 | [unicorn/no-for-loop](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-for-loop.md) | error | - | 禁止使用 `for` 循环，推荐使用高阶数组方法或 `for...of` |
-| [unicorn/no-hex-escape](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-hex-escape.md) | error | - | 禁止在字符串中使用十六进制转义序列（应使用 Unicode 转义） |
 | [unicorn/no-instanceof-builtins](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-instanceof-builtins.md) | error | - | 禁止对内置类型（如 `Array`, error）使用 `instanceof`（在不同 realm 中可能失效） |
 | [unicorn/no-invalid-fetch-options](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-invalid-fetch-options.md) | error | - | 禁止在 `fetch` 中使用无效的选项（例如 `body` 与 `GET` 一起用） |
 | [unicorn/no-invalid-remove-event-listener](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-invalid-remove-event-listener.md) | error | - | 禁止无效的 `removeEventListener`（传递的函数必须与添加时相同） |
@@ -512,7 +522,6 @@ module.exports = {
 | [unicorn/prefer-date-now](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-date-now.md) | error | - | 强制使用 `Date.now()` 而不是 `new Date().getTime()` |
 | [unicorn/prefer-default-parameters](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-default-parameters.md) | error | - | 强制使用默认参数而不是在函数体内设置默认值 |
 | [unicorn/prefer-dom-node-append](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-dom-node-append.md) | error | - | 强制使用 `Node.append` 而不是 `Node.appendChild`（支持多个参数） |
-| [unicorn/prefer-dom-node-dataset](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-dom-node-dataset.md) | error | - | 强制使用 `dataset` 来访问和设置 data-* 属性 |
 | [unicorn/prefer-dom-node-remove](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-dom-node-remove.md) | error | - | 强制使用 `ChildNode.remove` 而不是 `parentNode.removeChild` |
 | [unicorn/prefer-dom-node-text-content](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-dom-node-text-content.md) | error | - | 强制使用 `Node.textContent` 而不是 `Node.innerText`（性能更好，更可预测） |
 | [unicorn/prefer-event-target](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-event-target.md) | error | - | 强制使用 `EventTarget` 而不是 `EventEmitter`（用于自定义事件） |
@@ -552,6 +561,7 @@ module.exports = {
 | [unicorn/prefer-ternary](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-ternary.md) | error | - | 强制使用三元运算符而不是简单的 `if-else` 语句 |
 | [unicorn/prefer-top-level-await](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-top-level-await.md) | error | - | 强制在模块顶层使用 `await` 而不是包裹在 `async` 函数中（需在 ES 模块中） |
 | [unicorn/prefer-type-error](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-type-error.md) | error | - | 强制抛出 `TypeError` 而不是 error 用于类型错误 |
+| [unicorn/prefer-unicode-code-point-escapes](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-unicode-code-point-escapes.md) | error | - | 强制使用 Unicode 码点转义而不是传统的十六进制转义序列 |
 | [unicorn/prevent-abbreviations](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prevent-abbreviations.md) | error | - | 防止使用缩写（例如 `e` 代替 `event`, `cb` 代替 `callback`） |
 | [unicorn/relative-url-style](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/relative-url-style.md) | error | - | 强制相对 URL 使用一致的风格（例如 `./` 开头或不开头） |
 | [unicorn/require-array-join-separator](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/require-array-join-separator.md) | error | - | 强制 `Array.prototype.join` 方法提供分隔符参数（显式传递空字符串如果需要） |

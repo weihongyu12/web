@@ -9,28 +9,32 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 
 ## 总览
 
-| 特性/平台         | C端 - PC端              | C端 - 移动端（React）       | C端 - 移动端（Vue）          | B端 - PC端              |
-|---------------|-----------------------|-----------------------|------------------------|-----------------------|
-| 框架            | Next.js               | Next.js               | Vue                    | React                 |
-| 打包工具          | Rspack                | Rspack                | Vite                   | Rsbuild                |
-| UI 组件/框架      | Tailwind CSS          | Tailwind CSS          | Tailwind CSS           | Ant Design Pro        |
-| 路由            | -                     | -                     | Vue Router             | React Router          |
-| 路由模式          | history               | history               | hash                   | hash                  |
-| 状态管理          | -                     | -                     | Pinia                  | Zustand               |
-| TypeScript    | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| ESLint        | airbnb                | airbnb                | @vue/airbnb-typescript | airbnb                |
-|               | airbnb-typescript     | airbnb-typescript     | vue3/recommended       | airbnb-typescript     |
-|               | next/recommended      | next/recommended      |                        |                       |
-| Sass          | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| stylelint     | Bootstrap             | Bootstrap             | Bootstrap              | Bootstrap             |
-| HTML Validate | ✔️                    | ✔️                    | ✔️                     | ❌                     |
-| PWA           | ✔️                    | ✔️                    | ✔️                     | ✔️                    |
-| SSR           | ✔️                    | ✔️                    | ❌                      | ❌                     |
-| Electron      | ❌                     | ❌                     | ❌                      | ✔️                    |
-| Capacitor     | ❌                     | ❌                     | ✔️                     | ❌                     |
-| 单元测试          | Vitest                | Vitest                | Vitest                 | Vitest                |
-| 组件挂载库         | React Testing Library | React Testing Library | Vue Test Utils         | React Testing Library |
-| E2E测试         | Playwright            | Playwright            | Playwright             | Playwright            |
+| 特性/平台     | C端 - PC端                                                  | C端 - 移动端（React）                                       | C端 - 移动端（Vue）                                         | B端 - PC端                                                  |
+|---------------|-------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------|
+| 框架          | Next.js                                                     | Next.js                                                     | Vue                                                         | React                                                       |
+| 打包工具      | Rspack                                                      | Rspack                                                      | Vite                                                        | Rsbuild                                                     |
+| UI 组件/框架  | Tailwind CSS                                                | Tailwind CSS                                                | Tailwind CSS                                                | shadcn/ui                                                   |
+| 路由          | -                                                           | -                                                           | Vue Router                                                  | React Router                                                |
+| 路由模式      | history                                                     | history                                                     | hash                                                        | hash                                                        |
+| 状态管理      | -                                                           | -                                                           | Pinia                                                       | Zustand                                                     |
+| TypeScript    | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| ESLint        | `airbnb-extend`                                             | `airbnb-extend`                                             | `@vue/airbnb-typescript`                                    | `airbnb-extend`                                             |
+|               | `unicorn`                                                   | `unicorn`                                                   | `unicorn`                                                   | `unicorn`                                                   |
+|               | `typescript-eslint`                                         | `typescript-eslint`                                         | `typescript-eslint`                                         | `typescript-eslint`                                         |
+|               | `next/recommended`                                          | `next/recommended`                                          | `vue3/recommended`                                          |                                                             |
+|               | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` | `promise`<br />`regexp`<br />`jsdoc`<br />`eslint-comments` |
+|               | `security`<br />`risxss`<br />`no-unsanitized`              | `security`<br />`risxss`<br />`no-unsanitized`              | `risxss`<br />`no-unsanitized`                              | `risxss`<br />`no-unsanitized`                              |
+|               | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />`tailwindcss`                        | `@tanstack/query`<br />` tailwindcss`                       |
+| Sass          | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| stylelint     | Bootstrap                                                   | Bootstrap                                                   | Bootstrap                                                   | Bootstrap                                                   |
+| HTML Validate | ✔️                                                          | ✔️                                                          | ✔️                                                          | ❌                                                          |
+| PWA           | ✔️                                                          | ✔️                                                          | ✔️                                                          | ✔️                                                          |
+| SSR           | ✔️                                                          | ✔️                                                          | ❌                                                          | ❌                                                          |
+| Electron      | ❌                                                          | ❌                                                          | ❌                                                          | ✔️                                                          |
+| Capacitor     | ❌                                                          | ❌                                                          | ✔️                                                          | ❌                                                          |
+| 单元测试      | Vitest                                                      | Vitest                                                      | Vitest                                                      | Vitest                                                      |
+| 组件挂载库    | React Testing Library                                       | React Testing Library                                       | Vue Test Utils                                              | React Testing Library                                       |
+| E2E测试       | Playwright                                                  | Playwright                                                  | Playwright                                                  | Playwright                                                  |
 
 **核心特点**
 
@@ -43,7 +47,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 **技术选型逻辑**
 
 - **框架选择**：根据 SSR 需求选择 Next.js 或传统 SPA 框架
-- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用成熟的 Ant Design Pro
+- **UI方案**：C端使用灵活的 Tailwind CSS，B端采用可定制的 shadcn/ui
 - **状态管理**：轻量化策略，React 生态使用 Zustand，Vue 生态使用 Pinia
 - **代码规范**：统一的 ESLint 配置和 stylelint 规范，确保代码质量一致性
 
@@ -63,7 +67,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 **技术选型说明**
 - B端项目用户群体相对固定，对系统稳定性要求更高
 - 如非面向客户的产品，建议采用成熟的组件库而非定制UI设计
-- 本架构中的 Ant Design Pro 已优化：移除 umi 依赖，仅保留核心的 Ant Design 和 Pro Components
+- 本架构采用 shadcn/ui：基于 Base UI 无头组件与 Tailwind CSS 构建，组件代码直接复制至项目中，支持完全自定义与按需调整
 :::
 
 ## 技术运用
@@ -123,7 +127,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 | React Native              | JavaScript/TypeScript | 基于 **React 声明式组件、Hooks 范式及虚拟 DOM 思想**，通过原生组件映射渲染，支持 JS 桥接或 JSI 直接调用。在逻辑层可完整复用标准 React 生态（状态管理 Zustand、TanStack Query 等），并原生适配动态热更新（CodePush）。但在复杂长列表和高负载动画场景下需进行专门的原生调优 |
 | Kotlin Multiplatform      | Kotlin/Swift          | 核心理念是 **“共享逻辑，保留 100% 纯原生 UI”**。仅在底层（数据、网络、算法、业务逻辑）实现多端代码共享，而 UI 层分别使用原生平台的 SwiftUI (iOS) 与 Jetpack Compose (Android) 自行构建                                              |
 | Compose Multiplatform     | Kotlin                | **基于 Jetpack Compose 延伸的跨平台声明式 UI 框架。** 不仅逻辑共享，UI 同样由 Kotlin 编写并通过 Compose 跨端图形引擎统一在 Android/iOS/Desktop 等平台上独立渲染                                                       |
-| SwiftUI (iOS)             | Swift                 | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation / Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
+| SwiftUI (iOS)             | Swift                 | **Apple 官方现代声明式 UI 框架。** 天然具备极致的动画性能（通过 CoreAnimation<br />Metal 直接渲染），提供 100% 纯正的 iOS 交互质感、对动态岛、小组件（Widgets）等最新 iOS 系统级功能完美支持                                             |
 | Jetpack Compose (Android) | Kotlin                | **Google 官方现代声明式 UI 框架。** 基于 Kotlin 语言构建，彻底抛弃传统的 XML 布局。具有优秀的局部刷新与重组（Recomposition）优化，与 Android Studio 及 Jetpack 工具链无缝契合                                                |
 | 传统纯原生开发                   | Kotlin/Swift          | 采用基于 XML (Android) 与 UIKit (iOS) 的传统命令式 UI 开发模式。对于全新启动的项目，更推崇以 SwiftUI 与 Jetpack Compose 组成的现代原生开发模式定性                                                                  |
 | HarmonyOS 原生              | ArkTS/TypeScript      | **华为官方推出的声明式 UI 框架（ArkUI）与开发语言（ArkTS）。** 依托底层 ArkCompiler 编译为原生机器码高效执行，直接对接鸿蒙原生分布式软总线，深度适配多端设备流转、元服务（卡片级应用）等 HarmonyOS NEXT 专有系统特性                                      |

@@ -23,14 +23,14 @@ import TOCInline from '@theme/TOCInline';
     "analyze": "cross-env RSDOCTOR=true rsbuild build",
     "preview": "rsbuild preview",
     "build-only": "rsbuild build",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --build --noEmit",
     "format": "biome format --write",
     "lint": "run-p lint:js lint:css",
-    "lint:js": "eslint . --cache",
-    "lint:css": "stylelint . --cache",
+    "lint:js": "eslint --cache",
+    "lint:css": "stylelint \"./src/**/*.{css,scss,sass,less}\" --cache",
     "fix": "run-s fix:js fix:css",
-    "fix:js": "eslint . --cache --fix",
-    "fix:css": "stylelint . --cache --fix",
+    "fix:js": "eslint --cache --fix",
+    "fix:css": "stylelint \"./src/**/*.{css,scss,sass,less}\" --cache --fix",
     "test": "run-p test:unit test:e2e",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -68,9 +68,10 @@ import TOCInline from '@theme/TOCInline';
   ```json
   {
     "compilerOptions": {
-      "lib": ["DOM", "ES2020"],
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+      "lib": ["DOM", "ES2023"],
       "jsx": "react-jsx",
-      "target": "ES2020",
+      "target": "ES2023",
       "noEmit": true,
       "skipLibCheck": true,
       "useDefineForClassFields": true,
@@ -106,6 +107,7 @@ import TOCInline from '@theme/TOCInline';
     /* $ pnpm add @tsconfig/node24 --save-dev */
     "extends": "@tsconfig/node24/tsconfig.json",
     "compilerOptions": {
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
       "noEmit": true,
       "module": "ESNext",
       "moduleResolution": "Bundler",
@@ -136,6 +138,7 @@ import TOCInline from '@theme/TOCInline';
   {
     "extends": "./tsconfig.app.json",
     "compilerOptions": {
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
       "strict": true,
       "strictNullChecks": true,
       "noImplicitAny": true,
@@ -176,18 +179,21 @@ import TOCInline from '@theme/TOCInline';
 ```ts
 // rsbuild.config.ts
 
-// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-babel @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss -D
+// pnpm add @rsbuild/core @rsbuild/plugin-react @rsbuild/plugin-svgr @rsbuild/plugin-tailwindcss @rsbuild/plugin-assets-retry @rsbuild/plugin-node-polyfill @rsbuild/plugin-check-syntax @rsbuild/plugin-eslint @rsbuild/plugin-type-check -D
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
+// import { pluginAssetsRetry } from '@rsbuild/plugin-assets-retry';
+import { pluginNodePolyfill } from '@rsbuild/plugin-node-polyfill';
+import { pluginCheckSyntax } from '@rsbuild/plugin-check-syntax';
+// import { pluginEslint } from '@rsbuild/plugin-eslint';
+// import { pluginTypeCheck } from '@rsbuild/plugin-type-check';
 
-// pnpm add compression-webpack-plugin @aaroon/workbox-rspack-plugin image-minimizer-webpack-plugin node-polyfill-webpack-plugin -D
+// pnpm add compression-webpack-plugin @aaroon/workbox-rspack-plugin image-minimizer-webpack-plugin -D
 import CompressionPlugin from 'compression-webpack-plugin';
 import { InjectManifest } from '@aaroon/workbox-rspack-plugin';
 import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 const isProd = process.env.NODE_ENV === 'production';
 const isDev = process.env.NODE_ENV === 'development';
@@ -195,16 +201,34 @@ const isDev = process.env.NODE_ENV === 'development';
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [
-    pluginReact(),
-    pluginBabel({
-      include: /\.[jt]sx?$/,
-      exclude: [/[\\/]node_modules[\\/]/],
-      babelLoaderOptions: {
-        configFile: true,
-      },
+    pluginReact({
+      reactCompiler: true,
     }),
-    pluginSvgr(),
+    pluginSvgr({
+      parallel: true,
+    }),
     pluginTailwindcss(),
+    
+    // 用于注入 Node 核心模块在浏览器端的 polyfills
+    pluginNodePolyfill(),
+    
+    // 用于在编译过程中运行 ESLint 检查，需要在构建/开发过程中实时输出 ESLint 错误时开启
+    // ⚠️ 构建时运行 ESLint 会显著增加构建时间，建议使用独立的 `pnpm run lint` 命令
+    // pluginEslint(),
+    
+    // 用于在单独的进程中运行 TypeScript 类型检查，需要在 dev server 错误覆盖层中显示类型错误时开启
+    // pluginTypeCheck(),
+    
+    // 静态资源加载失败自动重试，适用于 CDN 部署/多域名容灾场景
+    // pluginAssetsRetry({
+    //   test: /cdn\.example\.com/,
+    //   domain: ['cdn.example.com', 'cdn-backup.example.com'],
+    // }),
+    
+    // 检查构建产物的语法兼容性，判断是否存在导致兼容性问题的高级语法
+    pluginCheckSyntax({
+      ecmaVersion: 2023,
+    }),
   ],
   server: {
     publicDir: [
@@ -218,6 +242,11 @@ export default defineConfig({
     manifest: isProd,
     polyfill: 'usage',
     dataUriLimit: 0,
+    // ⚠️ 注意：不要将 .map 文件部署到公网服务器或 CDN ，否则会暴露源码！！
+    sourceMap: {
+      js: isDev ? 'cheap-module-source-map' : 'hidden-source-map',
+      css: isDev,
+    },
   },
   html: isProd ? { crossorigin: 'anonymous' } : undefined,
   security: isProd ? { sri: { enable: 'auto' } } : undefined,
@@ -318,8 +347,6 @@ export default defineConfig({
             }),
           ]
           : []),
-
-        new NodePolyfillPlugin(),
       ],
     },
   },
@@ -536,7 +563,7 @@ module.exports = {
             },
           },
           {
-            // 可以使用“?as=avif”生成器，生成 WebP 图片格式
+            // 可以使用“?as=avif”生成器，生成 AVIF 图片格式
             preset: 'avif',
             implementation: ImageMinimizerPlugin.sharpGenerate,
             options: {
@@ -614,25 +641,6 @@ export default defineConfig({
 ```
   </TabItem>
 </Tabs>
-
-## Babel
-
-:::warning
-现代化工具链通常不需要 Babel 转译。但是目前 React Compiler 只支持 Babel 来处理 JSX 转译，所以需要安装并配置 Babel。
-:::
-
-```js
-// babel.config.js
-
-// $ pnpm add babel-loader @babel/preset-typescript babel-plugin-react-compiler @babel/plugin-syntax-jsx --save-dev
-module.exports = {
-  presets: ['@babel/preset-typescript'],
-  plugins: [
-    'babel-plugin-react-compiler', 
-    '@babel/plugin-syntax-jsx',
-  ],
-};
-```
 
 ## Nginx
 
@@ -1389,8 +1397,6 @@ import regexp from 'eslint-plugin-regexp';
 import jsdoc from 'eslint-plugin-jsdoc';
 
 import reactHooks from 'eslint-plugin-react-hooks';
-// @ts-ignore
-import reactPerf from 'eslint-plugin-react-perf';
 import tanstackQuery from '@tanstack/eslint-plugin-query';
 import reactRefresh from 'eslint-plugin-react-refresh';
 // @ts-ignore
@@ -1449,7 +1455,6 @@ const reactConfig = defineConfig([
   ...configs.react.recommended,
 
   reactHooks.configs.flat['recommended-latest'],
-  reactPerf.configs.flat.recommended,
   ...tanstackQuery.configs['flat/recommended'],
   reactRefresh.configs.recommended,
 
@@ -1509,7 +1514,6 @@ const typescriptConfig = defineConfig([
 const nodeConfig = defineConfig([
   {
     files: [
-      'babel.config.cjs',
       'rspack.config.ts',
       'vitest.config.ts',
       '*.config.js',
@@ -1556,7 +1560,7 @@ module.exports = {
       './tsconfig.json',
     ],
   },
-  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss eslint-plugin-react-perf @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc @eslint-community/eslint-plugin-eslint-comments
+  // $ pnpm add -D eslint@^8.0.0 eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb-typescript  @typescript-eslint/eslint-plugin@^7.0.0 @typescript-eslint/parser@^7.0.0 eslint-plugin-no-unsanitized eslint-plugin-risxss @tanstack/eslint-plugin-query eslint-plugin-unicorn eslint-plugin-promise eslint-plugin-regexp eslint-plugin-jsdoc @eslint-community/eslint-plugin-eslint-comments
   extends: [
     'airbnb',
     'airbnb-typescript',
@@ -1565,7 +1569,6 @@ module.exports = {
     'plugin:react-hooks/recommended-latest',
     'plugin:no-unsanitized/recommended-legacy',
     'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:react-perf/recommended',
     'plugin:@tanstack/query/recommended',
     'plugin:promise/recommended',
     'plugin:regexp/recommended',
@@ -1682,58 +1685,41 @@ module.exports = {
 :::
 
 <Tabs>
-  <TabItem value="react" label="React/Next.js" default>
-:::warning
-关于 CSS-in-JS 仍在整理中
-:::
+  <TabItem value="css" label="CSS" default>
+:::info
+**OOCSS**（面向对象 CSS）主张将样式按「结构」与「外观」分离，把重复的视觉模式抽象为可复用的独立类，避免冗余与层级过深的选择器。
 
+**BEM**（Block Element Modifier）在 OOCSS 的复用思想基础上，进一步规定了类名的命名规范：`block__element--modifier`，通过 `__`（元素）和 `--`（修饰符）明确表达选择器的层级与用途，可读性高且便于组件化开发。
+:::
 
 ```js
 // stylelint.config.js
 
-// $ npm install stylelint stylelint-config-twbs-bootstrap --save-dev
+// $ pnpm add stylelint stylelint-config-twbs-bootstrap stylelint-selector-bem-pattern --save-dev
 module.exports = {
   extends: [
     'stylelint-config-twbs-bootstrap',
   ],
-  rules: {
-    // 允许在 CSS-in-JS 中使用 JS 变量或主题属性 (通常为 camelCase)
-    'value-keyword-case': null,
-    'function-name-case': null,
-    'selector-class-pattern': null, // 在 CSS-in-JS 中不适用
-    'selector-id-pattern': null, // 在 CSS-in-JS 中不适用
-  },
-  overrides: [
-    {
-      files: ['**/*.{js,jsx,ts,tsx}'],
-      // 使用可以从 JS/TS 文件中提取样式的自定义语法
-      customSyntax: 'postcss-styled-syntax',
-      // 针对 CSS-in-JS 的特定规则
-      rules: {
-        'no-empty-source': null, // 在 styled-components 中常见空样式块
-        'property-no-unknown': [ // 允许组件 props 作为 CSS 属性
-          true,
-          {
-            ignoreProperties: ['composes'],
-          }
-        ],
-        'selector-type-no-unknown': [ // 允许 styled-components/emotion 的组件作为选择器
-          true,
-          {
-            ignore: ['custom-elements', 'default-namespace'],
-          },
-        ],
-      },
-    },
+  plugins: [
+    'stylelint-selector-bem-pattern',
   ],
+  rules: {
+    // BEM 命名规范 (via postcss-bem-linter)
+    // 格式: .block, .block__element, .block--modifier, .block__element--modifier
+    // 示例: .card, .card__title, .card--featured, .card__title--large
+    'plugin/selector-bem-pattern': {
+      // BEM 预设: block__element--modifier，kebab-case
+      preset: 'bem',
+    },
+  },
 };
 ```
   </TabItem>
-  <TabItem value="vue" label="Vue" default>
+  <TabItem value="vue" label="Vue">
 ```js
 // stylelint.config.js
 
-// $ npm install stylelint stylelint-config-twbs-bootstrap stylelint-config-recommended-vue postcss-html --save-dev
+// $ pnpm add stylelint stylelint-config-twbs-bootstrap stylelint-config-recommended-vue postcss-html --save-dev
 module.exports = {
   extends: [
     'stylelint-config-twbs-bootstrap',
@@ -1750,557 +1736,6 @@ module.exports = {
 ```
   </TabItem>
 </Tabs>
-
-## Biome
-
-:::warning
-Biome 作为一个相对较新的工具，虽然在性能和功能上有很多优势，但在社区支持、插件生态和稳定性方面可能还不如 ESLint 和 Stylelint 成熟。因此，Biome 只作为格式化工具和前置检查工具使用，暂不建议完全替代 ESLint 和 Stylelint 进行代码质量检查。
-:::
-
-```json
-{
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "root": true,
-
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-
-  "files": {
-    "includes": [
-      "**/*.js",
-      "**/*.mjs",
-      "**/*.cjs",
-      "**/*.jsx",
-      "**/*.ts",
-      "**/*.tsx",
-      "**/*.css",
-      "**/*.scss"
-    ]
-  },
-
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineEnding": "lf",
-    "lineWidth": 100,
-    "bracketSpacing": true,
-    "bracketSameLine": false
-  },
-
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "jsxQuoteStyle": "double",
-      "quoteProperties": "asNeeded",
-      "trailingCommas": "all",
-      "semicolons": "always",
-      "arrowParentheses": "always",
-      "bracketSpacing": true,
-      "bracketSameLine": false
-    }
-  },
-
-  "css": {
-    "formatter": {
-      "enabled": true,
-      "indentStyle": "space",
-      "indentWidth": 2,
-      "lineEnding": "lf",
-      "lineWidth": 100,
-      "quoteStyle": "double"
-    },
-    "linter": {
-      "enabled": true
-    }
-  },
-
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
-
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": false,
-
-      "a11y": {
-        "recommended": false,
-        "noAccessKey": "error",
-        "noAriaHiddenOnFocusable": "off",
-        "noAriaUnsupportedElements": "error",
-        "noAutofocus": "error",
-        "noDistractingElements": "error",
-        "noHeaderScope": "off",
-        "noInteractiveElementToNoninteractiveRole": "error",
-        "noLabelWithoutControl": "error",
-        "noNoninteractiveElementInteractions": "error",
-        "noNoninteractiveElementToInteractiveRole": "error",
-        "noNoninteractiveTabindex": "error",
-        "noPositiveTabindex": "error",
-        "noRedundantAlt": "error",
-        "noRedundantRoles": "error",
-        "noStaticElementInteractions": "error",
-        "noSvgWithoutTitle": "off",
-        "useAltText": "error",
-        "useAnchorContent": "error",
-        "useAriaActivedescendantWithTabindex": "error",
-        "useAriaPropsForRole": "error",
-        "useAriaPropsSupportedByRole": "off",
-        "useButtonType": "error",
-        "useFocusableInteractive": "error",
-        "useGenericFontNames": "error",
-        "useHeadingContent": "error",
-        "useHtmlLang": "error",
-        "useIframeTitle": "error",
-        "useKeyWithClickEvents": "error",
-        "useKeyWithMouseEvents": "error",
-        "useMediaCaption": "error",
-        "useSemanticElements": "off",
-        "useValidAnchor": "error",
-        "useValidAriaProps": "error",
-        "useValidAriaRole": "error",
-        "useValidAriaValues": "error",
-        "useValidAutocomplete": "error",
-        "useValidLang": "error"
-      },
-
-      "complexity": {
-        "recommended": false,
-        "noAdjacentSpacesInRegex": "error",
-        "noArguments": "error",
-        "noCommaOperator": "error",
-        "noExcessiveCognitiveComplexity": "off",
-        "noExtraBooleanCast": "error",
-        "noForEach": "off",
-        "noImplicitCoercions": "off",
-        "noImportantStyles": "error",
-        "noStaticOnlyClass": "error",
-        "noUselessCatch": "error",
-        "noUselessConstructor": "error",
-        "noUselessLabel": "error",
-        "noUselessLoneBlockStatements": "error",
-        "noUselessRename": "error",
-        "noUselessStringConcat": "error",
-        "noUselessSwitchCase": "error",
-        "noUselessTernary": "error",
-        "noUselessUndefined": "error",
-        "noUselessUndefinedInitialization": "error",
-        "noVoid": "error",
-        "useArrowFunction": "error",
-        "useFlatMap": "warn",
-        "useLiteralKeys": "error",
-        "useOptionalChain": "warn",
-        "useRegexLiterals": "error",
-        "useSimpleNumberKeys": "error"
-      },
-
-      "correctness": {
-        "recommended": false,
-        "noConstAssign": "error",
-        "noConstantCondition": "warn",
-        "noConstructorReturn": "error",
-        "noEmptyCharacterClassInRegex": "error",
-        "noEmptyPattern": "error",
-        "noGlobalObjectCalls": "error",
-        "noInnerDeclarations": "error",
-        "noInvalidBuiltinInstantiation": "error",
-        "noInvalidConstructorSuper": "error",
-        "noInvalidDirectionInLinearGradient": "error",
-        "noInvalidGridAreas": "error",
-        "noInvalidPositionAtImportRule": "error",
-        "noInvalidUseBeforeDeclaration": "error",
-        "noMissingVarFunction": "error",
-        "noNonoctalDecimalEscape": "error",
-        "noPrecisionLoss": "error",
-        "noSelfAssign": "error",
-        "noSetterReturn": "error",
-        "noSwitchDeclarations": "error",
-        "noUnknownFunction": "warn",
-        "noUnknownMediaFeatureName": "error",
-        "noUnknownProperty": "error",
-        "noUnknownPseudoClass": "error",
-        "noUnknownPseudoElement": "error",
-        "noUnknownTypeSelector": "warn",
-        "noUnknownUnit": "error",
-        "noUnmatchableAnbSelector": "error",
-        "noUnreachable": "error",
-        "noUnreachableSuper": "error",
-        "noUnsafeFinally": "error",
-        "noUnsafeOptionalChaining": "error",
-        "noUnusedLabels": "error",
-        "noUnusedVariables": {
-          "level": "warn",
-          "options": {
-            "ignoreRestSiblings": true
-          }
-        },
-        "useIsNan": "error",
-        "useParseIntRadix": "error",
-        "useValidForDirection": "error",
-        "useValidTypeof": "error",
-        "useYield": "error"
-      },
-
-      "nursery": {
-        "recommended": false,
-        "noConditionalExpect": "error",
-        "noContinue": "error",
-        "noExcessiveClassesPerFile": {
-          "level": "error",
-          "options": {
-            "maxClasses": 1
-          }
-        },
-        "noFloatingClasses": "error",
-        "noForIn": "error",
-        "noIncrementDecrement": "error",
-        "noJsxPropsBind": "error",
-        "noMultiAssign": "error",
-        "noMultiStr": "error",
-        "noPlaywrightElementHandle": "warn",
-        "noPlaywrightEval": "warn",
-        "noPlaywrightForceOption": "warn",
-        "noPlaywrightMissingAwait": "error",
-        "noPlaywrightNetworkidle": "error",
-        "noPlaywrightPagePause": "warn",
-        "noPlaywrightUselessAwait": "warn",
-        "noPlaywrightWaitForNavigation": "error",
-        "noPlaywrightWaitForSelector": "warn",
-        "noPlaywrightWaitForTimeout": "warn",
-        "noProto": "error",
-        "noReturnAssign": "error",
-        "noScriptUrl": "error",
-        "noShadow": "error",
-        "useDestructuring": "warn",
-        "useExpect": "warn",
-        "useFind": "error",
-        "usePlaywrightValidDescribeCallback": "error",
-        "useSpread": "error"
-      },
-
-      "performance": {
-        "recommended": false,
-        "noAccumulatingSpread": "warn",
-        "noAwaitInLoops": "error",
-        "useTopLevelRegex": "warn"
-      },
-
-      "security": {
-        "recommended": false,
-        "noBlankTarget": "error",
-        "noDangerouslySetInnerHtml": "warn",
-        "noDangerouslySetInnerHtmlWithChildren": "error",
-        "noGlobalEval": "error"
-      },
-
-      "style": {
-        "recommended": false,
-        "noDescendingSpecificity": "off",
-        "noDoneCallback": "error",
-        "noImplicitBoolean": "off",
-        "noInferrableTypes": "off",
-        "noNamespace": "off",
-        "noNegationElse": "off",
-        "noNestedTernary": "error",
-        "noParameterAssign": "error",
-        "noRestrictedGlobals": {
-          "level": "error",
-          "options": {
-            "deniedGlobals": {
-              "isFinite": "Use Number.isFinite instead. https://github.com/airbnb/javascript#standard-library--isfinite",
-              "isNaN": "Use Number.isNaN instead. https://github.com/airbnb/javascript#standard-library--isnan",
-              "addEventListener": "Use window.addEventListener instead.",
-              "blur": "Use window.blur instead.",
-              "close": "Use window.close instead.",
-              "closed": "Use window.closed instead.",
-              "confirm": "Use window.confirm instead.",
-              "defaultStatus": "Use window.defaultStatus instead.",
-              "defaultstatus": "Use window.defaultstatus instead.",
-              "event": "Use window.event instead.",
-              "external": "Use window.external instead.",
-              "find": "Use window.find instead.",
-              "focus": "Use window.focus instead.",
-              "frameElement": "Use window.frameElement instead.",
-              "frames": "Use window.frames instead.",
-              "history": "Use window.history instead.",
-              "innerHeight": "Use window.innerHeight instead.",
-              "innerWidth": "Use window.innerWidth instead.",
-              "length": "Use window.length instead.",
-              "location": "Use window.location instead.",
-              "locationbar": "Use window.locationbar instead.",
-              "menubar": "Use window.menubar instead.",
-              "moveBy": "Use window.moveBy instead.",
-              "moveTo": "Use window.moveTo instead.",
-              "name": "Use window.name instead.",
-              "onblur": "Use window.onblur instead.",
-              "onerror": "Use window.onerror instead.",
-              "onfocus": "Use window.onfocus instead.",
-              "onload": "Use window.onload instead.",
-              "onresize": "Use window.onresize instead.",
-              "onunload": "Use window.onunload instead.",
-              "open": "Use window.open instead.",
-              "opener": "Use window.opener instead.",
-              "opera": "Use window.opera instead.",
-              "outerHeight": "Use window.outerHeight instead.",
-              "outerWidth": "Use window.outerWidth instead.",
-              "pageXOffset": "Use window.pageXOffset instead.",
-              "pageYOffset": "Use window.pageYOffset instead.",
-              "parent": "Use window.parent instead.",
-              "print": "Use window.print instead.",
-              "removeEventListener": "Use window.removeEventListener instead.",
-              "resizeBy": "Use window.resizeBy instead.",
-              "resizeTo": "Use window.resizeTo instead.",
-              "screen": "Use window.screen instead.",
-              "screenLeft": "Use window.screenLeft instead.",
-              "screenTop": "Use window.screenTop instead.",
-              "screenX": "Use window.screenX instead.",
-              "screenY": "Use window.screenY instead.",
-              "scroll": "Use window.scroll instead.",
-              "scrollbars": "Use window.scrollbars instead.",
-              "scrollBy": "Use window.scrollBy instead.",
-              "scrollTo": "Use window.scrollTo instead.",
-              "scrollX": "Use window.scrollX instead.",
-              "scrollY": "Use window.scrollY instead.",
-              "self": "Use window.self instead.",
-              "status": "Use window.status instead.",
-              "statusbar": "Use window.statusbar instead.",
-              "stop": "Use window.stop instead.",
-              "toolbar": "Use window.toolbar instead.",
-              "top": "Use window.top instead."
-            }
-          }
-        },
-        "noShoutyConstants": "off",
-        "noUnusedTemplateLiteral": "error",
-        "noUselessElse": "error",
-        "useArrayLiterals": "error",
-        "useAsConstAssertion": "off",
-        "useBlockStatements": "off",
-        "useCollapsedElseIf": "error",
-        "useCollapsedIf": "off",
-        "useConst": "error",
-        "useConsistentArrowReturn": "error",
-        "useConsistentBuiltinInstantiation": "error",
-        "useConsistentObjectDefinitions": "warn",
-        "useDefaultParameterLast": "error",
-        "useDefaultSwitchClause": "error",
-        "useExplicitLengthCheck": "error",
-        "useExponentiationOperator": "error",
-        "useForOf": "off",
-        "useFragmentSyntax": "error",
-        "useGroupedAccessorPairs": "error",
-        "useImportType": "off",
-        "useNodejsImportProtocol": "error",
-        "useNumericSeparators": "off",
-        "useObjectSpread": "error",
-        "useSelfClosingElements": "error",
-        "useShorthandAssign": "error",
-        "useSingleVarDeclarator": "error",
-        "useSymbolDescription": "error",
-        "useTemplate": "error",
-        "useThrowOnlyError": "warn"
-      },
-
-      "suspicious": {
-        "recommended": false,
-        "noAlert": "warn",
-        "noBitwiseOperators": "error",
-        "noCatchAssign": "error",
-        "noClassAssign": "error",
-        "noCommentText": "error",
-        "noCompareNegZero": "error",
-        "noConfusingLabels": "error",
-        "noConsole": "warn",
-        "noConstEnum": "error",
-        "noConstantBinaryExpressions": "off",
-        "noControlCharactersInRegex": "error",
-        "noDebugger": "error",
-        "noDoubleEquals": {
-          "level": "error",
-          "options": {
-            "ignoreNull": true
-          }
-        },
-        "noDuplicateAtImportRules": "error",
-        "noDuplicateCase": "error",
-        "noDuplicateClassMembers": "error",
-        "noDuplicateCustomProperties": "error",
-        "noDuplicateElseIf": "error",
-        "noDuplicateFontNames": "error",
-        "noDuplicateJsxProps": "error",
-        "noDuplicateObjectKeys": "error",
-        "noDuplicateParameters": "error",
-        "noDuplicateProperties": "error",
-        "noDuplicateSelectorsKeyframeBlock": "error",
-        "noEmptyBlock": "error",
-        "noEmptyBlockStatements": "warn",
-        "noEmptySource": "error",
-        "noEvolvingTypes": "off",
-        "noExplicitAny": "warn",
-        "noFallthroughSwitchClause": "error",
-        "noFocusedTests": "error",
-        "noFunctionAssign": "error",
-        "noGlobalAssign": "error",
-        "noGlobalIsFinite": "error",
-        "noGlobalIsNan": "error",
-        "noImplicitAnyLet": "off",
-        "noImportAssign": "error",
-        "noImportantInKeyframe": "error",
-        "noIrregularWhitespace": "error",
-        "noLabelVar": "error",
-        "noMisleadingCharacterClass": "error",
-        "noMisleadingInstantiator": "error",
-        "noMisplacedAssertion": "error",
-        "noOctalEscape": "error",
-        "noPrototypeBuiltins": "error",
-        "noRedeclare": "error",
-        "noSelfCompare": "error",
-        "noShadowRestrictedNames": "error",
-        "noShorthandPropertyOverrides": "error",
-        "noSkippedTests": "warn",
-        "noSparseArray": "error",
-        "noTemplateCurlyInString": "error",
-        "noUnknownAtRules": "error",
-        "noUnsafeNegation": "error",
-        "noUnusedExpressions": "error",
-        "noVar": "error",
-        "noWith": "error",
-        "useDefaultSwitchClauseLast": "error",
-        "useGetterReturn": "error",
-        "useGuardForIn": "error",
-        "useIsArray": "error",
-        "useIterableCallbackReturn": "error",
-        "useNamespaceKeyword": "error"
-      }
-    }
-  },
-
-  "overrides": [
-    {
-      "includes": [
-        "**/*.{test,spec}.{js,mjs,cjs,ts,jsx,tsx}",
-        "**/__tests__/**/*.{js,mjs,cjs,ts,jsx,tsx}"
-      ],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off",
-            "noExplicitAny": "off",
-            "noFocusedTests": "error",
-            "noMisplacedAssertion": "error",
-            "noSkippedTests": "warn"
-          },
-          "nursery": {
-            "noConditionalExpect": "error",
-            "useExpect": "warn"
-          }
-        }
-      }
-    },
-
-    {
-      "includes": ["e2e/**/*.{js,mjs,cjs,ts}"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off",
-            "noFocusedTests": "error",
-            "noMisplacedAssertion": "error",
-            "noSkippedTests": "warn"
-          },
-          "performance": {
-            "noAwaitInLoops": "off"
-          },
-          "nursery": {
-            "noConditionalExpect": "warn",
-            "noPlaywrightElementHandle": "warn",
-            "noPlaywrightEval": "warn",
-            "noPlaywrightForceOption": "warn",
-            "noPlaywrightMissingAwait": "error",
-            "noPlaywrightNetworkidle": "error",
-            "noPlaywrightPagePause": "warn",
-            "noPlaywrightUselessAwait": "warn",
-            "noPlaywrightWaitForNavigation": "error",
-            "noPlaywrightWaitForSelector": "warn",
-            "noPlaywrightWaitForTimeout": "warn",
-            "usePlaywrightValidDescribeCallback": "error"
-          }
-        }
-      }
-    },
-
-    {
-      "includes": [
-        "*.config.{js,ts,mjs,cjs}",
-        "**/vite.config.*",
-        "**/vitest.config.*",
-        "**/webpack.config.*",
-        "**/rollup.config.*",
-        "**/eslint.config.*",
-        "**/prettier.config.*",
-        "**/tailwind.config.*",
-        "**/tsup.config.*",
-        "**/tsdown.config.*"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "noDefaultExport": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "**/*.vue"
-      ],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noVueDataObjectDeclaration": "error",
-            "noVueDuplicateKeys": "error",
-            "noVueReservedKeys": "error",
-            "noVueReservedProps": "error",
-            "noVueSetupPropsReactivityLoss": "error"
-          },
-          "nursery": {
-            "noDuplicateAttributes": "error",
-            "noVueArrowFuncInWatch": "error",
-            "noVueVIfWithVFor": "error",
-            "useVueConsistentDefinePropsDeclaration": "warn",
-            "useVueConsistentVBindStyle": "warn",
-            "useVueConsistentVOnStyle": "warn",
-            "useVueDefineMacrosOrder": "warn",
-            "useVueHyphenatedAttributes": "warn",
-            "useVueMultiWordComponentNames": "error",
-            "useVueVForKey": "error",
-            "useVueValidTemplateRoot": "error",
-            "useVueValidVBind": "error",
-            "useVueValidVCloak": "error",
-            "useVueValidVElse": "error",
-            "useVueValidVElseIf": "error",
-            "useVueValidVHtml": "error",
-            "useVueValidVIf": "error",
-            "useVueValidVOn": "error",
-            "useVueValidVOnce": "error",
-            "useVueValidVPre": "error",
-            "useVueValidVText": "error"
-          }
-        }
-      }
-    }
-  ]
-}
-```
 
 ## Commitlint & Conventional Changelog
 
@@ -2333,7 +1768,7 @@ export default Configuration;
 // $ pnpm add lint-staged @biomejs/biome eslint stylelint --save-dev
 export default {
   '**/*.{js,ts,jsx,tsx,vue}': ['biome format --write', 'eslint --fix --cache'],
-  '**/*.{css,scss,sass,tsx,jsx}': ['biome format --write', 'stylelint --fix --cache'],
+  '**/*.{css,scss,sass,less}': ['biome format --write', 'stylelint --fix --cache'],
 };
 ```
 
@@ -2448,7 +1883,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// $ npm install dotenv --save-dev
+// $ pnpm add dotenv --save-dev
 // require('dotenv').config();
 
 /**
@@ -3238,9 +2673,15 @@ deploy_production:
 
 ## Orval
 
+:::info
+[Orval](https://orval.dev/) 是一个根据 OpenAPI/Swagger 规范自动生成 TypeScript 类型定义、 API 客户端代码和 Zod 校验层的工具，可减少手写样板代码并保证类型与后端契约一致。
+
+TypeScript 类型仅保证编译期静态安全，运行时数据可能不符合约定，Zod 则通过在运行时校验并转换接口返回数据，校验失败时可安全降级，且 Schema 与类型同源，确保前后端契约一致。
+:::
+
 <Tabs>
   <TabItem value="orval.config.ts" label="orval.config.ts" default>
-  ```
+  ```ts
   // orval.config.ts
   import { defineConfig } from 'orval';
 
@@ -3248,24 +2689,89 @@ deploy_production:
     api: {
       output: {
         mode: 'tags-split',
-        target: 'src/api/service.ts',
+        target: 'src/api/',
         schemas: 'src/api/model',
         client: 'react-query',
+        httpClient: 'axios',
         mock: true,
         override: {
           mutator: {
-          path: 'src/api/mutator/fetchInstance.ts',
-          name: 'fetchInstance',
+          path: 'src/api/mutator/axiosInstance.ts',
+          name: 'axiosInstance',
         },
+        allParamsOptional: true,
+        urlEncodeParameters: true,
+        indexFiles: true,
+        tagsSplitDeduplication: true,
+        clean: true,
       },
       input: {
-        target: 'https://openapi-v3-specification.exaple.com',
+        target: 'https://openapi-v3-specification.example.com',
+      },
+    },
+    apiZod: {
+      output: {
+        mode: 'tags-split',
+        target: 'src/api/zod',
+        client: 'zod',
+        indexFiles: true,
+        tagsSplitDeduplication: true,
+        clean: true,
+      },
+      input: {
+        target: 'https://openapi-v3-specification.example.com',
       },
     },
   });
    ```
   </TabItem>
-  <TabItem value="fetchInstance.ts" label="fetchInstance.ts">
+  <TabItem value="axiosInstance.ts" label="axiosInstance.ts">
+  ```ts
+  import Axios from 'axios';
+  import type { AxiosRequestConfig, AxiosError } from 'axios';
+
+  export const AXIOS_INSTANCE = Axios.create({
+    baseURL: import.meta.env.BASE_API_URL,
+    adapter: 'fetch'
+  });
+
+  // Request interceptor for auth
+  AXIOS_INSTANCE.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
+
+  // Response interceptor for error handling
+  AXIOS_INSTANCE.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        // Handle unauthorized
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    },
+  );
+
+  export const axiosInstance = <T>(
+    config: AxiosRequestConfig,
+    options?: AxiosRequestConfig,
+  ): Promise<T> => {
+    return AXIOS_INSTANCE({
+      ...config,
+      ...options,
+    }).then(({ data }) => data);
+  };
+
+  export type ErrorType<Error> = AxiosError<Error>;
+  export type BodyType<BodyData> = BodyData;
+  ```
   </TabItem>
 </Tabs>
 

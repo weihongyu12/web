@@ -162,6 +162,12 @@ module.exports = {
 
 [`eslint-plugin-react-perf`](http://github.com/cvazac/eslint-plugin-react-perf) 旨在帮助避免 React 应用中不必要的重新渲染，提升性能。
 
+:::warning[已禁用]
+项目已启用 [React Compiler](https://zh-hans.react.dev/learn/react-compiler)，编译器会在编译期自动对组件内的对象、数组和函数进行记忆化处理，避免不必要的重新渲染。因此 [`eslint-plugin-react-perf`](http://github.com/cvazac/eslint-plugin-react-perf) 已不再需要，配置中已移除该插件。
+
+继续手动使用 `useMemo`/`useCallback` 仅在需要语义层面的引用稳定性（如作为 Hook 依赖项）时才有意义，单纯为避免子组件重渲染而包装的做法已由编译器接管。
+:::
+
 ```js
 // .eslintrc.js
 

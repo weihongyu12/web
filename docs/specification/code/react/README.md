@@ -544,94 +544,15 @@ function BrokenProfile() {
 
 ## 5. 性能优化
 
-### 5.1 避免在 Props 中创建新对象、数组或函数
+:::info[React Compiler 已接管记忆化]
+项目已启用 [React Compiler](https://zh-hans.react.dev/learn/react-compiler)，编译器会在编译期自动对组件内的对象、数组、函数及 JSX 元素进行记忆化，无需再手动使用 `useMemo`/`useCallback` 来避免子组件重新渲染。
 
-在渲染过程中，每次都创建新的对象、数组或函数实例会导致子组件不必要的重新渲染。
-
-#### 5.1.1 对象
-
-:::tip[建议 👍 在组件外部定义或使用 `useMemo`]
-```tsx
-const containerStyle = { padding: '10px' };
-
-function MyComponent() {
-  return <div style={containerStyle}>Content</div>;
-}
-```
+直接在 JSX 中内联对象、数组或函数是安全的，编译器会确保其引用稳定性。`useMemo`/`useCallback` 仅在需要语义层面的引用稳定（如作为其他 Hook 的依赖项、或传递给未经过编译器处理的外部库）时才使用。
 :::
 
-:::tip[建议 👍 使用 `useMemo`]
-```tsx
-import { useMemo } from 'react';
+### 5.1 避免定义不稳定的嵌套组件
 
-function MyComponentWithMemo({ theme }: { theme: { color: string } }) {
-  const memoizedStyle = useMemo(() => ({
-    backgroundColor: theme.color,
-  }), [theme.color]);
-  
-  return <div style={memoizedStyle}>Content</div>;
-}
-```
-:::
-
-:::danger[不建议 👎 每次渲染都创建新对象]
-```tsx
-function MyComponentWithNewObject() {
-  return <div style={{ padding: '10px' }}>Content</div>;
-}
-```
-:::
-
-#### 5.1.2 数组
-
-:::tip[建议 👍]
-```tsx
-const defaultOptions = ['Option 1', 'Option 2'];
-
-function MySelectComponent() {
-  return <Select options={defaultOptions} />;
-}
-```
-:::
-
-:::danger[不建议 👎]
-```tsx
-function MySelectComponentWithNewArray() {
-  return <Select options={['Option 1', 'Option 2']} />;
-}
-```
-:::
-
-#### 5.1.3 函数
-
-使用 `useCallback` 来记忆化函数，或者将函数定义在组件外部。
-
-:::tip[建议 👍 使用 `useCallback`]
-
-```tsx
-import { useCallback } from 'react';
-
-function MyComponent() {
-  const handleClick = useCallback(() => {
-    console.log('Clicked!');
-  }, []);
-
-  return <MyButton onClick={handleClick} />;
-}
-```
-:::
-
-:::danger[不建议 👎 每次渲染都创建新函数]
-```tsx
-function MyComponentWithNewFunction() {
-  return <MyButton onClick={() => console.log('Clicked!')} />;
-}
-```
-:::
-
-### 5.2 避免定义不稳定的嵌套组件
-
-不要在另一个组件的渲染函数内部定义组件。这会导致嵌套组件在每次父组件渲染时都被重新创建，从而丢失其所有状态。
+不要在另一个组件的渲染函数内部定义组件。这会导致嵌套组件在每次父组件渲染时都被重新创建，从而丢失其所有状态。React Compiler 的规则会强制检查此类模式。
 
 :::tip[建议 👍]
 ```tsx

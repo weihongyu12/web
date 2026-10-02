@@ -14,12 +14,12 @@ description: Git 分支管理与提交规范，采用 GitLab Flow 工作流，�
 ```mermaid
 gitGraph
     commit id: "初始开发"
-    branch feature
-    checkout feature
+    branch feat
+    checkout feat
     commit id: "开发新功能"
     commit id: "完成功能"
     checkout main
-    merge feature id: "合并功能到main"
+    merge feat id: "合并功能到main"
     branch pre-production
     checkout pre-production
     commit id: "创建预发布分支"
@@ -32,14 +32,14 @@ gitGraph
     commit id: "标记v1.2.0"
     checkout main
     commit id: "继续开发"
-    branch hotfix
-    checkout hotfix
+    branch fix
+    checkout fix
     commit id: "修复生产问题"
     checkout production
-    merge hotfix id: "紧急修复合并到production"
+    merge fix id: "紧急修复合并到production"
     commit id: "标记v1.2.1"
     checkout main
-    merge hotfix id: "紧急修复同步到main"
+    merge fix id: "紧急修复同步到main"
 ```
 
 #### 持续发布模式分支说明
@@ -49,8 +49,8 @@ gitGraph
 | 分支类型 | 命名规范 | 用途 | 来源 | 生命周期 |
 |---------|---------|------|------|---------|
 | **main** | `main` | 主开发分支，包含最新代码 | - | 项目全周期，受保护 |
-| **feature** | `feature/功能名称` | 开发新功能或特性 | `main` | 短期，完成后删除 |
-| **hotfix** | `hotfix/问题描述` | 修复生产环境紧急问题 | `production` | 短期，修复后删除 |
+| **feature** | `feat/功能名称` | 开发新功能或特性 | `main` | 短期，完成后删除 |
+| **hotfix** | `fix/问题描述` | 修复生产环境紧急问题 | `production` | 短期，修复后删除 |
 | **pre-production** | `pre-production` | 预发布环境，最终测试验证 | `main` | 项目全周期，受保护 |
 | **production** | `production` | 生产环境代码 | `pre-production` | 项目全周期，高度受保护 |
 
@@ -63,14 +63,14 @@ gitGraph
 ```bash
 git checkout main
 git pull origin main  # 确保本地 main 分支最新
-git checkout -b feature/new-login  # 创建功能分支
+git checkout -b feat/new-login  # 创建功能分支
 ```
 
 #### 合并功能分支到 main 分支
 
 ```bash
 git checkout main
-git merge feature/new-login  # 合并功能分支到 main
+git merge feat/new-login  # 合并功能分支到 main
 git push origin main         # 推送更新到远程仓库
 ```
 
@@ -111,19 +111,19 @@ git push origin production --tags
 ```bash
 # 从 production 分支创建热修复分支
 git checkout production
-git checkout -b hotfix/v1.2.1
+git checkout -b fix/v1.2.1
 
 # 修复问题并提交
-echo "紧急修复" >> hotfix.txt
-git add hotfix.txt
+echo "紧急修复" >> fix.txt
+git add fix.txt
 git commit -m "fix: 修复生产环境中的关键登录错误"
 
 # 合并到 production 和 main
 git checkout production
-git merge hotfix/v1.2.1 --no-ff
+git merge fix/v1.2.1 --no-ff
 
 git checkout main
-git merge hotfix/v1.2.1 --no-ff
+git merge fix/v1.2.1 --no-ff
 
 # 打新版本标签（例如 v1.2.1）
 git tag -a v1.2.1 -m "热修复版本 v1.2.1"
@@ -136,12 +136,12 @@ git push origin main
 ```mermaid
 gitGraph
     commit id: "初始开发"
-    branch feature
-    checkout feature
+    branch feat
+    checkout feat
     commit id: "开发新功能"
     commit id: "完成功能"
     checkout main
-    merge feature id: "合并功能到main"
+    merge feat id: "合并功能到main"
     branch v1.2
     checkout v1.2
     commit id: "创建版本分支"
@@ -152,14 +152,14 @@ gitGraph
     checkout main
     commit id: "继续开发"
     checkout v1.2
-    branch bugfix-v1.2
-    checkout bugfix-v1.2
+    branch fix-v1.2
+    checkout fix-v1.2
     commit id: "修复版本问题"
     checkout v1.2
-    merge bugfix-v1.2 id: "合并修复到版本分支"
+    merge fix-v1.2 id: "合并修复到版本分支"
     commit id: "标记v1.2.1"
     checkout main
-    merge bugfix-v1.2 id: "同步修复到main"
+    merge fix-v1.2 id: "同步修复到main"
     commit id: "新功能开发"
     branch v1.3
     checkout v1.3
@@ -175,8 +175,8 @@ gitGraph
 |---------|---------|------|------|---------|
 | **main** | `main` | 主开发分支 | - | 项目全周期 |
 | **版本分支** | `v数字.数字`，如`v1.2` | 特定版本的开发与维护 | `main` | 版本支持期 |
-| **bugfix** | `bugfix/版本-问题描述` | 修复特定版本中的问题 | 对应版本分支 | 短期，完成后删除 |
-| **feature** | `feature/功能名称` | 开发新功能 | `main` | 短期，合并后删除 |
+| **bugfix** | `fix/版本-问题描述` | 修复特定版本中的问题 | 对应版本分支 | 短期，完成后删除 |
+| **feature** | `feat/功能名称` | 开发新功能 | `main` | 短期，合并后删除 |
 
 :::warning
 注意：版本发布模式特别适合需要同时维护多个版本的项目，如桌面应用、SDK或库等。
@@ -222,11 +222,11 @@ git push origin v1.2.0  # 推送标签到远程仓库
 ```bash
 # 从版本分支创建修复分支
 git checkout v1.2
-git checkout -b bugfix/v1.2-login-issue
+git checkout -b fix/v1.2-login-issue
 
 # 修复问题并提交
 git commit -m "fix: 修复v1.2中的用户登录问题"
-git push origin bugfix/v1.2-login-issue
+git push origin fix/v1.2-login-issue
 
 # 创建合并请求到v1.2分支
 # 审核通过后合并到v1.2分支
@@ -301,7 +301,7 @@ cherry-pick的最佳实践：
 
 ```bash
 git checkout main
-git merge bugfix/v1.2-login-issue
+git merge fix/v1.2-login-issue
 git push origin main
 ```
 

@@ -303,6 +303,60 @@ function UserDetail({ userId }: UserDetailProps) {
 export default UserDetail;
 ```
 
+## 🌐 静态资源容灾
+
+接口容灾只能保证“数据可达”，一旦 CDN 上的 JS/CSS/图片加载失败，页面依然会白屏或样式丢失。静态资源的重试与域名降级通过构建插件 [@rsbuild/plugin-assets-retry](https://github.com/rstackjs/rsbuild-plugin-assets-retry) 实现：构建时向 HTML 与 Rspack Runtime 注入一段运行时代码，监听资源加载错误事件，失败后自动重建标签重试，并按配置依次切换备用 CDN 域名，与接口侧的“主域名 -> 备用域名”策略形成完整的容灾闭环。
+
+```ts
+// rsbuild.config.ts
+// pnpm add @rsbuild/plugin-assets-retry -D
+import { pluginAssetsRetry } from '@rsbuild/plugin-assets-retry';
+
+export default defineConfig({
+  plugins: [
+    pluginAssetsRetry({
+      // 仅处理 CDN 资源
+      test: /cdn\.example\.com/,
+      // 第一个为默认域名，其余为备用域名，失败时依次降级
+      domain: ['cdn1.example.com', 'cdn2.example.com'],
+      // 单个资源最大重试次数
+      max: 3,
+      // 重试延迟，可按次数递增
+      delay: (ctx) => ctx.times * 1000,
+      // 重试时追加 query，避免浏览器/CDN 缓存干扰重试结果
+      addQuery: true,
+      // 全部失败后的兜底回调，用于监控上报
+      // 注意：回调会被序列化内联进 HTML，只能使用函数内部自包含的逻辑
+      onFail: ({ url, tagName }) => {
+        navigator.sendBeacon('/api/monitor/asset-error', JSON.stringify({ url, tagName }));
+      },
+    }),
+  ],
+  output: {
+    assetPrefix: 'https://cdn1.example.com',
+  },
+});
+```
+
+配合 `rules` 选项可为不同类型资源配置差异化策略，例如核心 JS 多次重试、图片快速放弃：
+
+```ts
+pluginAssetsRetry({
+  rules: [
+    { type: ['script'], max: 5, delay: 1000 },
+    { test: /\.css$/, max: 2, delay: 500 },
+    { test: /\.(png|jpe?g|gif|svg|webp|avif)$/, max: 1 },
+  ],
+});
+```
+
+限制与注意：
+
+- **仅重试 async/defer 脚本：** 同步 `<script src>` 重试无法保证执行顺序，插件不做处理。
+- **禁止敏感信息与外部引用：** 配置会被序列化注入 HTML，`onRetry`/`onSuccess`/`onFail` 中禁止放入 Token，也禁止引用函数外部的变量或方法。
+- **运行时代码保持内联：** 保持 `inlineScript: true`（默认）。抽成独立文件后，该文件自身加载失败会导致重试机制整体失效。
+- **Module Federation 场景：** 远程模块的静态资源重试需使用 [@module-federation/retry-plugin](https://www.npmjs.com/package/@module-federation/retry-plugin)。
+
 ## 📖 典型应用场景
 
 - 🛒 **电商平台：** 主服务器故障或大促限流时，优先展示 IndexedDB 中缓存的商品列表，避免用户看到空白页面，挽回交易转化率。
