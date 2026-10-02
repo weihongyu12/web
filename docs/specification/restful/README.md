@@ -511,8 +511,8 @@ interface Error {
 
 | Methods | URL                                  | 说明         | 状态码      | 响应           |
 |---------|--------------------------------------|------------|----------|--------------|
-| `GET`   | `/api/product`                       | 查询所有数据     | `200 OK` | `Object[]`   |
-| `GET`   | `/api/product?keyword=IC65`          | 带查询参数，查询数据 | `200 OK` | `Object[]`   |
+| `GET`   | `/api/product`                       | 查询列表数据     | `200 OK` | `Pagination` |
+| `GET`   | `/api/product?keyword=IC65`          | 带查询参数，查询数据 | `200 OK` | `Pagination` |
 | `GET`   | `/api/product?page=0&size=20`        | 带分页参数，查询数据 | `200 OK` | `Pagination` |
 | `GET`   | `/api/product/2AE6RZd9wnmNdv7DLn0bd` | 查询指定详情数据   | `200 OK` | `Object`     |
 
@@ -536,16 +536,26 @@ interface Pagination {
 
 ##### 分页
 
-| 参数     | 说明                                    | 示例                 |
-|--------|---------------------------------------|--------------------|
-| `page` | 指定第几页，需要与`size`搭配使用，从 `0` 开始          | `?page=2&size=100` |
-| `size` | 指定每页的记录数，需要与`page`搭配使用，**如不传此参数则不分页** | `?page=2&size=100` |
+| 参数     | 说明                           | 示例                 |
+|--------|------------------------------|--------------------|
+| `page` | 指定第几页，从 `0` 开始，不传时默认为 `0` | `?page=2&size=100` |
+| `size` | 指定每页的记录数，不传时使用默认值           | `?page=2&size=100` |
+
+`page` 与 `size` 不必须同时携带，未携带的参数使用默认值。
 
 ```:no-line-numbers
 GET /api/product?page=0&size=100  # 查询第 1 页数据，每页 100 条
 GET /api/product?page=2&size=100  # 查询第 3 页数据，每页 100 条
-GET /api/product                  # 查询所有数据
+GET /api/product                  # 使用默认分页参数查询列表数据
 ```
+
+:::note[参数边界修正]
+以下场景统一由**后端**修正，前端无需修正：
+
+- `page` 小于 `0`：后端修正为第 `1` 页（`page=0`）
+- `page` 大于总页数：后端直接返回最后一页数据
+- `size` 应限定最小值和最大值（如 `1` ~ `100`），小于最小值时以最小值处理，大于最大值时以最大值处理
+:::
 
 ##### 排序
 
@@ -557,18 +567,6 @@ GET /api/product                  # 查询所有数据
 ```:no-line-numbers
 GET /api/product?sortby=createdAt&order=asc   # 按 createdAt 字段升序排序
 GET /api/product?sortby=updatedAt&order=desc  # 按 updatedAt 字段降序排序
-```
-
-##### 限制查询条数
-
-| 参数       | 说明          | 示例           |
-|----------|-------------|--------------|
-| `limit`  | 指定返回记录的数量   | `?limit=10`  |
-| `offset` | 指定返回记录的开始位置 | `?offset=10` |
-
-```:no-line-numbers
-GET /api/product?limit=10            # 查询 10 条数据
-GET /api/product?limit=10&offset=10  # 查询 10 条数据，从第 10 条开始查询
 ```
 
 ##### 全文搜索
@@ -676,7 +674,7 @@ fetch(url, {
 
 ### 查询类接口响应格式
 
-#### 列表查询（分页）
+#### 列表查询
 
 ```json
 {
@@ -701,27 +699,6 @@ fetch(url, {
     "total": 10086
   }
 }
-```
-
-#### 列表查询（不分页）
-
-```json
-[
-  {
-    "id": "PrJ38xvJd5gLwrBxO9Y1A",
-    "name": "极狐阿尔法S5",
-    "stock": 10,
-    "status": "sale",
-    "createdAt": "2022-07-04T13:03:06+08:00"
-  },
-  {
-    "id": "V0WJa4X26eygvwLZl9pom",
-    "name": "极狐阿尔法T5",
-    "stock": 10,
-    "status": "inquiry",
-    "createdAt": "2022-07-04T13:03:06+08:00"
-  }
-]
 ```
 
 #### 单条查询
@@ -920,13 +897,13 @@ POST /api/user?username=tarzan&password=5wlvu%2BYe7TC33MT3VKxU6neaTpPk5EvfuGs%2B
 | Methods  | URL                                                            | 说明     | 状态码              | 响应  |
 |----------|----------------------------------------------------------------|--------|------------------|-----|
 | `DELETE` | `/api/product/dLEM04mVQavML57x8GV3q`                           | 删除单条数据 | `204 No Content` |     |
-| `DELETE` | `/api/product?ids=dLEM04mVQavML57x8GV3q,W0dpVxlO6dlnQwb4Pav5q` | 批量删除数据 | `204 No Content` |     |
+| `DELETE` | `/api/product?ids=dLEM04mVQavML57x8GV3q&ids=W0dpVxlO6dlnQwb4Pav5q` | 批量删除数据 | `204 No Content` |     |
 
 **删除接口应酌情提供批量删除**
 
 例如 `DELETE /api/product/1` 表示删除 id 为 1 的数据
 
-例如 `DELETE /api/product?ids=1,2,3` 表示批量删除 id 为 1 或 2 或 3 的数据
+例如 `DELETE /api/product?ids=1&ids=2&ids=3` 表示批量删除 id 为 1 或 2 或 3 的数据
 
 ## 文件类接口
 
