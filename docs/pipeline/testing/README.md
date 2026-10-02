@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-description: 前端测试体系，基于 Jest、Vitest、Testing Library 与 Playwright 的统一测试工具栈
+description: 前端测试体系，基于 Vitest、Testing Library 与 Playwright 的统一测试工具栈
 ---
 
 # 测试
@@ -13,7 +13,7 @@ description: 前端测试体系，基于 Jest、Vitest、Testing Library 与 Pla
 
 | 测试环节 | Next.js / React 生态 | Vue 生态 | 工具定位说明                                |
 |---------|---------------------|---------|---------------------------------------|
-| 单元测试 | [Jest](https://jestjs.io/zh-Hans/) | [Vitest](https://cn.vitest.dev/) | **极速反馈层：** 用于纯逻辑、工具函数、Hooks 的测试       |
+| 单元测试 | [Vitest](https://cn.vitest.dev/) | [Vitest](https://cn.vitest.dev/) | **极速反馈层：** 用于纯逻辑、工具函数、Hooks 的测试       |
 | 组件测试 | [React Testing Library](https://testing-library.com/) | [Vue Test Utils](https://test-utils.vuejs.org/zh/) | **UI 交互层：** 关注组件的 DOM 渲染与用户行为，不测实现细节  |
 | 集成/Mock | [MSW](https://mswjs.io/) + [Faker](https://fakerjs.dev/) | [MSW](https://mswjs.io/) + [Faker](https://fakerjs.dev/) | **数据拦截层：** 拦截真实网络请求，返回随机伪造数据，实现前后端解耦  |
 | E2E 测试 | [Playwright](https://playwright.dev/) | [Playwright](https://playwright.dev/) | **系统验证层：** 跨浏览器的真实用户场景模拟（高度侧重 UI 的验证） |
@@ -32,7 +32,7 @@ description: 前端测试体系，基于 Jest、Vitest、Testing Library 与 Pla
 
 实际操作时，应先明确 API 接口协议，编写对应的 MSW Handlers 拦截目标路由，随后利用 Faker.js 动态填充响应体的各种边界状态（如快乐路径、荒凉路径等）。这样一来，前端开发与测试将不再受制于后端接口的交付进度，集成测试也随之拥有了绝对可控的数据源。
 
-### 3. 编写与运行单测/组件测 (Jest / Vitest)
+### 3. 编写与运行单测/组件测 (Vitest)
 
 在开发业务逻辑时，遵循 **AAA (Arrange, Act, Assert)** 模式来编写测试：
 
@@ -51,7 +51,7 @@ description: 前端测试体系，基于 Jest、Vitest、Testing Library 与 Pla
 为了防止将破坏性的代码推送到远程仓库，通过 Husky + lint-staged 在本地提交时设置卡点。
 
 - **Lint 校验：** 对暂存区代码运行 ESLint。
-- **相关性测试运行：** 自动运行受当前提交文件影响的单元测试（例如 Jest 的 `--findRelatedTests` 或 Vitest 的 `vitest run --changed` 功能）。
+- **相关性测试运行：** 自动运行受当前提交文件影响的单元测试（例如 Vitest 的 `vitest run --changed` 功能）。
 - **卡点规则：** 仅当上述静态分析和受影响的单测全部通过时，才允许生成 commit。
 
 ## 阶段三：CI/CD 持续集成流水线 (Pipeline)
@@ -63,7 +63,7 @@ graph TD
     A["代码推送到远程 (Push/PR)"] --> B(依赖安装 Install)
     B --> C{"并行阶段 1：静态扫描与单测"}
     C -->|极快| D[Lint & Type Check]
-    C -->|快| E["单元与组件测试 (Jest/Vitest)"]
+    C -->|快| E["单元与组件测试 (Vitest)"]
     D --> F{"并行阶段 2：集成与构建"}
     E --> F
     F -->|中等| G[构建打包 Build]
@@ -79,7 +79,7 @@ graph TD
 ### 1. 并行质量门禁 (Quality Gates)
 
 - **静态检查 & 类型检查：** 全局运行 ESLint 及 TypeScript `tsc --noEmit`。
-- **单元测试/组件测试：** 执行全量的 Jest / Vitest 测试套件。这部分因为环境轻量（基于 JSDOM），通常会在 1~2 分钟内完成。
+- **单元测试/组件测试：** 执行全量的 Vitest 测试套件。这部分因为环境轻量（基于 JSDOM），通常会在 1~2 分钟内完成。
 - **覆盖率检查：** 收集代码覆盖率（Coverage）。通常以语句覆盖率（Statement coverage）作为基准，若低于项目设定的阈值（如 70%），流水线将直接阻断并报错。
 
 ### 2. 生产环境模拟构建 (Build)

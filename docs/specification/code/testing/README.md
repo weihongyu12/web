@@ -22,9 +22,13 @@ import TOCInline from '@theme/TOCInline';
 - Promises: Promise 的最后必须有 `.catch()` 或 `return`。避免在 `finally` 中返回值。
 - 正则表达式: 编写清晰、高效且无歧义的正则表达式，避免使用可能导致性能问题的模式。
 
-## 2. Jest (单元/集成测试)
+## 2. Vitest (单元/集成测试)
 
-Jest 是我们进行单元测试和集成测试的基础框架。以下规范确保测试用例的一致性和可靠性。
+Vitest 是我们进行单元测试和集成测试的基础框架，其 API 与 Jest 高度兼容，并由 Vite 驱动。以下规范确保测试用例的一致性和可靠性。
+
+:::tip
+推荐在测试文件中显式导入测试 API（如 `import { describe, it, expect, vi } from 'vitest'`），以获得更好的类型提示与 IDE 支持；若在 `vitest.config.ts` 中开启了 `globals: true`，也可以直接使用全局 API。
+:::
 
 ### 测试结构
 
@@ -34,6 +38,8 @@ Jest 是我们进行单元测试和集成测试的基础框架。以下规范确
 
 :::tip[建议 👍]
 ```ts
+import { describe, it, expect } from 'vitest';
+
 describe('sum', () => {
   it('should return the sum of two numbers', () => {
     expect(sum(1, 2)).toBe(3);
@@ -210,7 +216,7 @@ it('should resolve with data', () => {
 - 禁止使用 `test.only` 或 `describe.only`。
 - 禁止使用 `test.skip` 或 `describe.skip` 来禁用测试，除非有明确的临时理由。
 - 禁止使用被注释掉的测试代码。
-- 禁止使用 Jasmine 的全局变量，如 `fail`, `pending`, `spyOn`。
+- 禁止使用 Jasmine 的遗留全局变量，如 `fail`、`pending`；需要侦听函数时使用 `vi.spyOn()`。
 - 禁止使用别名方法，如 `toBeCalled()` 而不是 `toHaveBeenCalled()`。
 
 #### 2.10 避免在测试逻辑中使用条件语句
@@ -266,9 +272,48 @@ it('works with done', (done) => { // 避免
 ```
 :::
 
+#### 2.12 使用 `vi` API 进行 Mock
+
+Vitest 的 Mock 能力统一由 `vi` 对象提供（对应 Jest 中的 `jest` 对象）。
+
+:::tip[建议 👍]
+```ts
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock 函数
+const fn = vi.fn().mockReturnValue(42);
+
+// 侦听已有对象的方法
+vi.spyOn(console, 'log').mockImplementation(() => {});
+
+// Mock 模块（会被提升（hoist）到文件顶部执行）
+vi.mock('./user', () => ({
+  getUser: vi.fn().mockResolvedValue({ id: 1, name: 'John Doe' }),
+}));
+```
+:::
+
+:::danger[不建议 👎]
+```ts
+// 错误：使用 Jest 风格的 jest 对象
+jest.mock('./user');
+const fn = jest.fn();
+```
+:::
+
+为避免测试用例之间相互污染，应在 `afterEach` 中重置 Mock 状态：
+
+```ts
+import { afterEach, vi } from 'vitest';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+```
+
 ## 3. React Testing Library (组件测试)
 
-React Testing Library (RTL) 鼓励我们像用户一样测试组件。
+React Testing Library (RTL) 鼓励我们像用户一样测试组件。通过在 setup 文件中引入 `@testing-library/jest-dom/vitest`，可以使用 `toBeInTheDocument()` 等 DOM 断言匹配器。
 
 ### 查询元素
 
@@ -415,7 +460,7 @@ const element = container.querySelector('.my-class > span');
 
 #### 3.9 避免手动调用 `cleanup`
 
-RTL 会在每个测试用例结束后自动清理 DOM，无需手动调用 `cleanup()`。
+RTL 会在每个测试用例结束后自动清理 DOM，无需手动调用 `cleanup()`。该机制依赖全局的 `afterEach` 钩子——在 Vitest 中需开启 `globals: true`，否则应在 setup 文件中手动注册 `cleanup()`。
 
 #### 3.10 避免使用调试工具
 
@@ -429,7 +474,7 @@ Playwright 用于端到端（E2E）测试，模拟真实用户在浏览器中的
 
 #### 4.1 测试标题必须清晰、唯一
 
-与 Jest 类似，`test` 和 `describe` 的标题应为静态字符串，清晰描述测试场景。
+与单元测试规范一致，`test` 和 `describe` 的标题应为静态字符串，清晰描述测试场景。
 
 :::tip[建议 👍]
 ```ts

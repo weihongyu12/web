@@ -53,8 +53,8 @@ lint 解决的其实是一个团队协作问题。每个人写代码都有自己
 
 | Job | 工具 | 触发条件 |
 |-----|------|---------|
-| `unit tests` | Jest / Vitest | 每次 Pipeline |
-| `coverage tests` | Jest / Vitest（coverage 模式） | 每次 Pipeline，并上报覆盖率 |
+| `unit tests` | Vitest | 每次 Pipeline |
+| `coverage tests` | Vitest（coverage 模式） | 每次 Pipeline，并上报覆盖率 |
 | `e2e tests` | Playwright | 仅在 MR 和默认分支上触发 |
 
 单元测试每次 Pipeline 都跑，好处是回归问题会立刻被发现，不会攒到下个迭代再集中爆出来。覆盖率数据上报到 GitLab 后，在 MR 页面可以直接看到这次改动有没有把覆盖率带下去，是个很自然的提醒机制。

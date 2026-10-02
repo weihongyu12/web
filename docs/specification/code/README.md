@@ -38,4 +38,4 @@ description: 前端代码规范指南，提供统一的编码标准与最佳实�
 
 ## [测试代码规范](/web/docs/specification/code/testing/)
 
-本规范旨在为前端团队提供一套统一的测试代码编写标准，覆盖了 Jest（单元/集成测试）、React Testing Library（组件测试）和 Playwright（E2E 测试），以提高测试质量和可维护性。
+本规范旨在为前端团队提供一套统一的测试代码编写标准，覆盖了 Vitest（单元/集成测试）、React Testing Library（组件测试）和 Playwright（E2E 测试），以提高测试质量和可维护性。

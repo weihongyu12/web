@@ -29,7 +29,7 @@ project/
 ├── .gitlab-ci.yml
 ├── .lighthouserc.js
 ├── commitlint.config.js
-├── jest.config.js
+├── vitest.config.ts
 ├── package.json
 ├── package-lock.json
 ├── stylelint.config.js
@@ -52,7 +52,7 @@ project/
 - `.lighthouserc.js`：lighthouse 检查配置，在 CI 环境下运行
 - `commitlint.config.js`：commitlint 配置
 - `lint-staged.config.js`：lint-staged 配置
-- `jest.config.js`：Jest 配置
+- `vitest.config.ts`：Vitest 配置
 - `package.json`
 - `pnpm-lock.yaml`
 - `stylelint.config.js`：stylelint 配置

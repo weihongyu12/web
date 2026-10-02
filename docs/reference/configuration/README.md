@@ -32,8 +32,8 @@ import TOCInline from '@theme/TOCInline';
     "fix:js": "eslint . --cache --fix",
     "fix:css": "stylelint . --cache --fix",
     "test": "run-p test:unit test:e2e",
-    "test:unit": "jest",
-    "test:coverage": "jest --coverage",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "styleguidist": "styleguidist server",
     "styleguidist:build": "styleguidist build",
@@ -117,7 +117,6 @@ import TOCInline from '@theme/TOCInline';
     },
     "include": [
       "*.config.{js,ts,mjs,cjs}",
-      "**/jest.config.*",
       "**/vite.config.*",
       "**/vitest.config.*",
       "**/webpack.config.*",
@@ -142,8 +141,7 @@ import TOCInline from '@theme/TOCInline';
       "noImplicitAny": true,
       "types": [
         "node",
-        "jest",
-        "jsdom",
+        "vitest/globals",
         "@testing-library/jest-dom",
         "@playwright/test"
       ],
@@ -161,7 +159,7 @@ import TOCInline from '@theme/TOCInline';
       "src/setupTests.ts",
       "e2e/**/*.ts",
       "e2e/**/*.spec.ts",
-      "jest.config.ts"
+      "vitest.config.ts"
     ],
     "exclude": ["node_modules", "dist", "coverage"]
   }
@@ -1513,7 +1511,7 @@ const nodeConfig = defineConfig([
     files: [
       'babel.config.cjs',
       'rspack.config.ts',
-      'jest.config.ts',
+      'vitest.config.ts',
       '*.config.js',
       '*.config.ts',
       '*.config.mjs',
@@ -1639,16 +1637,15 @@ module.exports = {
 };
 ```
   </TabItem>
-  <TabItem value="jest" label="Jest">
+  <TabItem value="vitest" label="Vitest">
 ```js
 // .eslintrc.js
-// 继承于主项目规则，仅用于 Jest 单元测试
+// 继承于主项目规则，仅用于 Vitest 单元测试
 
 module.exports = {
-  // $ pnpm add -D eslint-plugin-jest eslint-plugin-testing-library
+  // $ pnpm add -D @vitest/eslint-plugin eslint-plugin-testing-library
   extends: [
-    'plugin:jest/recommended',
-    'plugin:jest/style',
+    'plugin:@vitest/legacy-recommended',
     // 根据项目框架，选择 React/Vue
     'plugin:testing-library/react',
     // 'plugin:testing-library/vue',
@@ -2244,7 +2241,6 @@ Biome 作为一个相对较新的工具，虽然在性能和功能上有很多�
     {
       "includes": [
         "*.config.{js,ts,mjs,cjs}",
-        "**/jest.config.*",
         "**/vite.config.*",
         "**/vitest.config.*",
         "**/webpack.config.*",
@@ -2382,111 +2378,62 @@ last 1 safari version
 支持的浏览器列表可通过访问 [https://browsersl.ist/](https://browsersl.ist/) 查看
 :::
 
-## Jest
+## Vitest
 
 :::tip
-[https://jestjs.io/docs/zh-Hans/configuration](https://jestjs.io/docs/zh-Hans/configuration)
+[https://cn.vitest.dev/config/](https://cn.vitest.dev/config/)
 :::
 
 <Tabs>
-  <TabItem value="jest.config.ts" label="jest.config.ts" default>
+  <TabItem value="vitest.config.ts" label="vitest.config.ts" default>
   ```ts
-  // jest.config.ts
+  // vitest.config.ts
 
-  // $ pnpm add jest @types/jest ts-jest identity-obj-proxy --save-dev
-  import type { Config } from 'jest';
+  // $ pnpm add vitest jsdom @vitejs/plugin-react @vitest/coverage-v8 --save-dev
+  import { defineConfig } from 'vitest/config';
+  import react from '@vitejs/plugin-react';
 
-  const config: Config = {
-    preset: 'ts-jest',
-    testEnvironment: 'jsdom',
-    roots: [
-      '<rootDir>/src',
-    ],
-    collectCoverageFrom: [
-      'src/**/*.{js,jsx,ts,tsx}',
-      '!src/**/*.d.ts',
-    ],
-    setupFilesAfterEnv: [
-      '<rootDir>/src/setupTests.ts',
-    ],
-    testMatch: [
-      '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
-      '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
-    ],
-    transform: {
-      '^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
+  export default defineConfig({
+    plugins: [react()],
+    test: {
+      environment: 'jsdom',
+      // 开启后可直接使用 describe/it/expect 等全局 API，需在 tsconfig 中引入 vitest/globals 类型
+      globals: true,
+      setupFiles: ['./src/setupTests.ts'],
+      include: [
+        'src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+        'src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+      ],
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{js,jsx,ts,tsx}'],
+        exclude: ['src/**/*.d.ts'],
+      },
     },
-    transformIgnorePatterns: [
-      '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
-    ],
-    modulePaths: [],
-    moduleNameMapper: {
-      '^react-native$': 'react-native-web',
-      '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
-      '^@/(.*)$': '<rootDir>/src/$1',
-      '^.+\\.css$': '<rootDir>/src/__mocks__/styleMock.js',
-      '^.+\\.svg$': '<rootDir>/src/__mocks__/svgMock.jsx',
-      '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico)$': '<rootDir>/src/__mocks__/fileMock.js',
-      '^.+\\.(woff|woff2|eot|otf)$': '<rootDir>/src/__mocks__/fileMock.js',
-      '^.+\\.(mp3|wav|ogg|flac|aac)$': '<rootDir>/src/__mocks__/fileMock.js',
-      '^.+\\.(mp4|webm|mov|avi|mkv|ogv)$': '<rootDir>/src/__mocks__/fileMock.js',
+    resolve: {
+      alias: {
+        '@': '/src',
+      },
     },
-    moduleFileExtensions: [
-      'web.js',
-      'js',
-      'web.ts',
-      'ts',
-      'web.tsx',
-      'tsx',
-      'json',
-      'web.jsx',
-      'jsx',
-      'node',
-    ],
-    resetMocks: true,
-  };
-
-  export default config;
+  });
   ```
   </TabItem>
   <TabItem value="setupTests" label="setupTests">
   ```ts
-  // jest-dom adds custom jest matchers for asserting on DOM nodes.
-  // allows you to do things like:
+  // 为 DOM 节点添加自定义断言匹配器（matchers），
+  // 允许你编写如下断言：
   // expect(element).toHaveTextContent(/react/i)
-  // learn more: https://github.com/testing-library/jest-dom
-  
+  // 了解更多：https://github.com/testing-library/jest-dom
+
   // $ pnpm add @testing-library/jest-dom @testing-library/react @testing-library/user-event --save-dev
-  import '@testing-library/jest-dom';
-  ```
-  </TabItem>
-  <TabItem value="styleMock.js" label="styleMock.js">
-  ```js
-  module.exports = {};
-  ```
-  </TabItem>
-  <TabItem value="fileMock.js" label="fileMock.js">
-  ```js
-  module.exports = 'test-file-stub';
-  ```
-  </TabItem>
-  <TabItem value="svgMock.jsx" label="svgMock.jsx">
-  ```jsx
-  const React = require('react');
-
-  const SvgMock = React.forwardRef((props, ref) => (
-    React.createElement('svg', { ref, ...props })
-  ));
-
-  SvgMock.displayName = 'SvgMock';
-
-  module.exports = {
-    ReactComponent: SvgMock,
-    default: 'svg-stub',
-  };
+  import '@testing-library/jest-dom/vitest';
   ```
   </TabItem>
 </Tabs>
+
+:::info
+与 Jest 不同，Vitest 由 Vite 驱动，CSS、CSS Modules、图片、字体、SVG 等静态资源由 Vite 原生处理，无需配置 `moduleNameMapper` 及各类资源 mock 文件。
+:::
 
 ## Playwright
 

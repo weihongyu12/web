@@ -34,7 +34,7 @@ import TOCInline from '@theme/TOCInline';
 单元测试是一种测试类型，用于将应用程序中较小的可测试部分或单元进行独立测试，以验证操作是否正确。这些单元的范围可以从函数、类或接口，一直延伸到服务或完整的组件。主要特点是：执行速度快、相互隔离、易于维护。
 
 :::info
-单元测试的工具包括但不限于 [Vitest](https://cn.vitest.dev/) 和 [Jest](https://jestjs.io/zh-Hans/)。
+单元测试的工具包括但不限于 [Vitest](https://cn.vitest.dev/)。
 :::
 
 #### 集成测试（Integration testing）
