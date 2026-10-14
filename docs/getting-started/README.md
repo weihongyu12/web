@@ -187,6 +187,7 @@ description: 前端架构指南与总览，涵盖 Next.js、React、Vue 等多�
 | [qs](https://github.com/ljharb/qs)                                               | 序列化和反序列化 querystring                                                               |
 | [socket.io-client](https://socket.io/)                                           | WebSocket 客户端库，用于实现实时双向通信                                                          |
 | [uuid](https://github.com/uuidjs/uuid)                                           | 通用唯一标识符生成器，用于生成符合 RFC4122 标准的 UUID                                                 |
+| [video.js](https://videojs.org/)                                                 | HTML5 视频播放器框架，用于在网页中嵌入和播放视频，支持自定义皮肤、插件扩展和多种流媒体格式                                      |
 | [xlsx](https://docs.sheetjs.com/)                                                | Excel 文件读写库，支持多种表格格式的解析和生成                                                         |
 | [xstate](https://stately.ai/docs)                                                | 状态机和状态图库，用于管理复杂的应用状态逻辑                                                             |
 | [zod](https://zod.dev/)                                                          | 数据验证库，用于验证、转换数据结构                                                                  |
