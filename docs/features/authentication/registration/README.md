@@ -5,43 +5,41 @@ description: 用户注册系统，采用自动注册优先策略，支持手机�
 
 # 用户注册
 
-用户注册系统采用**自动注册优先**的策略，提供最便捷的注册体验。系统支持手机验证码登录和微信登录时的自动账户创建，同时保留传统邮箱注册作为备选方案。
+用户注册采用**自动注册优先**策略：支持手机验证码登录和微信登录时的自动账户创建，保留传统邮箱注册作为备选方案。
 
 ## 核心策略
 
-### 🎯 自动注册（优先）
+### 自动注册（优先）
 
 - **手机验证码登录**：首次使用自动创建账户，无需额外注册步骤
 - **微信登录**：一键登录并自动创建账户，获取微信头像和昵称
-- **无缝体验**：无需区分登录和注册，系统智能处理
+- **无缝体验**：无需区分登录和注册，由系统自动处理
 
-### 📧 邮箱注册（备选）
+### 邮箱注册（备选）
 
 - **传统方式**：为需要明确密码管理的用户提供邮箱注册选项
-- **极简表单**：遵循 Web 最佳实践，摒弃冗余的确认密码字段
-- **完整功能**：支持智能表单验证、密码强度实时检测、凭据自动保存等完整功能
+- **极简表单**：不设确认密码字段，通过“显示密码”切换代替
+- **完整功能**：支持表单验证、密码强度实时检测、凭据自动保存
 
 ## 推荐注册流程
 
 ### 1. 手机验证码登录（推荐）
 
-- ✅ 无需记忆密码
-- ✅ 验证码直接登录（支持 `autocomplete="one-time-code"` 自动读取） 
-- ✅ 首次使用自动创建账户
-- ✅ 快速便捷，适合所有用户
+- 无需记忆密码
+- 验证码直接登录（支持 `autoComplete="one-time-code"` 自动读取）
+- 首次使用自动创建账户
 
 ### 2. 微信登录（移动端推荐）
 
-- ✅ 一键授权登录
-- ✅ 自动获取头像昵称
-- ✅ 首次使用自动创建账户
-- ✅ 适合微信生态用户
+- 一键授权登录
+- 自动获取头像昵称
+- 首次使用自动创建账户
+- 适合微信生态用户
 
 ### 3. 邮箱注册（传统方式）
 
-- 📝 需要设置和记忆密码
-- 📝 适合需要明确账户管理的用户
-- 📝 遵循最佳实践的高转化率表单设计
+- 需要设置和记忆密码
+- 适合需要明确账户管理的用户
 
 ## 交互流程设计
 
@@ -52,10 +50,9 @@ flowchart TD
     B -->|移动端推荐| D[微信登录]
     B -->|传统方式| E[邮箱注册]
     C --> F[首次使用自动注册]
-    D --> G[首次使用自动注册]
+    D --> F
     E --> H[填写邮箱和密码]
     F --> I[登录成功]
-    G --> I
     H --> J[提交注册信息]
     J --> K[注册验证成功]
     K --> I
@@ -65,7 +62,6 @@ flowchart TD
     style C fill:#e8f5e8
     style D fill:#e8f5e8
     style F fill:#fff3e0
-    style G fill:#fff3e0
     style I fill:#e3f2fd
     style N fill:#e3f2fd
 ```
@@ -190,7 +186,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-// 优化：移除了冗余的 confirmPassword 字段验证
+const passwordTester = new PasswordStrength();
+
 const registrationSchema = z.object({
   email: z.string().email('请输入有效的邮箱地址'),
   password: z
@@ -199,12 +196,8 @@ const registrationSchema = z.object({
     .max(32, '密码最多 32 位')
     .refine(
       (password) => {
-        const passwordStrength = new PasswordStrength();
-        const result = passwordStrength.check(password);
-
-        return (
-          result.strengthCode !== 'WEAK' && result.strengthCode !== 'VERY_WEAK'
-        );
+        const result = passwordTester.check(password);
+        return result.strengthCode !== 'WEAK' && result.strengthCode !== 'VERY_WEAK';
       },
       { message: '密码强度过弱，请增加大小写字母、数字或符号' },
     ),
@@ -259,8 +252,7 @@ const STRENGTH_LABELS: Record<Exclude<StrengthKey, null>, string> = {
 const getPasswordStrengthKey = (password: string): StrengthKey => {
   if (!password) return 'none';
 
-  const tester = new PasswordStrength();
-  const result = tester.check(password);
+  const result = passwordTester.check(password);
 
   switch (result.strengthCode) {
     case 'VERY_STRONG':
@@ -277,7 +269,6 @@ const getPasswordStrengthKey = (password: string): StrengthKey => {
 
 function RegistrationForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegistrationData>({
     resolver: zodResolver(registrationSchema),
@@ -294,23 +285,7 @@ function RegistrationForm() {
     [watchPassword],
   );
 
-  const handleSubmitSuccess = async (data: RegistrationData) => {
-    // 最佳实践：利用 Credential Management API 自动保存凭据
-    if ('credentials' in navigator) {
-      try {
-        const cred = new PasswordCredential({
-          id: data.email,
-          password: data.password,
-        });
-        await navigator.credentials.store(cred);
-      } catch (err) {
-        console.error('保存凭据失败:', err);
-      }
-    }
-  };
-
   const onSubmit = async (data: RegistrationData) => {
-    setIsSubmitting(true);
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -328,20 +303,29 @@ function RegistrationForm() {
 
       const result = await response.json();
 
-      if (result.success) {
-        await handleSubmitSuccess(data);
-        localStorage.setItem('auth_token', result.token);
-        window.location.href = '/dashboard?welcome=true';
-      } else {
+      if (!result.success) {
         throw new Error(result.message || '注册失败');
       }
-    } catch (error: any) {
+
+      if ('credentials' in navigator) {
+        try {
+          const cred = new PasswordCredential({
+            id: data.email,
+            password: data.password,
+          });
+          await navigator.credentials.store(cred);
+        } catch (err) {
+          console.error('保存凭据失败:', err);
+        }
+      }
+
+      localStorage.setItem('auth_token', result.token);
+      window.location.href = '/dashboard?welcome=true';
+    } catch (error) {
       console.error('注册错误:', error);
       form.setError('root', {
-        message: error.message || '注册失败，请重试',
+        message: error instanceof Error ? error.message : '注册失败，请重试',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -364,7 +348,7 @@ function RegistrationForm() {
                   <Input
                     placeholder="请输入邮箱地址"
                     type="email"
-                    autoComplete="username email" // 最佳实践：明确 username 和 email
+                    autoComplete="username email"
                     {...field}
                   />
                 </FormControl>
@@ -384,7 +368,7 @@ function RegistrationForm() {
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="请设置登录密码"
-                      autoComplete="new-password" // 最佳实践：通知浏览器这是新密码，触发强密码生成
+                      autoComplete="new-password"
                       className="pr-10"
                       {...field}
                     />
@@ -403,7 +387,6 @@ function RegistrationForm() {
                   </div>
                 </FormControl>
 
-                {/* 最佳实践：前置显示密码规则，而不是等用户提交才报错 */}
                 {!watchPassword && (
                   <p className="text-xs text-gray-500 mt-2">
                     密码需至少 6 位，建议混合使用字母、数字和符号。
@@ -430,8 +413,6 @@ function RegistrationForm() {
               </FormItem>
             )}
           />
-
-          {/* 移除确认密码字段，通过"显示密码"功能替代，减少用户摩擦 */}
 
           <FormField
             control={form.control}
@@ -470,9 +451,9 @@ function RegistrationForm() {
           <Button
             type="submit"
             className="w-full"
-            disabled={isSubmitting}
+            disabled={form.formState.isSubmitting}
           >
-            {isSubmitting ? '注册中...' : '立即注册'}
+            {form.formState.isSubmitting ? '注册中...' : '立即注册'}
           </Button>
         </form>
       </Form>
@@ -490,37 +471,37 @@ function RegistrationForm() {
 export default RegistrationForm;
 ```
 
-## 落地指南与综合策略
+## 落地指南
 
-为确保系统高效、安全且用户友好，在实施过程中请遵循以下综合策略：
+为确保系统高效、安全且用户友好，实施过程中应遵循以下策略：
 
 ### 1. 核心交互策略
 
-- **优先级原则**：首屏优先推荐手机/微信自动注册，大幅降低门槛。
-- **渐进式引导**：遵循“最小化起步”策略，初始只获取必要信息，利用价值驱动适时引导完善资料。
-- **一致性体验**：无论采用哪种注册方式，后续的登录、主页跳转和用户画像逻辑需完全统一。
+- **优先级原则**：首屏优先推荐手机/微信自动注册，降低注册门槛。
+- **渐进式引导**：初始只获取必要信息，进入产品后再引导完善资料。
+- **一致性体验**：无论采用哪种注册方式，后续的登录、跳转和用户资料逻辑保持统一。
 
 ### 2. 前端表单最佳实践
 
-- **移除“确认密码”**：摒弃传统的确认密码输入框，通过提供“显示密码（Show password）”切换按钮，在保障正确率的同时减少 50% 的输入负担。
-- **前置规则提示**：不要等到点击“提交”才提示错误，应在密码输入框下方提前写明密码规则（如长度、字符要求）。
-- **完善的 Autocomplete 支持**：
-  - 邮箱使用 `autocomplete="username email"`
-  - 新密码使用 `autocomplete="new-password"` 以唤起内置密码生成器
-  - 手机验证码输入框使用 `autocomplete="one-time-code" inputmode="numeric"`，支持 iOS/Android 自动提取短信验证码
-- **身份凭证 API**：通过集成 Credential Management API，在注册成功后自动提示浏览器保存密码，为下次顺滑登录铺路。
+- **移除“确认密码”**：通过“显示密码”切换按钮代替确认密码字段，在保障输入正确率的同时减少输入负担。
+- **前置规则提示**：密码规则（长度、字符要求）在输入框下方前置展示，而非提交时报错。
+- **Autocomplete 支持**：
+  - 邮箱使用 `autoComplete="username email"`
+  - 新密码使用 `autoComplete="new-password"` 以唤起内置密码生成器
+  - 手机验证码输入框使用 `autoComplete="one-time-code" inputMode="numeric"`，支持 iOS/Android 自动提取短信验证码
+- **身份凭证 API**：注册成功后通过 Credential Management API 提示浏览器保存密码。
 
 ### 3. 技术与安全性指南
 
-- **密码安全管理**：集成 `tai-password-strength`，通过进度条和颜色实现实时反馈，弱密码严禁提交。支持客户端预校验与服务端逻辑校验，双重保障。
-- **数据合规与合规性**：遵循最小化收集原则，确保隐私政策透明。提供完整的用户信息删除、绑定管理与撤销授权接口。
-- **性能监控**：实时追踪各注册方式的转化漏斗，分析用户偏好。监控接口响应时间与自动注册成功率，异常情况自动触发邮箱注册降级。
+- **密码安全管理**：集成 `tai-password-strength`，通过进度条与颜色实时反馈强度，弱密码禁止提交，客户端预校验与服务端校验配合。
+- **数据合规**：遵循最小化收集原则，确保隐私政策透明，提供用户信息删除、绑定管理与撤销授权接口。
+- **性能监控**：追踪各注册方式的转化漏斗，监控接口响应时间与自动注册成功率，异常时触发邮箱注册降级。
 
 ### 4. 持续优化建议
 
-- **场景智能化**：根据设备（移动端/PC端）智能切换推荐的注册方式。
+- **场景切换**：根据设备（移动端/PC 端）切换推荐的注册方式。
 - **数据驱动改进**：定期分析转化率，识别注册流失点（如表单填写耗时、验证码失败率等），持续迭代 UI 交互。
-- **用户信任构建**：在自动注册环节做好充分的权限说明，明确信息的使用范围与安全保障措施。
+- **用户信任**：在自动注册环节说明信息使用范围与安全保障措施。
 
 ## 参考资料
 

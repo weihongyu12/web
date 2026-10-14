@@ -2,21 +2,24 @@
 description: 敏感数据 AES 双向加密传输方案，涵盖数据分类识别、表现层脱敏处理与纵深防御安全策略
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # 敏感数据加密
 
-对敏感数据采用 AES 加密传输，支持前端到后端和后端到前端的双向加密通信，避免数据泄露
+对敏感数据采用 AES 加密传输，支持前端到后端、后端到前端的双向加密通信，避免数据在传输链路中被明文暴露。
 
 :::warning
-采用 AES 加密传输属于**纵深防御**，在传输数据时，应该确保**优先使用 HTTPS**
+AES 加密传输属于**纵深防御**，应优先使用 HTTPS，本方案不替代 TLS。
 :::
 
 ## 敏感数据治理与识别
 
-在实施加密之前，必须首先对系统内的敏感数据进行梳理。我们将这一过程划分为“数据分类与发现”以及“表现层脱敏”。
+实施加密前需先梳理系统内的敏感数据，过程分为“数据分类与发现”与“表现层脱敏”两部分。
 
 ### 1. 敏感数据的分类与特征
 
-敏感数据是指一旦泄露可能对个人、企业造成危害的信息。我们通常将其分为三大类，并针对其特征采用不同的识别策略：
+敏感数据指一旦泄露可能对个人或企业造成危害的信息，通常分为三大类，并针对其特征采用不同的识别策略：
 
 | 数据类别 | 具体字段示例 | 识别策略推荐 |
 |---|---|---|
@@ -26,10 +29,10 @@ description: 敏感数据 AES 双向加密传输方案，涵盖数据分类识�
 
 ### 2. 自动化识别与手动标记的结合
 
-在实际项目中，我们推荐采用“正则值检测”与“字段字典映射”相结合的纯函数手段，来精准定位复杂业务对象中的敏感数据，避免“一刀切”全量加密带来的性能开销。
+实际项目中推荐将“正则值检测”与“字段字典映射”结合，定位复杂业务对象中的敏感数据，避免“一刀切”全量加密带来的性能开销。
 
 ```ts
-// --- 1. 正则匹配规则库 (针对 PII 和标准格式) ---
+// 正则匹配规则（PII 及标准格式）
 const sensitivePatterns = {
   idCard: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
   phone: /^1[3-9]\d{9}$/,
@@ -37,21 +40,21 @@ const sensitivePatterns = {
   email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 };
 
-// --- 2. 业务字段映射表 (针对无固定格式的敏感信息) ---
-const sensitiveFields: Record<string, string> = {
-  'user.address': 'PII',
-  'payment.balance': 'FINANCIAL',
-  'auth.password': 'AUTH',
-  'auth.apiKey': 'AUTH',
-};
+// 业务字段字典（无固定格式的敏感信息）
+const sensitiveFields = new Set([
+  'user.address',
+  'payment.balance',
+  'auth.password',
+  'auth.apiKey',
+]);
 
 /**
- * 敏感字段检测管道
- * 检查依据：1. 值是否符合正则特征；2. 字段名是否包含密码特征；3. 字段路径是否在敏感字典中
+ * 判断字段是否敏感
+ * 依据：字段路径是否在敏感字典中、键名是否包含敏感词、值是否匹配敏感格式正则
  */
 export const isSensitiveData = (fieldPath: string, value: unknown): boolean => {
   // 检查是否在手动配置的字典中
-  if (sensitiveFields[fieldPath]) return true;
+  if (sensitiveFields.has(fieldPath)) return true;
 
   // 检查键名是否包含敏感词 (如 password, secret)
   if (/(password|pwd|secret|token)/i.test(fieldPath)) return true;
@@ -67,7 +70,7 @@ export const isSensitiveData = (fieldPath: string, value: unknown): boolean => {
 
 ### 3. 表现层：数据脱敏处理
 
-对于非网络传输场景（如日志打印、前端页面只读展示），我们使用数据脱敏（Masking）来保护隐私。以下是基于纯函数实现的标准脱敏工具：
+非网络传输场景（如日志打印、页面只读展示）通过数据脱敏（Masking）保护隐私：
 
 ```typescript
 /**
@@ -123,10 +126,10 @@ export const maskName = (name: string): string => {
 
 ## 传输层：双向混合加密架构
 
-本系统采用基于 RSA-OAEP (2048) 与 AES-GCM (256) 的混合加密方案：
+采用基于 RSA-OAEP (2048) 与 AES-GCM (256) 的混合加密方案：
 
-- **非对称加密 (RSA-OAEP)：** 仅用于安全地传输一次性的、随机生成的对称密钥，解决密钥分发问题。
-- **对称加密 (AES-GCM)：** 用于加密大容量的实际业务数据，具有极高的加解密性能，并提供**完整性校验（通过 Auth Tag）。**
+- **非对称加密 (RSA-OAEP)：** 仅用于加密一次性随机生成的对称密钥，解决密钥分发问题。
+- **对称加密 (AES-GCM)：** 用于加密实际业务数据，加解密性能高，并通过 Auth Tag 提供**完整性校验**。
 
 ### 核心前端代码实现
 
@@ -137,13 +140,17 @@ export interface EncryptedPayload {
   iv: string; // Base64 编码的 12 字节初始化向量
 }
 
-// ---------------------------
-// 实用工具函数
-// ---------------------------
+// Base64 编解码工具
 
-export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => (
-  btoa(String.fromCharCode(...new Uint8Array(buffer)))
-);
+export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+};
 
 export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   const binary = atob(base64);
@@ -154,9 +161,7 @@ export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   return bytes.buffer;
 };
 
-// ---------------------------
-// 密钥处理函数
-// ---------------------------
+// 密钥处理
 
 // 1. 导入服务端 RSA 公钥 (用于前端 -> 后端加密)
 export const importServerPublicKey = async (
@@ -186,15 +191,13 @@ export const generateClientKeyPair = async (): Promise<CryptoKeyPair> => (
   )
 );
 
-// 提取并导出客户端公钥为 Base64
+// 提取客户端公钥为 Base64
 export const exportClientPublicKey = async (publicKey: CryptoKey): Promise<string> => {
   const exported = await crypto.subtle.exportKey('spki', publicKey);
   return arrayBufferToBase64(exported);
 };
 
-// ---------------------------
-// 核心加解密函数
-// ---------------------------
+// 核心加解密
 
 // 3. 前端 -> 后端：加密业务数据
 export const encryptForServer = async (
@@ -272,7 +275,7 @@ export const decryptFromServer = async (
 
 前端生成随机 AES 密钥加密敏感数据，然后使用服务端公钥加密 AES 密钥，服务端接收后用私钥解密得到 AES 密钥，再用此密钥解密业务数据。
 
-适用于前端向后端提交登录凭据、支付密码、个人隐私档案等场景。前端每次请求都会生成一次性的随机 AES 密钥。
+适用于前端向后端提交登录凭据、支付密码等场景，每次请求生成一次性的随机 AES 密钥。
 
 ```mermaid
 sequenceDiagram
@@ -293,17 +296,17 @@ sequenceDiagram
 #### 前端实现
 
 ```ts
-import { importPublicKey, encryptPayload } from '@/utils/crypto';
+import { importServerPublicKey, encryptForServer } from '@/utils/crypto';
 
 export const submitSensitiveData = async (userData: Record<string, unknown>) => {
   try {
     // 1. 获取服务端公钥
-    const response = await fetch('/api/keys/server-public-key');
-    const { publicKeyBase64 } = await response.json();
-    
+    const response = await fetch('/api/server-public-key');
+    const { publicKey } = await response.json();
+
     // 2. 导入公钥并执行混合加密
-    const serverPubKey = await importPublicKey(publicKeyBase64);
-    const encryptedBody = await encryptPayload(userData, serverPubKey);
+    const serverPubKey = await importServerPublicKey(publicKey);
+    const encryptedBody = await encryptForServer(userData, serverPubKey);
 
     // 3. 发送加密数据给后端
     const submitRes = await fetch('/api/user/profile', {
@@ -322,16 +325,12 @@ export const submitSensitiveData = async (userData: Record<string, unknown>) => 
 
 #### 后端实现
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 <Tabs>
 <TabItem value="nestjs" label="NestJS" default>
 <Tabs>
 <TabItem value="controller" label="Controller">
 
 ```typescript
-// filepath: src/encryption/encryption.controller.ts
 import {
   Controller,
   Post,
@@ -364,20 +363,19 @@ export class EncryptionController {
         iv,
       );
 
-      console.log('接收到前端加密数据:', businessData);
       return { success: true, message: '数据接收成功', data: businessData };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('数据解密失败');
     }
   }
 
   @Post('encrypted-response')
   sendEncryptedData(@Headers('x-client-public-key') clientPublicKey: string) {
-    try {
-      if (!clientPublicKey) {
-        throw new BadRequestException('缺少客户端公钥');
-      }
+    if (!clientPublicKey) {
+      throw new BadRequestException('缺少客户端公钥');
+    }
 
+    try {
       const responseData = {
         message: '这是来自服务器的敏感数据',
         timestamp: new Date().toISOString(),
@@ -388,9 +386,8 @@ export class EncryptionController {
         responseData,
         clientPublicKey,
       );
-      console.log('发送加密数据给前端');
       return encryptedResponse;
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('服务器加密失败');
     }
   }
@@ -401,7 +398,6 @@ export class EncryptionController {
 <TabItem value="service" label="Service">
 
 ```typescript
-// filepath: src/encryption/encryption.service.ts
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 
@@ -410,7 +406,6 @@ export class EncryptionService {
   private readonly serverKeyPair: { privateKey: string; publicKey: string };
 
   constructor() {
-    // 初始化生成服务端的 2048 位 RSA 密钥对
     this.serverKeyPair = crypto.generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: { type: 'spki', format: 'pem' },
@@ -433,13 +428,12 @@ export class EncryptionService {
     iv: string,
   ): unknown {
     try {
-      // a. 解密一次性 AES 密钥 (显式指定 OAEP 及其 MGF1 哈希为 SHA-256)
+      // a. 解密一次性 AES 密钥（OAEP/SHA-256，Node 会将 MGF1 哈希与 oaepHash 保持一致）
       const decryptedAesKey = crypto.privateDecrypt(
         {
           key: this.serverKeyPair.privateKey,
           padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
           oaepHash: 'sha256',
-          mgf1Hash: 'sha256',
         },
         Buffer.from(encryptedAesKey, 'base64'),
       );
@@ -461,10 +455,12 @@ export class EncryptionService {
       );
       decipher.setAuthTag(tag);
 
-      let decrypted = decipher.update(ciphertext, undefined, 'utf8');
-      decrypted += decipher.final('utf8');
+      const decrypted = Buffer.concat([
+        decipher.update(ciphertext),
+        decipher.final(),
+      ]);
 
-      return JSON.parse(decrypted);
+      return JSON.parse(decrypted.toString('utf8'));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`数据完整性校验失败或解密失败: ${message}`);
@@ -492,16 +488,17 @@ export class EncryptionService {
           key: clientPublicKey,
           padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
           oaepHash: 'sha256',
-          mgf1Hash: 'sha256',
         },
         aesKey,
       );
 
       // c. AES-GCM 加密业务数据
       const cipher = crypto.createCipheriv('aes-256-gcm', aesKey, iv);
-      let ciphertext = cipher.update(JSON.stringify(data), 'utf8');
-      ciphertext = Buffer.concat([ciphertext, cipher.final()]);
-      const tag = cipher.getAuthTag(); // 抽取生成的 16 字节验证标签
+      const ciphertext = Buffer.concat([
+        cipher.update(JSON.stringify(data), 'utf8'),
+        cipher.final(),
+      ]);
+      const tag = cipher.getAuthTag();
 
       // d. 拼接 [密文 + Tag] 合包发送，使其匹配前端 Web Crypto 解密规范
       const combinedData = Buffer.concat([ciphertext, tag]);
@@ -523,7 +520,6 @@ export class EncryptionService {
 <TabItem value="module" label="Module">
 
 ```typescript
-// filepath: src/encryption/encryption.module.ts
 import { Module } from '@nestjs/common';
 import { EncryptionController } from './encryption.controller';
 import { EncryptionService } from './encryption.service';
@@ -545,7 +541,6 @@ export class EncryptionModule {}
 <TabItem value="controller" label="Controller">
 
 ```java
-// filepath: src/main/java/com/example/encryption/controller/EncryptionController.java
 package com.example.encryption.controller;
 
 import com.example.encryption.service.EncryptionService;
@@ -599,7 +594,6 @@ public class EncryptionController {
 
             Object businessData = encryptionService.decryptClientData(
                     encryptedAesKey, encryptedData, iv);
-            log.info("接收到前端加密数据: {}", businessData);
 
             Map<String, Object> result = new HashMap<>(3);
             result.put("success", Boolean.TRUE);
@@ -641,7 +635,6 @@ public class EncryptionController {
 
             Map<String, String> encryptedResponse =
                     encryptionService.encryptDataForClient(responseData, clientPublicKey);
-            log.info("发送加密数据给前端");
             return ResponseEntity.ok(encryptedResponse);
         } catch (Exception e) {
             log.error("服务器加密失败", e);
@@ -657,7 +650,6 @@ public class EncryptionController {
 <TabItem value="service" label="Service">
 
 ```java
-// filepath: src/main/java/com/example/encryption/service/EncryptionService.java
 package com.example.encryption.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -681,60 +673,22 @@ import java.util.Map;
 
 /**
  * 加密服务
- * 提供基于 RSA-OAEP/SHA-256 与 AES-GCM 的对称非对称混合加密能力。
+ * 提供基于 RSA-OAEP/SHA-256 与 AES-GCM 的混合加密能力。
  */
 @Slf4j
 @Service
 public class EncryptionService {
 
-    /**
-     * RSA 密钥长度
-     */
     private static final int RSA_KEY_SIZE = 2048;
-
-    /**
-     * AES 密钥长度（位）
-     */
     private static final int AES_KEY_SIZE = 256;
-
-    /**
-     * GCM 初始化向量长度（字节）
-     */
     private static final int GCM_IV_LEN = 12;
-
-    /**
-     * GCM 校验标签长度（位）
-     */
     private static final int GCM_TAG_BITS = 128;
-
-    /**
-     * RSA 加密算法标识
-     */
     private static final String RSA_ALGORITHM = "RSA";
-
-    /**
-     * AES 加密算法标识
-     */
     private static final String AES_GCM_ALGORITHM = "AES/GCM/NoPadding";
-
-    /**
-     * RSA 加密转换标识（配合 OAEP ParameterSpec 使用）
-     */
     private static final String RSA_OAEP_TRANSFORMATION = "RSA/ECB/OAEPPadding";
 
-    /**
-     * 服务端 RSA 密钥对
-     */
     private final KeyPair serverKeyPair;
-
-    /**
-     * JSON 序列化工具
-     */
     private final ObjectMapper objectMapper;
-
-    /**
-     * 安全随机数生成器
-     */
     private final SecureRandom secureRandom;
 
     public EncryptionService() {
@@ -743,7 +697,7 @@ public class EncryptionService {
             keyGen.initialize(RSA_KEY_SIZE);
             this.serverKeyPair = keyGen.generateKeyPair();
             this.objectMapper = new ObjectMapper();
-            this.secureRandom = SecureRandom.getInstanceStrong();
+            this.secureRandom = new SecureRandom();
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("初始化 RSA 密钥对失败", e);
         }
@@ -854,35 +808,19 @@ public class EncryptionService {
 <TabItem value="module" label="Module">
 
 ```java
-// filepath: src/main/java/com/example/encryption/EncryptionApplication.java
 package com.example.encryption;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Spring Boot 启动类
- * 提供加密通信示例应用的启动入口。
  */
-@Slf4j
 @SpringBootApplication
 public class EncryptionApplication {
 
-    /**
-     * 私有构造，防止工具类被实例化（Spring Boot 主类保留空参 private 构造以符合规范）
-     */
-    private EncryptionApplication() {
-    }
-
-    /**
-     * 应用主入口
-     *
-     * @param args 命令行参数
-     */
     public static void main(String[] args) {
         SpringApplication.run(EncryptionApplication.class, args);
-        log.info("加密通信示例应用启动完成");
     }
 }
 ```
@@ -896,9 +834,9 @@ public class EncryptionApplication {
 <TabItem value="views" label="Views">
 
 ```python
-# filepath: encryption/views.py
 import json
 import logging
+from datetime import datetime
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -913,12 +851,12 @@ encryption_service = EncryptionService()
 
 @require_http_methods(["GET"])
 def get_server_public_key(request):
-    """获取服务器RSA公钥"""
+    """获取服务端 RSA 公钥"""
     try:
         public_key = encryption_service.get_server_public_key()
         return JsonResponse({'publicKey': public_key})
     except Exception as e:
-        logger.error(f"获取服务器公钥失败: {str(e)}")
+        logger.error('获取服务器公钥失败: %s', e)
         return JsonResponse({'error': '获取公钥失败'}, status=500)
 
 @csrf_exempt
@@ -937,15 +875,14 @@ def receive_encrypted_data(request):
         business_data = encryption_service.decrypt_client_data(
             encrypted_aes_key, encrypted_data, iv
         )
-        
-        logger.info(f"接收到前端加密数据: {business_data}")
+
         return JsonResponse({
             'success': True,
             'message': '数据接收成功',
             'data': business_data
         })
     except Exception as e:
-        logger.error(f"解密前端数据失败: {str(e)}")
+        logger.error('解密前端数据失败: %s', e)
         return JsonResponse({'success': False, 'message': '数据解密失败'}, status=400)
 
 @csrf_exempt
@@ -966,11 +903,10 @@ def send_encrypted_data(request):
         encrypted_response = encryption_service.encrypt_data_for_client(
             response_data, client_public_key
         )
-        
-        logger.info("发送加密数据给前端")
+
         return JsonResponse(encrypted_response)
     except Exception as e:
-        logger.error(f"加密响应数据失败: {str(e)}")
+        logger.error('加密响应数据失败: %s', e)
         return JsonResponse({'error': '服务器加密失败'}, status=500)
 ```
 
@@ -978,22 +914,19 @@ def send_encrypted_data(request):
 <TabItem value="services" label="Services">
 
 ```python
-# filepath: encryption/services.py
 import json
 import base64
 import os
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
 
 class EncryptionService:
     def __init__(self):
-        # 产生服务端 RSA 密钥对
+        # 生成服务端 RSA 密钥对
         self.server_private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
-            backend=default_backend()
         )
         self.server_public_key = self.server_private_key.public_key()
 
@@ -1026,29 +959,22 @@ class EncryptionService:
             ciphertext = combined_bytes[:-16]
             tag = combined_bytes[-16:]
 
-            # c. 执行带完整性校验的 AES-GCM 解密
+            # c. 执行带完整性校验的 AES-GCM 解密（构造时显式传入 Tag）
             iv_bytes = base64.b64decode(iv)
-            cipher = Cipher(
-                algorithms.AES(aes_key_bytes),
-                modes.GCM(iv_bytes, tag), # 显式传入 Tag 校验
-                backend=default_backend()
-            )
+            cipher = Cipher(algorithms.AES(aes_key_bytes), modes.GCM(iv_bytes, tag))
             decryptor = cipher.decryptor()
             decrypted = decryptor.update(ciphertext) + decryptor.finalize()
 
             return json.loads(decrypted.decode('utf-8'))
         except Exception as e:
-            raise Exception(f"解密及完整性检测失败: {str(e)}")
+            raise Exception(f"解密及完整性校验失败: {e}")
 
     # 2. 为客户端响应加密数据
     def encrypt_data_for_client(self, data, client_public_key_b64):
         try:
             # 导入客户端公钥
             client_pub_bytes = base64.b64decode(client_public_key_b64)
-            client_public_key = serialization.load_der_public_key(
-                client_pub_bytes,
-                backend=default_backend()
-            )
+            client_public_key = serialization.load_der_public_key(client_pub_bytes)
 
             # a. 构造 256 位临时对称密钥
             aes_key = os.urandom(32)
@@ -1066,14 +992,10 @@ class EncryptionService:
 
             # c. AES-GCM 加密业务数据并拼接合包
             json_bytes = json.dumps(data).encode('utf-8')
-            cipher = Cipher(
-                algorithms.AES(aes_key),
-                modes.GCM(iv),
-                backend=default_backend()
-            )
+            cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv))
             encryptor = cipher.encryptor()
             ciphertext = encryptor.update(json_bytes) + encryptor.finalize()
-            tag = encryptor.tag # 提取 Python 生成的 16 字节校验标签
+            tag = encryptor.tag
 
             # 拼接为 [密文 + Tag] 发送
             combined_data = ciphertext + tag
@@ -1084,7 +1006,7 @@ class EncryptionService:
                 'iv': base64.b64encode(iv).decode('utf-8')
             }
         except Exception as e:
-            raise Exception(f"响应数据构建失败: {str(e)}")
+            raise Exception(f"响应数据构建失败: {e}")
 ```
 
 </TabItem>
@@ -1106,7 +1028,6 @@ composer require phpseclib/phpseclib:^3.0
 
 ```php
 <?php
-// filepath: app/Http/Controllers/EncryptionController.php
 
 namespace App\Http\Controllers;
 
@@ -1153,8 +1074,6 @@ class EncryptionController extends Controller
                 $iv
             );
 
-            Log::info('接收到前端加密数据', $businessData);
-
             return response()->json([
                 'success' => true,
                 'message' => '数据接收成功',
@@ -1188,7 +1107,6 @@ class EncryptionController extends Controller
                 $clientPublicKey
             );
 
-            Log::info('发送加密数据给前端');
             return response()->json($encryptedResponse);
         } catch (Exception $e) {
             Log::error('加密响应数据失败: ' . $e->getMessage());
@@ -1203,8 +1121,6 @@ class EncryptionController extends Controller
 
 ```php
 <?php
-
-// filepath: app/Services/EncryptionService.php
 
 namespace App\Services;
 
@@ -1240,15 +1156,15 @@ class EncryptionService
         string $iv
     ): array {
         try {
-            // a. 使用 RSA-OAEP SHA-256 解密 AES 密钥
+            // a. 使用 RSA-OAEP/SHA-256 解密 AES 密钥
             $encryptedKeyBinary = base64_decode($encryptedAesKey);
 
-            $this->serverPrivateKey = $this->serverPrivateKey
+            $privateKey = $this->serverPrivateKey
                 ->withPadding(RSA::ENCRYPTION_OAEP)
                 ->withHash('sha256')
                 ->withMGFHash('sha256');
 
-            $aesKey = $this->serverPrivateKey->decrypt($encryptedKeyBinary);
+            $aesKey = $privateKey->decrypt($encryptedKeyBinary);
 
             // b. 分离混合密文 [密文 + 16 字节 Tag]
             $combinedBinary = base64_decode($encryptedData);
@@ -1334,8 +1250,6 @@ class EncryptionService
 ```php
 <?php
 
-// filepath: routes/api.php
-
 use App\Http\Controllers\EncryptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -1353,9 +1267,7 @@ Route::post('/encrypted-response', [EncryptionController::class, 'sendEncryptedD
 <TabItem value="service" label="Service">
 
 ```csharp
-// filepath: Services/EncryptionService.cs
 using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -1396,14 +1308,14 @@ namespace EncryptionApi.Services
                 var combined = Convert.FromBase64String(encryptedData);
                 if (combined.Length < 16) throw new InvalidOperationException("密文太短");
                 
-                var ciphertext = combined[..^16]; // 利用 Range 索引获取前半部分
-                var tag = combined[^16..];        // 尾部 16 字节
+                var ciphertext = combined[..^16];
+                var tag = combined[^16..];
 
                 var ivBytes = Convert.FromBase64String(iv);
                 byte[] decryptedBytes = new byte[ciphertext.Length];
 
-                // c. .NET Core 3.0+ 推荐使用原生的安全 AesGcm 容器执行带完整性校验的解密
-                using (var aesGcm = new AesGcm(aesKeyBytes))
+                // c. AesGcm 构造时声明 Tag 长度（.NET 8 起要求显式指定）
+                using (var aesGcm = new AesGcm(aesKeyBytes, 16))
                 {
                     aesGcm.Decrypt(ivBytes, ciphertext, tag, decryptedBytes);
                 }
@@ -1441,9 +1353,9 @@ namespace EncryptionApi.Services
                 var jsonBytes = Encoding.UTF8.GetBytes(json);
 
                 byte[] ciphertext = new byte[jsonBytes.Length];
-                byte[] tag = new byte[16]; // 申请 16 字节输出
+                byte[] tag = new byte[16];
 
-                using (var aesGcm = new AesGcm(aesKey))
+                using (var aesGcm = new AesGcm(aesKey, 16))
                 {
                     aesGcm.Encrypt(iv, jsonBytes, ciphertext, tag);
                 }
@@ -1480,7 +1392,6 @@ namespace EncryptionApi.Services
 <TabItem value="controller" label="Controller">
 
 ```csharp
-// filepath: Controllers/EncryptionController.cs
 using EncryptionApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -1533,8 +1444,6 @@ namespace EncryptionApi.Controllers
                     request.Iv
                 );
 
-                _logger.LogInformation("接收到前端加密数据: {Data}", businessData);
-
                 return Ok(new 
                 { 
                     success = true, 
@@ -1568,8 +1477,7 @@ namespace EncryptionApi.Controllers
                 };
 
                 var encryptedResponse = _encryptionService.EncryptDataForClient(responseData, clientPublicKey);
-                _logger.LogInformation("发送加密数据给前端");
-                
+
                 return Ok(encryptedResponse);
             }
             catch (Exception ex)
@@ -1593,7 +1501,6 @@ namespace EncryptionApi.Controllers
 <TabItem value="program" label="Program">
 
 ```csharp
-// filepath: Program.cs
 using EncryptionApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -1642,20 +1549,20 @@ sequenceDiagram
     前端->>前端: 8. 传入 Tag、IV，使用 SERVER_AES_KEY 完成 GCM 解密及校验
 ```
 
-**前端示例代码：**
+#### 前端实现
 
 ```ts
-import { 
-  generateClientKeyPair, 
-  exportPublicKeyToBase64, 
-  decryptPayload,
+import {
+  generateClientKeyPair,
+  exportClientPublicKey,
+  decryptFromServer,
 } from '@/utils/crypto';
 
 export const fetchSensitiveData = async () => {
   try {
     // 1. 动态生成客户端临时的 RSA 密钥对
     const { publicKey, privateKey } = await generateClientKeyPair();
-    const clientPublicKeyBase64 = await exportPublicKeyToBase64(publicKey);
+    const clientPublicKeyBase64 = await exportClientPublicKey(publicKey);
 
     // 2. 发起请求，携带前端公钥供后端加密使用
     const response = await fetch('/api/finance/statements', {
@@ -1668,9 +1575,7 @@ export const fetchSensitiveData = async () => {
     const encryptedResponsePayload = await response.json();
 
     // 3. 使用前端私钥解密后端返回的 Payload
-    const decryptedData = await decryptPayload(encryptedResponsePayload, privateKey);
-    
-    console.log('成功解密后端下发的敏感账单:', decryptedData);
+    const decryptedData = await decryptFromServer(encryptedResponsePayload, privateKey);
     return decryptedData;
   } catch (error) {
     console.error('获取或解密数据失败:', error);
@@ -1683,23 +1588,19 @@ export const fetchSensitiveData = async () => {
 
 ### 密钥复用策略
 
-- **会话复用（Session Key）：** 对于高频交互场景，切勿在每次请求中都执行耗时的 RSA 非对称加密。可以在一次会话开始时进行握手，交换并缓存当前的对称 AES 密钥，在后续的一定生命周期（如 30 分钟）内重复复用它。 
-- **分块与异步流处理：** 
-  - 当处理超过 5MB 的海量业务数据或附件时，禁止一次性全部读入内存。 
-  - 前端应使用 Web Workers 开启后台线程加密，防止 UI 渲染主线程卡顿；后端采用流式（Stream）解密方式进行处理。
+- **会话复用（Session Key）：** 高频交互场景应避免每次请求都执行耗时的 RSA 非对称加密，可在会话开始时握手并缓存对称 AES 密钥，在一定生命周期（如 30 分钟）内复用。
+- **分块与异步流处理：** 处理大数据量（如超过 5MB 的附件）时不应一次性读入内存；前端使用 Web Workers 在后台线程加密，避免阻塞 UI 主线程，后端采用流式（Stream）解密。
 
 ## 安全风险一览
 
 | 风险点 | 业务隐患 | 防范方案 |
 |---|---|---|
-| **中间人攻击 (MITM)** | 攻击者在第一次握手时伪造并下发假的服务器公钥，即可拦截解密 | **必须在全站强制实施 HTTPS。** 双向加密仅作为纵深防御 |
-| **重放攻击 (Replay)** | 恶意第三方拦截用户的合法密文直接重复发送给服务端，导致业务重放 | 在加密明文对象中强行添加当前的 **时间戳（Timestamp）** 和 **随机唯一序列（Nonce）**，服务端校验在一定窗口外（如 1 分钟外）或重复使用的请求，一律丢弃 |
-| **内存及文件缓存泄露** | RSA 私钥在后端容器内存中常驻或直接写在磁盘配置文件中 | 生产中禁止硬编码私钥。应使用环境变量或专业的密钥管理产品（如 HSM、Vault 等）进行统一注入和生命周期轮换 |
-| **IV 密钥复用风险** | 同一个 AES 密钥在加密不同数据时使用了相同的 IV，会导致安全性下降 | **强制** 每次调用 AES-GCM 加密时，都必须重新由 `SecureRandom` 随机生成全新的 12 字节 IV |
+| **中间人攻击 (MITM)** | 攻击者在握手阶段伪造并下发假的服务器公钥，拦截解密通信内容 | **全站启用 HTTPS**，双向加密仅作为纵深防御 |
+| **重放攻击 (Replay)** | 恶意第三方拦截合法密文并重复发送给服务端 | 在加密明文中添加**时间戳（Timestamp）**与**随机序列（Nonce）**，服务端丢弃超出时间窗口（如 1 分钟）或重复使用的请求 |
+| **内存及文件缓存泄露** | RSA 私钥在后端容器内存常驻，或直接写入磁盘配置文件 | 生产环境不硬编码私钥，通过环境变量或密钥管理产品（如 HSM、Vault）注入并定期轮换 |
+| **IV 密钥复用风险** | 同一 AES 密钥加密不同数据时复用了相同 IV，安全性下降 | 每次加密都应通过安全随机源生成新的 12 字节 IV（前端对应 `crypto.getRandomValues`） |
 
 ## 参考资料
-
-### Web 加密 API
 
 - [MDN Web Doc - Web Crypto API](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Crypto_API)
 - [SubtleCrypto API 文档](https://developer.mozilla.org/zh-CN/docs/Web/API/SubtleCrypto)

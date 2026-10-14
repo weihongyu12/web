@@ -1,37 +1,37 @@
 ---
 sidebar_position: 1
-description: 手机验证码登录方案，支持自动注册、60秒倒计时防刷、多场景复用与 Credential Management API 集成
+description: 手机验证码登录方案，支持自动注册、发送倒计时防刷、多场景复用与 Credential Management API 集成
 ---
 
 # 手机验证码登录
 
-手机验证码登录为用户提供了无需记忆密码的安全认证方式，是推荐的首选登录方式，特别适合移动端场景与重视安全性的现代 Web 应用。
+手机验证码登录无需记忆密码，推荐作为首选登录方式，适合移动端场景。
 
 ## 核心功能
 
-- **手机号智能验证**：前端正则校验与后端严格验证
+- **手机号验证**：前端正则校验与后端严格验证
 - **验证码状态管理**：发送节流与 60 秒倒计时防刷
-- **多场景复用**：支持注册、登录、找回密码等多种业务链路
-- **自动注册账户（极简流程）**：首次登录用户自动创建账户，无需跳转冗长的注册表单
-- **系统级自动填充**：默认支持基于 `autocomplete="one-time-code"` 的原生键盘提取，并提供 WebOTP API（适用于出海海外业务）的无感提取进阶方案
+- **多场景复用**：支持注册、登录、找回密码等业务链路
+- **自动注册**：首次登录自动创建账户，无需单独的注册流程
+- **验证码自动填充**：基于 `autoComplete="one-time-code"` 的系统键盘提取，海外业务可选用 WebOTP API 实现自动读取
 
 ## 为什么选择手机验证码登录？
 
-### 🚀 用户体验优势
+### 用户体验优势
 
-- **零记忆负担**：无需记住繁琐的复杂密码组合
-- **快速便捷**：登录与注册逻辑合二为一，一步完成
-- **普适性强**：适用于所有年龄段及各种数字技能水平的用户
+- **零记忆负担**：无需记忆密码
+- **登录注册合一**：首次登录即自动注册，一步完成
+- **使用门槛低**：适用于各类用户
 
-### 🔒 安全性保障
+### 安全性保障
 
-- **实时验证**：验证码具有单次有效性与极短的时效性（通常为 5 分钟）
-- **实名溯源**：基于国内手机号实名制的基础身份验证
-- **防暴力破解**：配合人机验证与请求频率限制，天然防御撞库攻击
+- **时效与单次有效**：验证码有效期通常为 5 分钟，验证成功后立即失效
+- **实名溯源**：基于国内手机号实名制的身份验证
+- **防暴力破解**：配合人机验证与请求频率限制防御撞库攻击
 
 ## 交互流程
 
-在深入代码之前，先了解验证码登录的核心交互逻辑与时序。
+验证码登录的核心交互逻辑与时序如下。
 
 ### 业务流程图
 
@@ -76,10 +76,10 @@ flowchart TD
 
 ## 代码实现
 
-以下是基于 React Hook Form、Zod 的表单实现。
+基于 React Hook Form 与 Zod 的表单实现。
 
 :::tip
-代码中包含了针对海外业务的 `listenForWebOTP` 逻辑。如果为纯国内业务，可以保留或安全地移除该部分，国内环境主要依赖 `autoComplete="one-time-code"` 属性生效。
+代码中的 `listenForWebOTP` 逻辑针对海外业务，国内环境主要依赖 `autoComplete="one-time-code"` 属性生效，纯国内业务可移除该部分。
 :::
 
 ```tsx
@@ -123,7 +123,6 @@ function SmsLoginForm() {
   const [countdown, setCountdown] = useState(0);
   const [codeStatus, setCodeStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const acRef = useRef<AbortController | null>(null);
 
   const form = useForm<SmsLoginData>({
@@ -137,7 +136,7 @@ function SmsLoginForm() {
       navigator.credentials.get({ password: true, mediation: 'optional' })
         .then((cred) => {
           if (cred && 'id' in cred && PHONE_REGEX.test(cred.id)) {
-            form.setValue('phone', cred.id);
+            form.setValue('phone', cred.id, { shouldValidate: true });
             form.setValue('remember', true);
           }
         })
@@ -147,26 +146,16 @@ function SmsLoginForm() {
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (acRef.current) acRef.current.abort();
+      acRef.current?.abort();
     };
   }, []);
 
   useEffect(() => {
-    if (countdown > 0) {
-      timerRef.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [countdown]);
 
   const listenForWebOTP = useCallback(() => {
@@ -175,7 +164,7 @@ function SmsLoginForm() {
       navigator.credentials.get({
         otp: { transport: ['sms'] },
         signal: acRef.current.signal,
-      })
+      } as CredentialRequestOptions)
         .then((otp: any) => {
           if (otp && otp.code) {
             form.setValue('code', otp.code, { shouldValidate: true });
@@ -317,7 +306,7 @@ function SmsLoginForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-[120px]"
+                    className="w-28"
                     onClick={sendVerificationCode}
                     disabled={countdown > 0 || codeStatus === 'sending'}
                   >
@@ -364,13 +353,13 @@ export default SmsLoginForm;
 
 ## 短信文案规范
 
-为了让系统能够精准提取验证码，短信的文案格式至关重要。请根据目标用户群体选择合适的文案规范：
+短信文案格式决定系统能否精准提取验证码，需根据目标用户群体选择合适的文案规范：
 
-### 🇨🇳 场景一：国内常规业务
+### 场景一：国内常规业务
 
-国内短信受工信部及运营商防诈骗网关的严格监管，请勿在短信中包含非备案的域名、链接或特殊符号（如 `@`），否则极易被拦截。
+国内短信受工信部及运营商防诈骗网关监管，短信中不应包含非备案的域名、链接或特殊符号（如 `@`），否则容易被拦截。
 
-前端只需配置 `autocomplete="one-time-code"`，国内主流手机（如 iOS Safari、华为、小米等）的系统键盘即可自动识别"验证码"字样并提供填充建议。
+前端配置 `autoComplete="one-time-code"` 后，国内主流手机（iOS Safari、vivo、小米等）的系统键盘可自动识别验证码短信并提供填充建议。
 
 国内标准模板参考：
 
@@ -378,9 +367,9 @@ export default SmsLoginForm;
 【产品签名】登录验证码是：123456，5分钟内有效。请勿泄露给他人。
 ```
 
-### 🌍 场景二：出海 / 纯海外业务 (WebOTP 规范)
+### 场景二：海外业务（WebOTP 规范）
 
-如果面向海外用户，且希望利用 Android / Chrome 提供的 WebOTP API 实现跨越键盘的完全自动化读取，短信必须包含特定的域绑定格式。
+面向海外用户且希望利用 Android / Chrome 的 WebOTP API 实现自动读取时，短信必须包含特定的域绑定格式。
 
 海外 WebOTP 模板规范：
 
@@ -396,19 +385,19 @@ Your verification code is: 123456.
 
 ### 无缝注册体验
 
-- **极简入口**：拒绝繁杂的先注册再登录步骤，入口合一
-- **渐进式完善**：自动创建账户不阻塞核心流程，可在用户进入 Dashboard 后再通过气泡提示引导其完善头像、昵称等个人资料
+- **入口合一**：登录与注册共用同一入口，无需单独的注册流程
+- **渐进式完善**：自动创建账户不阻塞核心流程，进入 Dashboard 后再引导完善头像、昵称等资料
 
-### 现代化的无感式登录
+### 无感式登录
 
-- **Credential Management API**：浏览器规范级别的凭据管理，当用户下次访问时，甚至可以通过浏览器的底边栏直接一键选取本机保存的手机号快速发起登录操作
-- **基于 autoComplete 的短信提取**：结合 HTML `autoComplete="one-time-code"` 与 `inputMode="numeric"`，完美触发 iOS 系统及大多数国内 Android 深度定制系统的"来自信息的验证码"键盘提示，具有极佳的兼容性
-- **WebOTP API（海外）**：对于支持 GMS 的 Android 设备且满足特定短信文案格式的出海应用，可实现跨越键盘的程序级自动读取与填充
+- **Credential Management API**：下次访问时可通过浏览器的凭据选择器直接选取已保存的手机号发起登录
+- **基于 autoComplete 的短信提取**：`autoComplete="one-time-code"` 配合 `inputMode="numeric"`，可触发 iOS 及多数国内 Android 系统的验证码键盘提示，兼容性好
+- **WebOTP API（海外）**：支持 GMS 的 Android 设备配合特定的短信文案格式，可实现程序级自动读取与填充
 
 ## 实施注意事项与最佳实践
 
 :::warning
-💡 **防范短信被刷**是上线前最重要的检查点！验证码相关接口最容易遭受黑产的恶意请求（俗称"短信轰炸机"）。
+**防范短信被刷**是上线前的重点检查项，验证码接口容易遭受黑产恶意请求（俗称"短信轰炸机"）。
 :::
 
 ### 多重防刷策略
@@ -421,9 +410,9 @@ Your verification code is: 123456.
 - 短信验证码建议使用纯数字 6 位，有效期设置为 5-10 分钟
 - 服务端校验验证码时，须保证验证码"阅后即焚"（验证成功后立即使其失效，防止重放攻击）
 
-### 优雅的资源回收
+### 资源回收
 
-若启用了 WebOTP API 监听，务必使用 `AbortController` 绑定生命周期。在用户手动输入提交、或者组件卸载时及时 `.abort()`，防止系统级监听在后台长期驻留报错
+若启用 WebOTP API 监听，需通过 `AbortController` 绑定组件生命周期：用户手动输入提交或组件卸载时及时 `.abort()`，避免监听在后台驻留
 
 ## 参考资料
 

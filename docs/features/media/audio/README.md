@@ -11,8 +11,8 @@ description: HTML5 音频元素使用指南，采用免专利优先的编解码�
 ```html
 <audio controls preload="metadata">
   <!-- 免专利格式（优先） -->
-  <source src="audio.opus.ogg" type="audio/ogg; codecs=opus">  <!-- Ogg容器Opus -->
-  <source src="audio.opus.webm" type="audio/webm; codecs=opus"> <!-- WebM容器Opus -->
+  <source src="audio.opus.ogg" type="audio/ogg; codecs=opus">
+  <source src="audio.opus.webm" type="audio/webm; codecs=opus">
   <source src="audio.vorbis.ogg" type="audio/ogg; codecs=vorbis">
 
   <!-- 无损格式（按需添加） -->
@@ -101,11 +101,11 @@ description: HTML5 音频元素使用指南，采用免专利优先的编解码�
 | 容器格式 | 支持的音频编解码器 | 浏览器兼容性 | 最适用场景 |
 |---------|-----------------|------------|------------|
 | **Ogg** | Opus, Vorbis, FLAC | Chrome, Firefox, Edge, Opera | 开源项目，高质量音频 |
-| **WebM** | Opus, Vorbis | Chrome, Firefox, Edge, Opera, Safari 16+ | 网络流式传输，低延迟应用 |
+| **WebM** | Opus, Vorbis | Chrome, Firefox, Edge, Opera, Safari 14.1+ | 网络流式传输，低延迟应用 |
 | **MP4/M4A** | AAC, MP3, Opus (少数) | 全部现代浏览器 | 通用音频，最佳兼容性 |
 | **MP3** | MP3 | 所有浏览器 | 最广泛兼容，较旧设备 |
 | **WAV** | PCM (无压缩) | 几乎所有浏览器 | 原始音频，录音应用 |
-| **FLAC** | FLAC | Chrome, Firefox, Edge, Opera | 高保真音乐，音频存档 |
+| **FLAC** | FLAC | Chrome, Firefox, Edge, Opera, Safari 11+ | 高保真音乐，音频存档 |
 
 ### 编解码器性能与兼容性比较
 
@@ -115,7 +115,7 @@ description: HTML5 音频元素使用指南，采用免专利优先的编解码�
 | **AAC** | 高 | 高 | 所有现代浏览器 | 专利受限 | 128-256kbps                   |
 | **Vorbis** | 高 | 高 | Chrome, Firefox, Edge, Opera | 免费开源 | 128-192kbps                   |
 | **MP3** | 中 | 中 | 所有浏览器 | 专利过期 | 128-320kbps                   |
-| **FLAC** | 无损 | 原始音质 | Chrome, Firefox, Edge, Opera | 免费开源 | 无损 (约原始大小的50%)                |
+| **FLAC** | 无损 | 原始音质 | Chrome, Firefox, Edge, Opera, Safari 11+ | 免费开源 | 无损 (约原始大小的50%)                |
 | **PCM (WAV)** | 无 | 原始音质 | 所有浏览器 | 无专利 | 无压缩 (1411kbps, 16bit/44.1kHz) |
 
 :::tip
@@ -182,10 +182,19 @@ ffmpeg -i input.wav -c:a flac -compression_level 8 -vn audio.flac.ogg
 - **进度保存**：为长音频内容保存播放进度
 
 ```javascript
-// 保存音频播放进度
 const audioElement = document.querySelector('audio');
-audioElement.addEventListener('timeupdate', () => {
-  localStorage.setItem('audioProgress', audioElement.currentTime);
+
+// 在暂停或页面隐藏时保存进度，避免 timeupdate 高频触发造成重复写入
+function saveProgress() {
+  localStorage.setItem('audioProgress', String(audioElement.currentTime));
+}
+
+audioElement.addEventListener('pause', saveProgress);
+window.addEventListener('pagehide', saveProgress);
+
+// 播放结束后清除进度，避免下次恢复到音频末尾
+audioElement.addEventListener('ended', () => {
+  localStorage.removeItem('audioProgress');
 });
 
 // 恢复播放进度
@@ -264,26 +273,29 @@ audio:focus,
 Web Audio API 提供了更高级的音频处理功能，适用于需要音频可视化、效果处理或实时音频应用的场景：
 
 ```javascript
-// 简单的音频可视化示例
 const audioElement = document.querySelector('audio');
 const audioContext = new AudioContext();
 const source = audioContext.createMediaElementSource(audioElement);
 const analyser = audioContext.createAnalyser();
 
-// 连接节点
 source.connect(analyser);
 analyser.connect(audioContext.destination);
 
-// 设置分析器参数
 analyser.fftSize = 256;
 const bufferLength = analyser.frequencyBinCount;
 const dataArray = new Uint8Array(bufferLength);
 
-// 渲染可视化（需配合Canvas使用）
+// 受自动播放策略影响，AudioContext 初始处于 suspended 状态，需在用户手势中恢复
+audioElement.addEventListener('play', () => {
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+});
+
+// 渲染可视化（需配合 Canvas 使用）
 function renderFrame() {
   requestAnimationFrame(renderFrame);
   analyser.getByteFrequencyData(dataArray);
-  // 使用dataArray数据绘制可视化效果
 }
 renderFrame();
 ```

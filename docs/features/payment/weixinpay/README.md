@@ -2,6 +2,9 @@
 description: 微信支付 JSAPI 接入指南，适用于公众号与小程序场景，支持 H5 页面调起微信支付模块
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # 微信支付
 
 ## 简介
@@ -27,7 +30,7 @@ sequenceDiagram
 
     用户->>前端: 1. 点击支付按钮
     前端->>后端: 2. 提交订单请求（商品信息、金额）
-    后端->>微信支付: 3. 调用统一下单API（appid、mch_id、nonce_str、sign等）
+    后端->>微信支付: 3. 调用统一下单API（out_trade_no、amount、openid等）
     微信支付-->>后端: 4. 返回预支付ID（prepay_id）
     后端->>后端: 5. 生成支付签名（paySign）
     后端-->>前端: 6. 返回支付参数（appId、timeStamp、nonceStr、package、paySign）
@@ -44,25 +47,21 @@ sequenceDiagram
 ### 前端调用（JavaScript）
 
 ```javascript
-// 1. 引入微信JSSDK
-// 方式一：通过CDN引入
-// <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+// 引入微信JSSDK
+// CDN: <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+// npm: npm install weixin-js-sdk
 
-// 方式二：通过npm安装
-// npm install weixin-js-sdk
-// import wx from 'weixin-js-sdk'
-
-// 2. 配置微信JSSDK
+// wx.config 的签名参数需由后端的 JS-SDK 签名接口下发
 wx.config({
-  debug: false, // 开启调试模式
-  appId: 'your_app_id', // 必填，公众号的唯一标识
-  timestamp: '', // 必填，生成签名的时间戳
-  nonceStr: '', // 必填，生成签名的随机串
-  signature: '', // 必填，签名
-  jsApiList: ['chooseWXPay'] // 必填，需要使用的JS接口列表
+  debug: false,
+  appId: 'your_app_id',
+  timestamp: '',
+  nonceStr: '',
+  signature: '',
+  jsApiList: ['chooseWXPay']
 });
 
-// 3. 发起支付请求
+// 发起支付请求
 async function createWxPayOrder(orderData) {
   const response = await fetch('/api/wxpay/create-order', {
     method: 'POST',
@@ -72,28 +71,23 @@ async function createWxPayOrder(orderData) {
   
   const payParams = await response.json();
   
-  // 调用微信JSAPI
   wx.chooseWXPay({
     timestamp: payParams.timeStamp,
     nonceStr: payParams.nonceStr,
     package: payParams.package,
     signType: 'RSA',
     paySign: payParams.paySign,
-    success: function(res) {
-      console.log('支付成功', res);
-      // 跳转成功页面或轮询订单状态
+    success: () => {
+      // 支付成功，跳转结果页或轮询订单状态，最终状态以后端异步通知为准
     },
-    fail: function(res) {
-      console.log('支付失败', res);
+    fail: () => {
+      // 支付失败或取消，提示用户重试
     }
   });
 }
 ```
 
 ### 后端实现
-
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 <Tabs>
 <TabItem value="java" label="Java" default>
@@ -114,12 +108,12 @@ public class WxPayService {
       .merchantId(wxConfig.getMchId())
       .privateKeyFromPath(wxConfig.getPrivateKeyPath())
       .merchantSerialNumber(wxConfig.getSerialNo())
-      .apiV3Key(wxConfig.getApiv3PrivateKey())
+      .apiV3Key(wxConfig.getApiV3Key())
       .build();
     this.service = new JsapiServiceExtension.Builder().config(config).build();
   }
   
-  // 统一下单
+  // 统一下单：返回值含 timeStamp、nonceStr、packageVal、paySign，供前端 wx.chooseWXPay 使用
   public PrepayWithRequestPaymentResponse createOrder(OrderData orderData) {
     PrepayRequest request = new PrepayRequest();
     request.setAppid(orderData.getAppId());
@@ -161,19 +155,23 @@ use WeChatPay\Util\PemUtil;
 
 class WxPayService {
   private $instance;
+  private $mchId;
   
   public function __construct($config) {
+    $this->mchId = $config['mchId'];
+
     $merchantPrivateKeyInstance = Rsa::from(
       file_get_contents($config['privateKeyPath']), 
       Rsa::KEY_TYPE_PRIVATE
     );
     
+    // certs 的键为微信支付平台证书序列号（非商户证书序列号），用于验签应答与回调
     $this->instance = Builder::factory([
       'mchid' => $config['mchId'],
       'serial' => $config['serialNo'],
       'privateKey' => $merchantPrivateKeyInstance,
       'certs' => [
-        $config['serialNo'] => file_get_contents($config['certPath'])
+        $config['platformCertSerial'] => PemUtil::loadCertificate($config['platformCertPath']),
       ],
     ]);
   }
@@ -184,7 +182,7 @@ class WxPayService {
       ->chain('v3/pay/transactions/jsapi')
       ->post([
         'json' => [
-          'mchid' => $orderData['mchId'],
+          'mchid' => $this->mchId,
           'out_trade_no' => $orderData['outTradeNo'],
           'appid' => $orderData['appId'],
           'description' => $orderData['description'],
@@ -215,7 +213,6 @@ class WxPayService {
     return $resp->toArray();
   }
 }
-?>
 ```
 
 </TabItem>
@@ -311,8 +308,11 @@ func (s *WxPayService) QueryOrder(outTradeNo string) (*jsapi.Transaction, error)
   "wxpay": {
     "appId": "your_app_id",
     "mchId": "your_mch_id",
-    "apiKey": "your_api_key",
+    "apiV3Key": "your_api_v3_key",
+    "serialNo": "your_merchant_cert_serial_no",
     "privateKeyPath": "./cert/apiclient_key.pem",
+    "platformCertPath": "./cert/wechatpay_platform_cert.pem",
+    "platformCertSerial": "platform_cert_serial_no",
     "notifyUrl": "https://your-domain.com/api/wxpay/notify"
   }
 }

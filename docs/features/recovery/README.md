@@ -4,18 +4,18 @@ description: 基于 IndexedDB 的前端接口请求容灾方案，提供主域�
 
 # 接口请求兜底容灾
 
-基于 IndexedDB 的前端接口请求容灾解决方案，提供多层级的容错机制，确保在极端网络或服务异常情况下，让 Web 应用依然“坚不可摧”。
+基于 IndexedDB 的前端接口请求容灾方案，提供多层级容错机制，在极端网络或服务异常情况下保持核心页面可用。
 
-## ✨ 核心特性
+## 核心特性
 
-- **四级递进容灾：** 主域名 -> 重试 -> 备用域名 -> 本地缓存 -> 平滑降级。
-- **业务零中断：** 有效避免接口挂掉导致的页面白屏。
-- **无感存取：** 成功请求自动缓存至 IndexedDB，无需手动干预。
-- **全链路可观测：** 清晰标记数据来源（实时/缓存/备用），便于监控报警。
+- **四级递进容灾：** 主域名 -> 重试 -> 备用域名 -> 本地缓存 -> 平滑降级
+- **避免白屏：** 接口异常时优先展示本地缓存数据
+- **无感存取：** 成功请求自动持久化至 IndexedDB，无需手动干预
+- **来源可判断：** 结合 isFetching 与 navigator.onLine 区分实时数据与离线缓存
 
-## 🏗️ 容灾策略架构
+## 容灾策略架构
 
-本方案采用递进式的处理机制。当发起一个 GET 请求时，系统会按以下流程流转：
+GET 请求按以下流程流转：
 
 ```mermaid
 graph TD
@@ -50,26 +50,26 @@ graph TD
 
 ```
 
-## 🚀 实际工程落地指南
+## 实际工程落地指南
 
-在生产环境中，推荐使用 **TanStack Query + Axios + localforage** 的组合来实现这套容灾机制。
+生产环境推荐使用 **TanStack Query + Axios + localforage** 组合实现。
 
 ### 核心依赖安装
 
 ```bash
-pnpm add @tanstack/react-query @tanstack/react-query-persist-client @tanstack/query-async-storage-persister axios localforage
+pnpm add @tanstack/react-query @tanstack/react-query-devtools @tanstack/react-query-persist-client @tanstack/query-async-storage-persister axios localforage
 ```
 
 ### Axios 层面：定制 Orval Mutator 实现主/备域名容灾
 
-结合 RESTful 规范，我们在 Orval 配置的自定义 Mutator `src/api/mutator/axios.ts` 中植入备用域名的重试策略：
+在 Orval 自定义 Mutator `src/api/mutator/axios.ts` 中加入备用域名重试策略：
 
 ```ts
-// src/api/mutator/axios.ts
 import Axios from 'axios';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
+import { toast } from 'sonner';
 
-// 结合 RESTful 规范定义的统一错误响应格式
+// 统一错误响应结构
 export interface ApiErrorResponse {
   code: string;
   message: string;
@@ -106,45 +106,52 @@ interface FallbackRequestConfig extends AxiosRequestConfig {
   _retryCount?: number;
 }
 
-// 响应拦截器：先尝试备用域名容灾，失败后再处理全局业务错误
+// 响应拦截器：GET 失败时依次切换备用域名，全部失效后进入全局错误处理
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
     const config = error.config as FallbackRequestConfig;
 
-    // ============================================
-    // 1. 容灾降级：备用域名切换策略
-    // ============================================
-    if (config && config.fallbackEnabled && config.method === 'get') {
+    // 1. 备用域名切换：仅网络错误与 5xx 值得重试，4xx 换域名也不会成功
+    const isRetryable = !error.response || error.response.status >= 500;
+
+    if (
+      config &&
+      config.fallbackEnabled &&
+      config.method === 'get' &&
+      isRetryable
+    ) {
       config._retryCount = config._retryCount || 0;
       const fallbackDomains = config.fallbackDomains || BACKUP_DOMAINS;
 
       if (config._retryCount < fallbackDomains.length) {
         const nextDomain = fallbackDomains[config._retryCount];
         config._retryCount += 1;
-
         config.baseURL = nextDomain;
-        console.warn(`[API Fallback] 主域名请求失败，正在尝试备用域名: ${nextDomain}`);
 
         return axiosInstance(config);
       }
     }
 
-    // ============================================
-    // 2. 全局错误拦截 (容灾全部失效或无需容灾的请求)
-    // ============================================
+    // 2. 全局错误拦截（容灾失效或未开启容灾的请求）
     if (error.response) {
       const { status, data } = error.response;
       switch (status) {
         case 401:
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = `/login?redirect=${encodeURIComponent(
+            window.location.pathname,
+          )}`;
           break;
         case 403:
-          console.error('访问被拒绝:', data.message || '没有操作权限');
+          toast.error('访问被拒绝', {
+            description: data.message || '没有操作权限',
+          });
           break;
         case 500:
-          console.error('服务器内部错误:', data.error || '系统异常');
+          toast.error('服务器内部错误', {
+            description: data.error || '系统异常',
+          });
           break;
         default:
           break;
@@ -173,16 +180,14 @@ export type BodyType<BodyData> = BodyData;
 在 `src/providers/QueryProvider.tsx` 中配置持久化存储：
 
 ```tsx
-// src/providers/QueryProvider.tsx
-import { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import localforage from 'localforage';
 import type { ReactNode } from 'react';
 
-// 初始化 IndexedDB 存储
+// IndexedDB 存储实例
 const idbStorage = localforage.createInstance({
   name: 'AppFallbackDB',
   storeName: 'api_cache',
@@ -192,14 +197,13 @@ const asyncStoragePersister = createAsyncStoragePersister({
   storage: idbStorage,
 });
 
-// 初始化 QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2, // TanStack 自带的主域名网络级重试
+      retry: 2, // 网络级重试，与 axios 层备用域名形成两级容灾
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-      staleTime: 5 * 60 * 1000, // 5 分钟内数据被认为是新鲜的
-      gcTime: 24 * 60 * 60 * 1000, // 垃圾回收时间保留 24 小时，作为断网兜底池
+      staleTime: 5 * 60 * 1000, // 数据 5 分钟内视为新鲜
+      gcTime: 24 * 60 * 60 * 1000, // 缓存保留 24 小时，作为断网兜底池
       refetchOnWindowFocus: false,
     },
   },
@@ -209,22 +213,19 @@ interface QueryProviderProps {
   children: ReactNode;
 }
 
+// PersistQueryClientProvider 会在缓存恢复完成后再渲染子组件，避免首屏闪烁
 function QueryProvider({ children }: QueryProviderProps) {
-  useEffect(() => {
-    const unsubscribe = persistQueryClient({
-      queryClient,
-      persister: asyncStoragePersister,
-      maxAge: 24 * 60 * 60 * 1000, // 缓存最长保留 24 小时
-    });
-
-    return () => unsubscribe[1]();
-  }, []);
-
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: asyncStoragePersister,
+        maxAge: 24 * 60 * 60 * 1000,
+      }}
+    >
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
@@ -233,12 +234,11 @@ export default QueryProvider;
 
 ### 组件级使用：结合 Orval 生成的 Hooks 处理降级
 
-业务代码只需正常调用 Orval 自动生成的 hooks，并加上 `fallbackEnabled` 配置即可。遇到断网或服务器崩溃，UI 会自动展示 IndexedDB 里的旧数据：
+业务代码正常调用 Orval 生成的 hooks，通过 `axios` 选项传递请求级配置开启容灾。断网或服务器崩溃时，UI 自动展示 IndexedDB 中的旧数据：
 
 ```tsx
-// src/pages/UserDetail.tsx
 import { AlertCircle } from 'lucide-react';
-import { useGetUserById } from '@/api/user/user'; // 由 Orval 自动生成
+import { useGetUserById } from '@/api/user/user';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -248,22 +248,22 @@ interface UserDetailProps {
 }
 
 function UserDetail({ userId }: UserDetailProps) {
-  // 第二个参数传递给自定义的 axios mutator，开启容灾标识
+  // 通过 axios 选项向 mutator 传递容灾开关
   const { data: user, isLoading, error, isFetching } = useGetUserById(userId, {
-    fallbackEnabled: true,
+    axios: { fallbackEnabled: true },
   });
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-[200px]" />
-        <Skeleton className="h-[100px] w-full rounded-xl" />
+        <Skeleton className="h-8 w-52" />
+        <Skeleton className="h-24 w-full rounded-xl" />
       </div>
     );
   }
 
-  // error 只有在所有备用域名失效，且 IndexedDB 中完全没有缓存时才会出现
-  if (error) {
+  // 所有域名失效且缓存为空时才渲染错误；存在旧缓存时带着缓存继续渲染
+  if (error && !user) {
     const apiCode = error.response?.data?.code;
     return (
       <Alert variant="destructive">
@@ -280,11 +280,11 @@ function UserDetail({ userId }: UserDetailProps) {
 
   return (
     <div className="space-y-4">
-      {/* 离线状态且取到缓存兜底数据的 UI 提示 */}
+      {/* 离线时提示当前展示的是缓存数据 */}
       {!isFetching && !navigator.onLine && (
         <Alert>
-          <AlertTitle>您处于离线状态</AlertTitle>
-          <AlertDescription>当前网络不可用，正在显示离线缓存数据</AlertDescription>
+          <AlertTitle>当前处于离线状态</AlertTitle>
+          <AlertDescription>网络不可用，正在展示离线缓存数据</AlertDescription>
         </Alert>
       )}
 
@@ -303,7 +303,7 @@ function UserDetail({ userId }: UserDetailProps) {
 export default UserDetail;
 ```
 
-## 🌐 静态资源容灾
+## 静态资源容灾
 
 接口容灾只能保证“数据可达”，一旦 CDN 上的 JS/CSS/图片加载失败，页面依然会白屏或样式丢失。静态资源的重试与域名降级通过构建插件 [@rsbuild/plugin-assets-retry](https://github.com/rstackjs/rsbuild-plugin-assets-retry) 实现：构建时向 HTML 与 Rspack Runtime 注入一段运行时代码，监听资源加载错误事件，失败后自动重建标签重试，并按配置依次切换备用 CDN 域名，与接口侧的“主域名 -> 备用域名”策略形成完整的容灾闭环。
 
@@ -321,8 +321,8 @@ export default defineConfig({
       domain: ['cdn1.example.com', 'cdn2.example.com'],
       // 单个资源最大重试次数
       max: 3,
-      // 重试延迟，可按次数递增
-      delay: (ctx) => ctx.times * 1000,
+      // 重试延迟，按重试次数递增
+      delay: (times) => times * 1000,
       // 重试时追加 query，避免浏览器/CDN 缓存干扰重试结果
       addQuery: true,
       // 全部失败后的兜底回调，用于监控上报
@@ -353,18 +353,19 @@ pluginAssetsRetry({
 限制与注意：
 
 - **仅重试 async/defer 脚本：** 同步 `<script src>` 重试无法保证执行顺序，插件不做处理。
-- **禁止敏感信息与外部引用：** 配置会被序列化注入 HTML，`onRetry`/`onSuccess`/`onFail` 中禁止放入 Token，也禁止引用函数外部的变量或方法。
+- **避免敏感信息与外部引用：** 配置会被序列化注入 HTML，`onRetry`/`onSuccess`/`onFail` 中不应放入 Token，也不应引用函数外部的变量或方法。
 - **运行时代码保持内联：** 保持 `inlineScript: true`（默认）。抽成独立文件后，该文件自身加载失败会导致重试机制整体失效。
 - **Module Federation 场景：** 远程模块的静态资源重试需使用 [@module-federation/retry-plugin](https://www.npmjs.com/package/@module-federation/retry-plugin)。
 
-## 📖 典型应用场景
+## 典型应用场景
 
-- 🛒 **电商平台：** 主服务器故障或大促限流时，优先展示 IndexedDB 中缓存的商品列表，避免用户看到空白页面，挽回交易转化率。
-- 📰 **内容/资讯平台：** 网络不稳定时，用户依然可以阅读之前缓存的文章列表，保证“永远有内容可看”。 
-- 🏢 **企业级 SaaS：** 权限或配置接口异常时，利用缓存的“基础权限”维持核心流程运转，同时静默上报异常。
+- **电商平台：** 主服务器故障或大促限流时，优先展示 IndexedDB 中缓存的商品列表，避免空白页面。
+- **内容/资讯平台：** 网络不稳定时仍可阅读之前缓存的文章列表，保证内容可用。
+- **企业级 SaaS：** 权限或配置接口异常时，用缓存的基础权限维持核心流程运转，同时上报异常。
 
-## ⚠️ 最佳实践与限制
+## 最佳实践与限制
 
-- **仅限 GET 请求：** 兜底缓存机制仅适用于无副作用的 GET 请求。不要对 POST/PUT/DELETE 等操作使用缓存兜底。
-- **区分缓存层级：** Axios 层面的备用域名保证了“服务器宕机但网络通畅”的情况；TanStack Query 层的 IndexedDB 保证了“断网或所有服务器全挂”的情况。两者的责任边界很清晰。
-- **数据敏感性安全：** 若应用包含高度敏感的金融/医疗数据，缓存至 IndexedDB 前需考虑前端加密加密（如 `crypto-js`），或在用户登出时主动调用 `queryClient.clear()` 和 `idbStorage.clear()` 清理本地数据。
+- **仅限 GET 请求：** 兜底缓存仅适用于无副作用的 GET 请求，不对 POST/PUT/DELETE 等写操作使用缓存兜底。
+- **区分容灾层级：** Axios 层的备用域名覆盖“服务器宕机但网络通畅”的情况；TanStack Query 层的 IndexedDB 覆盖“断网或所有服务器不可用”的情况。
+- **离线检测的局限：** `navigator.onLine` 存在误报场景，仅作为 UI 提示参考，可靠的兜底依赖持久化缓存与请求失败结果本身。
+- **数据敏感性与清理：** 包含金融/医疗等高敏数据时，缓存至 IndexedDB 前应加密（如 `crypto-js`），并在用户登出时调用 `queryClient.clear()` 与 `idbStorage.clear()` 清理本地数据。

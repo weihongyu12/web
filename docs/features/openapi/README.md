@@ -6,19 +6,19 @@ description: OpenAPI 前端集成方案，使用 Orval、Axios 与 TanStack Quer
 
 ## 概述
 
-本指南将介绍如何使用 OpenAPI 规范、Orval 工具、Axios 和 TanStack Query 来构建类型安全的前端数据请求解决方案。通过这套工具链，您可以：
+基于 OpenAPI 规范、Orval、Axios 与 TanStack Query 构建类型安全的前端数据请求方案：
 
-- 基于 OpenAPI 规范自动生成 TypeScript 类型定义和 Zod 校验 Schema
+- 基于 OpenAPI 规范自动生成 TypeScript 类型定义与 Zod 校验 Schema
 - 按业务模块（Tags）自动生成 API 接口函数
-- 使用 TanStack Query 进行高效的数据请求和状态管理
-- 严格遵循团队的 **RESTful API 规范**，保持前后端接口的一致性和类型安全
+- 使用 TanStack Query 进行数据请求与状态管理
+- 遵循 **RESTful API 规范**，保持前后端接口的一致性和类型安全
 
 :::tip
-[TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)（原 React Query）是一个用于管理、缓存和更新服务器状态的库。通过使用 TanStack Query，您可以轻松实现：
+[TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)（原 React Query）是一个用于管理、缓存和更新服务器状态的库：
 
-- **数据获取：** 利用 useQuery 和 useMutation 等 Hook 来简化 API 请求。
-- **缓存机制：** 自动管理请求的数据缓存，减少不必要的重复请求。
-- **错误处理：** 结合 axios 拦截器，优雅处理全局和局部的业务错误。
+- **数据获取：** 利用 useQuery 和 useMutation 等 Hook 简化 API 请求。
+- **缓存机制：** 自动管理请求的数据缓存，减少重复请求。
+- **错误处理：** 结合 axios 拦截器处理全局与局部业务错误。
 :::
 
 ## 核心配置与使用方法
@@ -27,14 +27,12 @@ description: OpenAPI 前端集成方案，使用 Orval、Axios 与 TanStack Quer
 
 ```bash
 pnpm add @tanstack/react-query @tanstack/react-query-devtools axios
-pnpm add -D orval biome
+pnpm add -D orval msw @faker-js/faker biome
 ```
-
-_(注：根据配置使用了 Biome 作为代码格式化工具)_
 
 ### 2. 配置 Orval
 
-在项目根目录配置 `orval.config.ts`。我们采用 `tags-split` 模式将 API 按标签拆分为多个文件，并同时生成 Zod Schema 用于前端数据校验：
+在项目根目录配置 `orval.config.ts`，采用 `tags-split` 模式将 API 按标签拆分为多个文件，并生成 Zod Schema 用于前端数据校验：
 
 ```typescript
 import { defineConfig } from 'orval';
@@ -42,7 +40,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   api: {
     input: {
-      target: './openapi.yaml', // 您的 OpenAPI 规范文件路径
+      target: './openapi.yaml', // OpenAPI 规范文件路径
     },
     output: {
       mode: 'tags-split', // 按 Tag 拆分生成文件，适合大型项目
@@ -79,13 +77,14 @@ export default defineConfig({
 
 ### 3. 创建 Axios 拦截器与自定义 Mutator
 
-深度结合我们的 **RESTful API 规范**，创建 `src/api/mutator/axios.ts`，定义标准的错误体结构并处理异常：
+结合 **RESTful API 规范**创建 `src/api/mutator/axios.ts`，定义统一错误结构并处理异常：
 
 ```typescript
 import Axios from 'axios';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
+import { toast } from 'sonner';
 
-// 结合 RESTful 规范定义的统一错误响应格式
+// 统一错误响应结构
 export interface ApiErrorResponse {
   code: string;
   message: string;
@@ -94,16 +93,15 @@ export interface ApiErrorResponse {
 
 export const axiosInstance = Axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  adapter: 'fetch', // 默认使用 fetch adapter (Axios v1.7+)
+  adapter: 'fetch', // 使用 fetch adapter（Axios v1.7+）
 });
 
-// 请求拦截器：自动携带 OAuth 2.0 Token
+// 请求拦截器：携带 Token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
 
     if (token) {
-      // 避免直接修改函数参数 (Airbnb)，但在 Axios 拦截器中通常通过合并或重新赋值属性处理
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -121,16 +119,20 @@ axiosInstance.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // 401 Unauthorized 处理
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = `/login?redirect=${encodeURIComponent(
+            window.location.pathname,
+          )}`;
           break;
         case 403:
-          // 可以在此处集成全局 Toast 通知无权限
-          console.error('访问被拒绝:', data.message || '没有操作权限');
+          toast.error('访问被拒绝', {
+            description: data.message || '没有操作权限',
+          });
           break;
         case 500:
-          console.error('服务器内部错误:', data.error || '系统异常');
+          toast.error('服务器内部错误', {
+            description: data.error || '系统异常',
+          });
           break;
         default:
           break;
@@ -150,7 +152,7 @@ export const axios = <T>(
     ...options,
   }).then(({ data }) => data);
 
-// 覆盖 react-query 的返回错误类型，明确关联我们的 ApiErrorResponse
+// Orval 生成 Hook 的错误类型，关联 ApiErrorResponse
 export type ErrorType<Error = ApiErrorResponse> = AxiosError<Error>;
 export type BodyType<BodyData> = BodyData;
 ```
@@ -171,7 +173,7 @@ interface QueryProviderProps {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1, // 失败默认重试 1 次
+      retry: 1, // 失败重试 1 次
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 数据 5 分钟内视为新鲜
     },
@@ -239,8 +241,8 @@ function UserDetail({ userId }: UserDetailProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-[200px]" />
-        <Skeleton className="h-[100px] w-full rounded-xl" />
+        <Skeleton className="h-8 w-52" />
+        <Skeleton className="h-24 w-full rounded-xl" />
       </div>
     );
   }
@@ -278,6 +280,7 @@ export default UserDetail;
 
 ```tsx
 import { useState } from 'react';
+import { keepPreviousData } from '@tanstack/react-query';
 import { useGetProducts } from '@/api/product/product';
 import { Button } from '@/components/ui/button';
 import {
@@ -290,10 +293,14 @@ import {
 } from '@/components/ui/table';
 
 function ProductListWithPagination() {
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState(0);
   const size = 20;
 
-  const { data, isLoading } = useGetProducts({ page, size });
+  // keepPreviousData：翻页时保留上一页数据，避免整表闪烁 loading
+  const { data, isLoading } = useGetProducts(
+    { page, size },
+    { query: { placeholderData: keepPreviousData } },
+  );
 
   const handlePrevPage = () => {
     setPage((prev) => Math.max(0, prev - 1));
@@ -403,26 +410,23 @@ export default UserManager;
 
 ### 4. 结合 Zod 进行数据转换与防御性编程
 
-利用 Orval 自动生成的 Zod Schema 拦截脏数据，显示状态：
+利用 Orval 生成的 Zod Schema 校验响应数据：
 
 ```tsx
-import { z } from 'zod';
-import { getUserByIdResponseItem } from '@/api/user/user.zod';
+import { isAfter, subDays } from 'date-fns';
+import { getUserByIdResponse } from '@/api/user/user.zod';
 import { useGetUserById } from '@/api/user/user';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// 扩展自动生成的 Schema，添加前端特有的计算属性
-const UserWithComputedSchema = getUserByIdResponseItem
-  .extend({ isActive: z.boolean().optional() })
-  .transform((data) => ({
-    ...data,
-    isActive: data.lastLoginAt
-      ? new Date(data.lastLoginAt)
-        > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      : false,
-  }));
+// 基于生成的 Schema 追加前端计算属性
+const UserWithComputedSchema = getUserByIdResponse.transform((data) => ({
+  ...data,
+  isActive: data.lastLoginAt
+    ? isAfter(new Date(data.lastLoginAt), subDays(new Date(), 30))
+    : false,
+}));
 
 interface UserCardProps {
   userId: string;
@@ -435,11 +439,9 @@ function UserCard({ userId }: UserCardProps) {
     return <Skeleton className="h-32 w-full" />;
   }
 
-  // 严格校验和转换数据
   const userResult = UserWithComputedSchema.safeParse(rawUser);
 
   if (!userResult.success) {
-    console.error('API 数据格式异常', userResult.error);
     return (
       <div className="p-4 text-red-500">数据格式异常，无法渲染卡片</div>
     );
@@ -484,9 +486,8 @@ function UserProfile({ userId }: UserProfileProps) {
   const { data, error, isLoading } = useGetUserById(userId, {
     query: {
       retry: (failureCount, err) => {
-        // AxiosError 已经在 global types 被定义关联到了 ApiErrorResponse
         if (err.response?.status === 404) {
-          return false; // 404 错误不进行重试
+          return false; // 404 不重试
         }
         return failureCount < 3;
       },
@@ -495,7 +496,7 @@ function UserProfile({ userId }: UserProfileProps) {
 
   if (isLoading) {
     return (
-      <div className="text-sm text-muted-foreground">加载配置中...</div>
+      <div className="text-sm text-muted-foreground">加载中...</div>
     );
   }
 
@@ -503,7 +504,7 @@ function UserProfile({ userId }: UserProfileProps) {
     const apiCode = error.response?.data?.code;
     const apiMessage = error.response?.data?.message || '未知服务错误';
 
-    // 基于业务状态码（来自 RESTful 规范）执行特定视图逻辑
+    // 基于业务错误码执行特定视图逻辑
     if (apiCode === 'A0201') {
       return (
         <Alert variant="destructive">
@@ -523,7 +524,7 @@ function UserProfile({ userId }: UserProfileProps) {
     );
   }
 
-  return <div>配置拥有者：{data?.name}</div>;
+  return <div>姓名：{data?.name}</div>;
 }
 
 export default UserProfile;

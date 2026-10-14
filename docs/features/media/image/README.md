@@ -80,7 +80,7 @@ description: HTML5 图片元素使用指南，采用新格式优先策略，支�
 ```
 
 :::tip
-可以优先使用现代图片并且不使用 `<picture>` 元素，现在浏览器的对 AVIF 和 WebP 格式的覆盖支持率是非常高的。
+当前主流浏览器对 AVIF 和 WebP 的支持率已超过 95%。若无旧浏览器兼容需求，可直接使用现代格式，无需 `<picture>` 多格式回退。
 :::
 
 ## 图片格式比较
@@ -123,7 +123,7 @@ flowchart TD
    - 所有现代浏览器都支持
 
 :::tip
-iconfont？iconfont 已经不推荐使用了，SVG 是更好的选择！
+图标字体存在不支持多色、依赖字体文件加载、样式控制受限等局限，SVG 图标是更合适的替代方案。
 :::
 
 2. **AVIF**：
@@ -244,16 +244,14 @@ assets/
 
 ### Next.js Image 组件
 
-Next.js 提供了优化的 `Image` 组件，它是 HTML `<img>` 标签的扩展，具有多种强大的内置功能：
+Next.js 提供了优化的 `Image` 组件，它是 HTML `<img>` 标签的扩展，内置多项图像优化能力：
 
-- **自动图像优化**：自动按需将图像转换为 WebP 和 AVIF 等现代格式，同时根据设备需求调整图像大小，减少不必要的带宽占用
+- **自动图像优化**：按需将图像转换为现代格式（默认 WebP，配置 `images.formats` 后可输出 AVIF），并根据设备需求调整图像尺寸，减少带宽占用
 - **立即尺寸确定**：通过强制设置宽高比例，消除加载过程中的布局偏移 (CLS)，提升页面稳定性
-- **智能懒加载**：使用 IntersectionObserver 自动实现视口内加载，仅当图片即将进入可视区域时才加载
-- **预加载优先级**：可设置高优先级图像提前加载，显著改善 LCP (最大内容绘制) 性能指标
+- **懒加载**：使用 IntersectionObserver 实现视口内按需加载，仅当图片即将进入可视区域时才加载
+- **预加载优先级**：通过 `priority` 属性提前加载关键图像，改善 LCP (最大内容绘制) 指标
 - **模糊占位符**：支持加载期间显示低质量图像占位符 (LQIP)，提升用户感知体验
-- **自适应尺寸**：通过 sizes 属性自动为不同视口宽度提供最佳的图像尺寸
-
-这种一体化图像解决方案极大简化了 Web 开发中的图像优化工作，同时保证了高性能和良好的用户体验。
+- **自适应尺寸**：通过 sizes 属性自动为不同视口宽度提供合适的图像尺寸
 
 ```jsx
 import Image from 'next/image';
@@ -275,19 +273,14 @@ function HomePage() {
         alt="Profile Picture"
         width={500}
         height={500}
-        loading="lazy"
       />
     </div>
   );
 }
 ```
 
-:::tip
-使用 Next.js Image 组件可以大幅简化图像优化流程，自动为您处理现代格式转换、按需加载和适合设备的尺寸调整。
-:::
-
 :::warning
-Next.js Image SSR 模式下，会增加服务器负担，可能导致页面加载速度变慢。请根据服务器性能和流量需求谨慎使用。
+Next.js Image 的按需优化由服务端运行时处理，自托管场景会增加服务器负载；可通过自定义 loader 将优化工作交给外部图像服务或 CDN。
 :::
 
 ### 图像 CDN 和自动优化
@@ -342,10 +335,9 @@ SVGR 相比于传统的 SVG 使用方法有以下优势：
   - 照片和复杂图像：AVIF > WebP > JPEG
   - 需要透明度的图像：AVIF > WebP > PNG
 
-- **预加载关键图像**:
+- **预加载关键图像**（仅预加载确定会使用的格式，并列多个格式会在部分浏览器中造成重复下载）:
   ```html
   <link rel="preload" as="image" href="hero-image.avif" type="image/avif">
-  <link rel="preload" as="image" href="hero-image.webp" type="image/webp">
   ```
 
 - **图像懒加载**: 使用 `loading="lazy"` 属性或 Intersection Observer
@@ -386,24 +378,19 @@ SVGR 相比于传统的 SVG 使用方法有以下优势：
   }
   ```
 
-- **避免突然的布局变化**: 通过固定宽高比容器防止累积布局偏移 (CLS)
+- **固定宽高比**: 通过宽高比容器防止累积布局偏移 (CLS)
   ```css
   .aspect-ratio-box {
-    position: relative;
-    height: 0;
-    padding-top: 56.25%; /* 16:9 宽高比 */
+    aspect-ratio: 16 / 9;
   }
+
   .aspect-ratio-box img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
   ```
 
-- **使用宽高比盒子**: 避免加载时的布局变化
   ```html
   <div class="aspect-ratio-box">
     <img src="image.jpg" alt="描述文本">
@@ -419,9 +406,9 @@ SVGR 相比于传统的 SVG 使用方法有以下优势：
   <img src="chart.png" alt="2023 年第一季度销售增长图表，显示同比增长 15%">
   ```
 
-- **隐藏装饰性图片**:
+- **隐藏装饰性图片**（`alt` 为空即会被辅助技术忽略）:
   ```html
-  <img src="decoration.png" alt="" role="presentation">
+  <img src="decoration.png" alt="">
   ```
 
 - **复杂图像的扩展描述**:

@@ -2,6 +2,9 @@
 description: 支付宝支付接入指南，介绍电脑网站支付流程与代码实现，支持网页跳转收银台完成付款
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # 支付宝支付
 
 ## 简介
@@ -51,45 +54,54 @@ sequenceDiagram
 ### 前端调用（JavaScript）
 
 ```javascript
-// 1. 引入支付宝JSSDK（可选，用于手机网站支付）
-// 方式一：通过CDN引入
-// <script src="https://gw.alipayobjects.com/as/g/h5-lib/alipayjsapi/3.1.1/alipayjsapi.inc.min.js"></script>
+// 引入方式（仅手机网站支付 JSAPI 需要）：
+// CDN: <script src="https://gw.alipayobjects.com/as/g/h5-lib/alipayjsapi/3.1.1/alipayjsapi.inc.min.js"></script>
+// npm: @alipay/alipayjsapi，引入后通过全局 ap 对象调用
 
-// 方式二：通过npm安装
-// npm install @alipay/alipayjsapi
-// import alipayjsapi from '@alipay/alipayjsapi'
-
-// 2. 发起支付请求（电脑网站支付）
+// 电脑网站支付：创建订单后跳转收银台
 async function createAlipayOrder(orderData) {
   const response = await fetch('/api/alipay/create-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData)
   });
-  
+
   const result = await response.json();
-  
-  // 直接跳转到支付宝收银台
-  window.location.href = result.payUrl;
+
+  if (result.payUrl) {
+    // 后端以 method 'get' 组装参数时返回收银台 URL
+    window.location.href = result.payUrl;
+    return;
+  }
+
+  // 后端返回自动提交表单时（EasySDK / page_execute），注入页面并提交
+  const container = document.createElement('div');
+  container.innerHTML = result.formHtml;
+  document.body.appendChild(container);
+  container.querySelector('form')?.submit();
 }
 
-// 3. 手机网站支付示例（使用JSSDK）
-function createMobileAlipayOrder(orderData) {
-  // 检测是否在支付宝客户端内
-  if (alipayjsapi.isAlipayClient()) {
-    // 在支付宝客户端内，可以使用JSAPI
-    alipayjsapi.ready(function(res) {
-      alipayjsapi.tradePay({
-        tradeNO: orderData.tradeNo, // 支付宝交易号
-        bizType: 'trade'
-      }, function(result) {
-        if (result.resultCode === '9000') {
-          console.log('支付成功');
+// 手机网站支付（支付宝客户端内）
+async function createMobileAlipayOrder(orderData) {
+  const response = await fetch('/api/alipay/create-wap-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData)
+  });
+  const result = await response.json();
+
+  const isAlipayClient = /alipayclient/i.test(navigator.userAgent);
+  if (isAlipayClient) {
+    ap.tradePay(
+      { tradeNO: result.tradeNo },
+      (res) => {
+        // res.resultCode '9000' 表示支付成功，最终状态以后端异步通知为准
+        if (res.resultCode === '9000') {
+          window.location.href = '/pay/success';
         }
-      });
-    });
+      }
+    );
   } else {
-    // 不在支付宝客户端内，跳转到支付页面
     window.location.href = result.payUrl;
   }
 }
@@ -97,14 +109,11 @@ function createMobileAlipayOrder(orderData) {
 
 ### 后端实现
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 <Tabs>
 <TabItem value="nodejs" label="Node.js" default>
 
 ```javascript
-// 使用支付宝官方SDK
+// 使用支付宝官方SDK（alipay-sdk v2）
 const AlipaySdk = require('alipay-sdk').default;
 const AlipayFormData = require('alipay-sdk/lib/form').default;
 
@@ -118,7 +127,7 @@ class AlipayService {
     });
   }
   
-  // 创建支付订单
+  // 创建支付订单：method 'get' 时返回收银台 URL
   async createPagePay(orderData) {
     const formData = new AlipayFormData();
     formData.setMethod('get');
@@ -134,11 +143,9 @@ class AlipayService {
     formData.addField('returnUrl', orderData.returnUrl);
     formData.addField('notifyUrl', orderData.notifyUrl);
     
-    const result = await this.alipaySdk.exec('alipay.trade.page.pay', {}, {
+    return this.alipaySdk.exec('alipay.trade.page.pay', {}, {
       formData: formData
     });
-    
-    return result;
   }
   
   // 验证回调签名
@@ -148,32 +155,32 @@ class AlipayService {
   
   // 查询订单状态
   async queryOrder(outTradeNo) {
-    const result = await this.alipaySdk.exec('alipay.trade.query', {
+    return this.alipaySdk.exec('alipay.trade.query', {
       bizContent: {
         out_trade_no: outTradeNo
       }
     });
-    
-    return result;
   }
 }
 
-// 支付回调处理
+// 服务单例，避免每次请求重建
+const alipayService = new AlipayService(config);
+
+// 支付回调：报文为 form-urlencoded，需启用 express.urlencoded({ extended: false }) 中间件
 app.post('/api/alipay/notify', (req, res) => {
-  const alipayService = new AlipayService(config);
-  
-  if (alipayService.checkNotifySign(req.body)) {
-    const { out_trade_no, trade_status } = req.body;
-    
-    if (trade_status === 'TRADE_SUCCESS') {
-      // 更新订单状态为已支付
-      updateOrderStatus(out_trade_no, 'paid');
-    }
-    
-    res.send('success');
-  } else {
-    res.send('fail');
+  if (!alipayService.checkNotifySign(req.body)) {
+    return res.send('fail');
   }
+
+  const { out_trade_no, trade_status } = req.body;
+
+  if (trade_status === 'TRADE_SUCCESS' || trade_status === 'TRADE_FINISHED') {
+    // 更新前须与本地订单核对金额；写入需幂等，防止重复通知重复处理
+    updateOrderStatus(out_trade_no, 'paid');
+  }
+
+  // 验签通过的通知一律返回 success，否则支付宝会按间隔重发（最多 8 次）
+  res.send('success');
 });
 ```
 
@@ -279,7 +286,6 @@ class AlipayService {
     return Factory::payment()->common()->query($outTradeNo);
   }
 }
-?>
 ```
 
 </TabItem>
@@ -350,6 +356,7 @@ from alipay.aop.api.AlipayClientConfig import AlipayClientConfig
 from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
 from alipay.aop.api.request.AlipayTradeQueryRequest import AlipayTradeQueryRequest
+from alipay.aop.api.util.SignatureUtils import verify_with_rsa
 
 class AlipayService:
   def __init__(self, config):
@@ -358,7 +365,8 @@ class AlipayService:
     alipay_client_config.app_id = config['app_id']
     alipay_client_config.app_private_key = config['private_key']
     alipay_client_config.alipay_public_key = config['alipay_public_key']
-    
+
+    self.alipay_public_key = config['alipay_public_key']
     self.client = DefaultAlipayClient(alipay_client_config)
   
   # 创建支付订单
@@ -374,14 +382,17 @@ class AlipayService:
     request.return_url = order_data['return_url']
     request.notify_url = order_data['notify_url']
     
-    response = self.client.page_execute(request)
-    return response
+    # page_execute 返回自动提交表单的 HTML
+    return self.client.page_execute(request)
   
-  # 验证回调签名
+  # 验证回调签名：通知参数去除 sign/sign_type 后按 key 排序拼接
   def verify_notify(self, params):
     try:
-      return self.client.verify(params)
-    except:
+      sign = params.get('sign')
+      data = {k: v for k, v in params.items() if k not in ('sign', 'sign_type')}
+      message = '&'.join(f'{k}={v}' for k, v in sorted(data.items()))
+      return verify_with_rsa(self.alipay_public_key, message, sign)
+    except Exception:
       return False
   
   # 查询订单
@@ -391,8 +402,7 @@ class AlipayService:
       "out_trade_no": out_trade_no
     }
     
-    response = self.client.execute(request)
-    return response
+    return self.client.execute(request)
 ```
 
 </TabItem>

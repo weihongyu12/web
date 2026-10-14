@@ -2,6 +2,9 @@
 description: 云闪付银联网关支付接入指南，支持各大银行借记卡与信用卡快捷支付
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # 云闪付
 
 ## 简介
@@ -45,121 +48,103 @@ sequenceDiagram
 ### 前端调用（JavaScript）
 
 ```javascript
-// 注意：银联云闪付没有提供前端JSSDK
-// 支付流程是通过页面跳转到银联收银台完成
+// 银联未提供前端 JSAPI，支付通过页面跳转或表单提交到银联收银台完成
 
-// 发起支付请求
 async function createUnionpayOrder(orderData) {
   const response = await fetch('/api/unionpay/create-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData)
   });
-  
+
   const result = await response.json();
-  
-  // 跳转到云闪付收银台
-  window.location.href = result.payUrl;
+
+  if (result.payUrl) {
+    window.location.href = result.payUrl;
+    return;
+  }
+
+  submitUnionpayForm(result.formHtml);
 }
 
-// 或者直接提交表单（如果后端返回的是HTML表单）
+// 后端返回自动提交表单时，注入页面并提交（避免 innerHTML += 覆盖已有 DOM）
 function submitUnionpayForm(formHtml) {
-  // 将表单HTML插入到页面中
-  document.body.innerHTML += formHtml;
-  // 自动提交表单
-  document.forms['unionpaysubmit'].submit();
+  const container = document.createElement('div');
+  container.innerHTML = formHtml;
+  document.body.appendChild(container);
+  container.querySelector('form')?.submit();
 }
 
-// 监听支付结果（通过URL参数或本地存储）
-function checkPaymentResult() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const respCode = urlParams.get('respCode');
-  
-  if (respCode === '00') {
-    console.log('支付成功');
-    // 处理支付成功逻辑
-  } else {
-    console.log('支付失败或取消');
-    // 处理支付失败逻辑
+// 前台回跳（frontUrl）为银联向商户后端的表单 POST，由后端验签后
+// 302 至前端结果页并携带订单号；前端仅凭订单号查询后端获取最终状态，
+// 不信任 URL 携带的 respCode（客户端参数可被篡改）
+async function checkPaymentResult(orderId) {
+  const response = await fetch(`/api/unionpay/query-order?orderId=${orderId}`);
+  const result = await response.json();
+
+  if (result.respCode === '00') {
+    window.location.href = '/pay/success';
   }
 }
-
-// 页面加载时检查支付结果
-window.onload = function() {
-  checkPaymentResult();
-};
 ```
 
 ### 后端实现
-
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 <Tabs>
 <TabItem value="java" label="Java" default>
 
 ```java
-// 使用银联官方SDK
+// 使用银联官方SDK（acpservice-sdk）
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.unionpay.acp.sdk.AcpService;
-import com.unionpay.acp.sdk.LogUtil;
 import com.unionpay.acp.sdk.SDKConfig;
 
 public class UnionpayService {
-  
-  public UnionpayService() {
-    // 初始化SDK配置
+
+  private final String merId;
+
+  // 银联交易时间格式
+  private static final DateTimeFormatter TXN_TIME_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+  public UnionpayService(String merId) {
+    this.merId = merId;
+    // 读取 classpath 下的 acp_sdk.properties（证书与网关地址配置）
     SDKConfig.getConfig().loadPropertiesFromSrc();
   }
   
-  // 创建支付订单
+  // 创建支付订单：返回自动提交表单的 HTML
   public String createPayOrder(OrderData orderData) {
-    Map<String, String> requestData = new HashMap<String, String>();
+    Map<String, String> requestData = new HashMap<>();
     
-    // 版本号
     requestData.put("version", "5.1.0");
-    // 字符集编码
     requestData.put("encoding", "UTF-8");
-    // 签名方法
     requestData.put("signMethod", "01");
-    // 交易类型
-    requestData.put("txnType", "01");
-    // 交易子类
-    requestData.put("txnSubType", "01");
-    // 业务类型
-    requestData.put("bizType", "000201");
-    // 渠道类型
-    requestData.put("channelType", "08");
-    // 接入类型
-    requestData.put("accessType", "0");
-    // 货币代码
-    requestData.put("currencyCode", "156");
+    requestData.put("txnType", "01");          // 01：消费
+    requestData.put("txnSubType", "01");       // 01：自助消费
+    requestData.put("bizType", "000201");      // 000201：B2C 网关支付
+    requestData.put("channelType", "08");      // 08：手机渠道
+    requestData.put("accessType", "0");        // 0：商户直接入
+    requestData.put("currencyCode", "156");    // 人民币
     
-    // 商户号码
-    requestData.put("merId", orderData.getMerId());
-    // 商户订单号
+    requestData.put("merId", merId);
     requestData.put("orderId", orderData.getOrderId());
-    // 订单发送时间
     requestData.put("txnTime", getCurrentTime());
-    // 交易金额，单位分
-    requestData.put("txnAmt", String.valueOf(orderData.getTxnAmt()));
-    // 订单描述
+    requestData.put("txnAmt", String.valueOf(orderData.getTxnAmt())); // 单位：分
     requestData.put("orderDesc", orderData.getOrderDesc());
     
-    // 前台通知地址
     requestData.put("frontUrl", orderData.getFrontUrl());
-    // 后台通知地址
     requestData.put("backUrl", orderData.getBackUrl());
     
     // 报文签名
-    requestData = AcpService.sign(requestData, "UTF-8");
+    Map<String, String> signedData = AcpService.sign(requestData, "UTF-8");
     
-    // 获取请求银联的前台地址
     String requestFrontUrl = SDKConfig.getConfig().getFrontRequestUrl();
-    
-    // 生成自动跳转的Html表单
-    String html = AcpService.createAutoFormHtml(requestFrontUrl, requestData, "UTF-8");
-    
-    return html;
+    return AcpService.createAutoFormHtml(requestFrontUrl, signedData, "UTF-8");
   }
   
   // 验证签名
@@ -169,31 +154,37 @@ public class UnionpayService {
   
   // 查询订单
   public Map<String, String> queryOrder(String orderId, String txnTime) {
-    Map<String, String> requestData = new HashMap<String, String>();
+    Map<String, String> requestData = new HashMap<>();
     
     requestData.put("version", "5.1.0");
     requestData.put("encoding", "UTF-8");
     requestData.put("signMethod", "01");
-    requestData.put("txnType", "00");
+    requestData.put("txnType", "00");          // 00：查询
     requestData.put("txnSubType", "00");
     requestData.put("bizType", "000201");
     requestData.put("accessType", "0");
-    requestData.put("channelType", "07");
     
     requestData.put("orderId", orderId);
-    requestData.put("merId", SDKConfig.getConfig().getMerId());
+    requestData.put("merId", merId);
     requestData.put("txnTime", txnTime);
     
-    requestData = AcpService.sign(requestData, "UTF-8");
+    Map<String, String> signedData = AcpService.sign(requestData, "UTF-8");
     String requestUrl = SDKConfig.getConfig().getSingleQueryUrl();
-    Map<String, String> rspData = AcpService.post(requestData, requestUrl, "UTF-8");
+    Map<String, String> rspData = AcpService.post(signedData, requestUrl, "UTF-8");
+    
+    // 应答验签，防篡改
+    if (!AcpService.validate(rspData, "UTF-8")) {
+      throw new IllegalStateException("查询应答验签失败");
+    }
+    if (!"00".equals(rspData.get("respCode"))) {
+      throw new IllegalStateException("订单查询失败: " + rspData.get("respMsg"));
+    }
     
     return rspData;
   }
   
-  // 获取当前时间
   private String getCurrentTime() {
-    return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    return TXN_TIME_FORMATTER.format(LocalDateTime.now());
   }
 }
 ```
@@ -203,15 +194,27 @@ public class UnionpayService {
 
 ### 配置文件
 
-```json
-{
-  "unionpay": {
-    "merId": "your_merchant_id",
-    "privateKey": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
-    "publicKey": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
-    "gateway": "https://gateway.95516.com/gateway/api/frontTransReq.do",
-    "frontUrl": "https://your-domain.com/pay/success",
-    "backUrl": "https://your-domain.com/api/unionpay/notify"
-  }
-}
+银联 SDK 通过 `SDKConfig.loadPropertiesFromSrc()` 读取 classpath 下的 `acp_sdk.properties`：
+
+```properties
+# 交易网关地址
+acp_sdk.frontTransUrl=https://gateway.95516.com/gateway/api/frontTransReq.do
+acp_sdk.backTransUrl=https://gateway.95516.com/gateway/api/backTransReq.do
+acp_sdk.singleQueryUrl=https://gateway.95516.com/gateway/api/singleQuery.do
+
+# 签名证书（PKCS12 格式及密码）
+acp_sdk.signCert.path=/certs/production_sign_cert.pfx
+acp_sdk.signCert.pwd=your_cert_password
+acp_sdk.signCert.type=PKCS12
+
+# 验签用的银联根证书 / 中级证书 / 加密证书
+acp_sdk.rootCert.path=/certs/root_cert.cer
+acp_sdk.middleCert.path=/certs/middle_cert.cer
+acp_sdk.encryptCert.path=/certs/production_encrypt_cert.cer
+acp_sdk.validateCert.dir=/certs/
+
+acp_sdk.version=5.1.0
+acp_sdk.signMethod=01
 ```
+
+商户号 `merId`、前台回跳 `frontUrl` 与后台通知 `backUrl` 属于业务参数，随每笔交易请求传入。

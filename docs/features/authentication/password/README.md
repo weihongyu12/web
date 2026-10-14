@@ -1,21 +1,21 @@
 ---
 sidebar_position: 3
-description: 用户名密码登录方案，支持账号智能识别、密码强度检测、凭据管理 API 集成及无障碍设计
+description: 用户名密码登录方案，支持邮箱/手机号混输识别、凭据管理 API 集成及无障碍设计
 ---
 
 # 用户名/密码登录
 
-用户名/密码登录作为**传统的身份验证方式**，为需要明确密码管理的用户提供了完整的登录体验。该模块集成了现代 Web 应用所需的所有关键功能，包括灵活的账号识别、安全的凭据管理以及无障碍设计。
+用户名/密码登录是**传统的身份验证方式**，为需要明确密码管理的用户提供完整的登录体验，支持邮箱/手机号混输识别、浏览器凭据管理以及无障碍设计。
 
 ## 适用群体与场景
 
-### 🔐 适用用户群体
+### 适用用户群体
 
 - **习惯密码管理**：习惯使用浏览器或第三方密码管理器的用户
 - **企业与组织**：有统一密码策略和合规要求的企业环境
 - **传统偏好**：更信任或偏好传统密码登录方式的群体
 
-### 💼 特定应用场景
+### 特定应用场景
 
 - **多账户切换**：需要频繁切换和管理多个不同账户的环境
 - **离线与兼容**：希望在本地保存凭据，或需要兼容不支持新式免密登录的老旧系统
@@ -48,17 +48,17 @@ sequenceDiagram
     Form-->>UI: 返回字段错误提示（如有）
 
     User->>UI: 提交表单
-    UI->>Form: 处理提交 (防抖/防止重复提交)
+    UI->>Form: 处理提交（防止重复提交）
     
-    alt 验证通过
+    alt 表单验证通过
         Form->>Server: 发送登录请求
-        Server-->>Form: 返回登录令牌/结果
-        
+        Server-->>Form: 返回登录结果
+
         alt 登录成功 & 勾选"自动登录"
             Form->>CredAPI: 浏览器安全存储凭据
         end
-    else 验证失败
-        Form-->>UI: 显示服务端错误信息
+    else 表单验证失败
+        Form-->>UI: 显示字段错误提示
     end
 ```
 
@@ -137,7 +137,14 @@ function LoginForm() {
 
   const onSubmit = async (values: LoginFormData) => {
     try {
-      console.log('正在提交登录信息:', values);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+      if (!response.ok) {
+        throw new Error('登录失败');
+      }
 
       if (values.remember && 'credentials' in navigator) {
         const cred = new PasswordCredential({
@@ -192,7 +199,7 @@ function LoginForm() {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>密码</FormLabel>
-                  <a href="/forgot-password" className="text-sm text-blue-600 hover:underline" tabIndex={-1}>
+                  <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
                     忘记密码？
                   </a>
                 </div>
@@ -260,27 +267,27 @@ export default LoginForm;
 
 ## 体验与安全特性
 
-为了提供企业级的产品体验，该模块在交互、安全和无障碍设计上，进行了深度优化：
+该模块在交互、安全和无障碍设计上的处理要点如下：
 
-### 🎯 交互与表单校验
+### 交互与表单校验
 
-- **移动端输入防干扰**：明确设置 `autoCapitalize="none"`、`autoCorrect="off"` 和 `spellCheck={false}`，彻底解决移动端输入邮箱时首字母大写或被系统错误纠正的痛点
-- **智能账号识别**：单个输入框支持邮箱与手机号混输，底层通过正则自动判断格式并给出精准的错误提示
-- **流失路径兜底**：表单内嵌了“忘记密码”和“立即注册”的入口，对于密码验证失败的用户，提供清晰的找回路径可有效提高留存率
-- **实时且友好的反馈**：采用“失去焦点校验 + 输入时消除错误”的策略，既防止打断用户输入，又能及时纠正错误
-- **密码可见性控制**：提供一键明/暗文切换功能，切换后自动保持输入框焦点，操作连贯
+- **移动端输入防干扰**：设置 `autoCapitalize="none"`、`autoCorrect="off"` 和 `spellCheck={false}`，避免移动端输入邮箱时首字母自动大写或被自动纠正
+- **账号混输识别**：单个输入框支持邮箱与手机号混输，通过正则判断格式并给出对应的错误提示
+- **找回路径**：表单内嵌“忘记密码”和“立即注册”入口，密码验证失败时提供找回路径
+- **校验时机**：采用 `onTouched` 模式，字段首次失焦后触发校验，避免打断输入
+- **密码可见性切换**：支持明文/密文切换，通过 `aria-pressed` 反映切换状态
 
-### 🛡️ 凭据管理与安全 (Credential API)
+### 凭据管理与安全 (Credential API)
 
-- **密码管理器友好**：完美搭配了 `autoComplete="username"` 和 `autoComplete="current-password"`，并显式添加 `required` 属性，确保所有主流浏览器都能准确识别并提示保存/自动填充
-- **原生安全存储**：利用浏览器的 Credential Management API（需 HTTPS 环境），在获取用户授权（勾选记住密码）后，安全地将凭据交由系统底层管理
-- **防重复提交**：登录按钮在请求期间处于 `disabled` 状态，防止网络延迟导致的多重提交
+- **密码管理器兼容**：设置 `autoComplete="username"` 与 `autoComplete="current-password"`，并添加 `required` 属性，便于浏览器识别并提示保存/自动填充
+- **凭据存储**：基于 Credential Management API（需 HTTPS），勾选自动登录后将凭据交由浏览器管理
+- **防重复提交**：登录按钮在请求期间处于 `disabled` 状态，避免重复提交
 
-### ♿ 无障碍与移动端优化 (a11y)
+### 无障碍与移动端优化 (a11y)
 
-- **移动端键盘适配**：为用户名输入框指定 `inputMode="email"` 唤起最适合的虚拟键盘
-- **屏幕阅读器友好**：全面支持 ARIA 属性（如 `aria-label`、`aria-pressed`），确保视障用户能准确获取密码框的可见性状态
-- **全键盘操作**：所有交互元素（包括密码显示切换按钮）均可通过 Tab 键聚焦并使用键盘回车触发
+- **移动端键盘**：用户名输入框通过 `inputMode="email"` 唤起对应的虚拟键盘
+- **屏幕阅读器**：密码可见性切换按钮通过 `aria-label`、`aria-pressed` 标记当前状态
+- **键盘操作**：交互元素（包括密码可见性切换按钮）均可通过 Tab 聚焦、回车触发
 
 ## 参考资料
 

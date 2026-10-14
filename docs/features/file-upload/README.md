@@ -1,17 +1,17 @@
 ---
-description: 企业级文件上传方案，集成哈希校验秒传、分片并发上传、断点续传、多层安全防护与 OSS/MinIO 云原生存储
+description: 文件上传方案，集成哈希秒传、分片并发上传、断点续传、多层安全防护与 OSS/MinIO 对象存储直传
 ---
 
 # 文件上传
 
-构建一个稳定、高效、安全的文件上传系统是现代 Web 应用的基础设施。综合考虑了性能、可靠性和安全性，通过引入 **哈希校验 (秒传)**、**分片并发上传**、**断点续传** 以及 **多重安全防护**，并深度集成主流云原生存储方案 (OSS / MinIO)，提供了一套完整的企业级解决方案。
+文件上传是现代 Web 应用的基础设施。方案围绕性能、可靠性与安全性，引入 **哈希校验（秒传）**、**分片并发上传**、**断点续传** 与 **多层安全防护**，并对接对象存储（OSS / MinIO）实现前端直传。
 
-## 🌟 核心能力特性
+## 核心能力
 
-- **极速上传：** 基于 Checksum 的文件级“秒传”与去重。
-- **高可靠性：** 分片并发传输，支持网络中断后的无缝断点续传。
-- **安全可控：** 前端预检、文件魔数校验、服务端防病毒扫描与 STS 临时凭证直传。
-- **云端原生：** 灵活对接公有云 OSS 或私有化 MinIO，彻底释放后端带宽压力。
+- **秒传与去重：** 基于文件哈希的文件级秒传与内容去重。
+- **分片并发与断点续传：** 分片并发传输，网络中断后仅重传未成功的分片。
+- **多层安全防护：** 前端预检、文件魔数校验与 STS 临时凭证直传。
+- **对象存储直传：** 对接公有云 OSS 或私有化 MinIO，减少后端带宽压力。
 
 ## 1. 核心架构与校验机制 (Checksum)
 
@@ -26,13 +26,14 @@ sequenceDiagram
     participant DB as 数据库
     participant FS as 存储层(OSS/本地)
 
-    C->>C: 计算文件 Hash (如 MD5)
+    C->>C: 计算文件 Hash (SHA-256/MD5)
     C->>S: 发起预检请求 (校验 Hash)
     S->>DB: 查询 Hash 是否存在
     
     alt Hash 已存在 (秒传)
-        DB-->>S: 返回已存在的文件信息
-        S-->>C: 【秒传成功】返回文件 URL
+        DB-->>S: 命中已存在的物理文件
+        S->>DB: 为当前用户创建逻辑文件记录
+        S-->>C: 【秒传成功】返回该用户的文件 URL
     else Hash 不存在
         S-->>C: 【需要上传】返回 UploadId
         Note over C,FS: 进入分片上传流程 (每个分片独立校验 Hash)
@@ -41,44 +42,54 @@ sequenceDiagram
     end
 ```
 
+秒传只复用物理存储，服务端仍为当前用户创建独立的逻辑文件记录，文件访问权限按用户校验——仅知晓哈希不能获得他人文件。对安全敏感场景，整文件哈希应使用 SHA-256；有更高要求时可增加持有证明（Proof of Possession）：服务端随机指定文件某个偏移区段，客户端须返回该区段内容才算秒传成功，证明确实持有该文件。
+
 ### 1.2 数据库模型设计
 
-为支持完善的断点续传和秒传，系统采用 **主表 (`FILES`)** + **分片记录表 (`FILE_CHUNKS`)** 的一对多设计，确保服务端随时掌握已上传的可靠分片状态。
+断点续传与秒传要求服务端掌握每个分片的上传状态。模型上区分**物理文件**与**逻辑文件**：`FILE_BLOBS` 以 checksum 为唯一键做内容去重（秒传只复用物理文件）；`USER_FILES` 按用户记录归属与原始文件名，多个用户上传相同内容时各自拥有独立的逻辑记录，指向同一物理文件，权限互相隔离。
 
 ```mermaid
 erDiagram
-    FILES ||--o{ FILE_CHUNKS : "包含 (1:N)"
-    
-    FILES {
-        BIGINT id PK "文件唯一标识"
-        VARCHAR(64) checksum UK "文件完整性哈希 (秒传核心)"
-        VARCHAR(255) original_name "原始文件名"
+    USER_FILES }o--|| FILE_BLOBS : "引用物理文件 (N:1)"
+    FILE_BLOBS ||--o{ FILE_CHUNKS : "包含 (1:N)"
+
+    FILE_BLOBS {
+        BIGINT id PK "物理文件标识"
+        VARCHAR(64) checksum UK "内容哈希，物理去重键"
         BIGINT file_size "文件大小（字节）"
         VARCHAR(500) storage_path "物理存储路径或 OSS Key"
         TINYINT status "状态 (0:上传中, 1:完成, 2:失败)"
         INT total_chunks "总分片数"
+        INT ref_count "被逻辑文件引用的次数，归零后可回收"
     }
 
     FILE_CHUNKS {
         BIGINT id PK "分片唯一 ID"
-        BIGINT file_id FK "关联文件表"
+        BIGINT blob_id FK "关联物理文件表"
         INT chunk_index "分片序号 (0, 1, 2...)"
         VARCHAR(64) chunk_hash "分片哈希 (单片校验)"
         TINYINT status "状态 (1:已上传)"
+    }
+
+    USER_FILES {
+        BIGINT id PK "逻辑文件标识"
+        BIGINT user_id "所属用户"
+        BIGINT blob_id FK "关联物理文件"
+        VARCHAR(255) original_name "用户侧原始文件名"
+        DATETIME created_at "上传时间"
     }
 ```
 
 ### 1.3 基于 Checksum 的物理存储路径设计
 
-为了在物理存储层面实现高效索引与去重，系统在服务端/存储端采用基于 Checksum 的内容寻址存储（Content-Addressable Storage）设计：
+物理存储采用基于 Checksum 的内容寻址存储（Content-Addressable Storage），每个哈希仅落盘一份，用户侧的文件名由逻辑表维护：
 
 ```
 /uploads/
 ├── e3b0c44298fc1c14.../  (以文件 Hash 命名的目录)
-│   ├── document.pdf      # 用户A上传的文件名
-│   └── report_v2.pdf     # 用户B上传的同内容文件，不同命名
+│   └── blob              # 物理文件仅保留一份
 ├── 9f8e7d6c5b4a3b21.../
-│   └── company_video.mp4
+│   └── blob
 └── ...
 ```
 
@@ -88,7 +99,7 @@ erDiagram
 
 ### 2.1 分片并发上传
 
-客户端通过 `File.slice()` 切割文件，配合并发控制器实现多通道并发上传。
+客户端通过 `File.slice()` 切割文件，使用 [p-limit](https://github.com/sindresorhus/p-limit)（`pnpm add p-limit`）控制同时在途的分片数量；首个分片失败时通过 `AbortController` 立即中止其余在途与排队中的分片。
 
 ```mermaid
 sequenceDiagram
@@ -118,9 +129,12 @@ sequenceDiagram
 #### 核心代码实现
 
 ```ts
+import pLimit from 'p-limit';
+
 export interface ChunkUploaderOptions {
   chunkSize?: number;
   concurrency?: number;
+  onProgress?: (uploadedCount: number, totalChunks: number) => void;
 }
 
 export interface ChunkTask {
@@ -128,9 +142,21 @@ export interface ChunkTask {
   index: number;
 }
 
-/**
- * 基础分片上传类
- */
+// 上传错误：携带 HTTP 状态码，网络层错误无 status
+export class UploadError extends Error {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.status = status;
+  }
+
+  // 仅网络错误与 5xx 值得重试，4xx 重试也不会成功
+  get retryable(): boolean {
+    return this.status === undefined || this.status >= 500;
+  }
+}
+
 export class ChunkUploader {
   protected file: File;
 
@@ -140,14 +166,16 @@ export class ChunkUploader {
 
   protected chunks: Blob[];
 
+  protected onProgress?: ChunkUploaderOptions['onProgress'];
+
   constructor(file: File, options: ChunkUploaderOptions = {}) {
     this.file = file;
-    this.chunkSize = options.chunkSize || 5 * 1024 * 1024; // 默认分片 5MB
-    this.maxConcurrency = options.concurrency || 3; // 默认并发限制为 3
+    this.chunkSize = options.chunkSize ?? 5 * 1024 * 1024; // 分片 5MB
+    this.maxConcurrency = options.concurrency ?? 3;
+    this.onProgress = options.onProgress;
     this.chunks = this.createChunks();
   }
 
-  // 1. 文件分片
   protected createChunks(): Blob[] {
     const chunks: Blob[] = [];
     let start = 0;
@@ -158,69 +186,105 @@ export class ChunkUploader {
     return chunks;
   }
 
-  // 2. 并发上传调度
-  public async uploadChunks(uploadId: string, uploadedIndices: number[] = []): Promise<void> {
-    // 过滤掉已成功上传的分片
-    const tasks: ChunkTask[] = this.chunks
-      .map((chunkBlob, index) => ({ chunkBlob, index }))
-      .filter((task) => !uploadedIndices.includes(task.index));
-
-    let activeCount = 0;
-    let taskIndex = 0;
-
-    return new Promise((resolve, reject) => {
-      const next = (): void => {
-        if (taskIndex >= tasks.length && activeCount === 0) {
-          resolve();
-          return;
-        }
-
-        while (activeCount < this.maxConcurrency && taskIndex < tasks.length) {
-          const { chunkBlob, index } = tasks[taskIndex];
-          taskIndex += 1;
-          activeCount += 1;
-
-          this.uploadSingleChunk(uploadId, index, chunkBlob)
-            .then(() => {
-              activeCount -= 1;
-              next(); // 释放槽位，加载下一任务
-            })
-            .catch((err: Error) => {
-              reject(new Error(`分片 ${index} 上传失败: ${err.message}`));
-            });
-        }
-      };
-
-      next();
-    });
+  // 分片哈希，服务端逐片校验传输完整性
+  protected async computeChunkHash(chunkBlob: Blob): Promise<string> {
+    const digest = await crypto.subtle.digest('SHA-256', await chunkBlob.arrayBuffer());
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('');
   }
 
-  // 3. 执行单分片上传
-  protected async uploadSingleChunk(uploadId: string, index: number, chunkBlob: Blob): Promise<any> {
+  // 并发调度：p-limit 控制并发，任一分片失败即中止其余请求
+  public async uploadChunks(
+    uploadId: string,
+    uploadedIndices: ReadonlySet<number> = new Set(),
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const tasks: ChunkTask[] = this.chunks
+      .map((chunkBlob, index) => ({ chunkBlob, index }))
+      .filter((task) => !uploadedIndices.has(task.index));
+
+    const totalChunks = this.chunks.length;
+    let uploadedCount = uploadedIndices.size;
+
+    const controller = new AbortController();
+    const abortOnExternal = () => controller.abort();
+    signal?.addEventListener('abort', abortOnExternal);
+
+    const limit = pLimit(this.maxConcurrency);
+
+    try {
+      await Promise.all(
+        tasks.map((task) =>
+          limit(() => {
+            if (controller.signal.aborted) return;
+
+            return this.uploadSingleChunk(
+              uploadId,
+              task.index,
+              task.chunkBlob,
+              controller.signal,
+            ).then(
+              () => {
+                uploadedCount += 1;
+                this.onProgress?.(uploadedCount, totalChunks);
+              },
+              (error) => {
+                controller.abort();
+                throw error;
+              },
+            );
+          }),
+        ),
+      );
+    } finally {
+      signal?.removeEventListener('abort', abortOnExternal);
+    }
+  }
+
+  // 单分片上传：FormData 附带分片哈希供服务端校验
+  protected async uploadSingleChunk(
+    uploadId: string,
+    index: number,
+    chunkBlob: Blob,
+    signal?: AbortSignal,
+  ): Promise<void> {
     const formData = new FormData();
     formData.append('chunk', chunkBlob);
     formData.append('uploadId', uploadId);
     formData.append('index', String(index));
+    formData.append('chunkHash', await this.computeChunkHash(chunkBlob));
 
-    const response = await fetch('/api/upload/chunk', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('网络请求异常');
+    let response: Response;
+    try {
+      response = await fetch('/api/upload/chunk', {
+        method: 'POST',
+        body: formData,
+        signal,
+      });
+    } catch (error) {
+      // 主动取消原样透传，其余视为网络层错误（无 status，可重试）
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
+      throw new UploadError(`分片 ${index} 网络请求失败`);
     }
 
-    return response.json();
+    if (!response.ok) {
+      throw new UploadError(
+        `分片 ${index} 上传失败，接口返回 ${response.status}`,
+        response.status,
+      );
+    }
   }
 }
 
 export default ChunkUploader;
 ```
 
+`onProgress(uploadedCount, totalChunks)` 回调供 UI 层渲染进度条；`uploadChunks` 与 `startUpload` 均接受外部 `AbortSignal`，组件卸载或用户取消时调用 `controller.abort()` 即可中断整个上传流程。
+
 ### 2.2 断点续传与网络重试
 
-发生中断或页面刷新后，客户端通过服务端的已上传分片列表直接“定位断点”，并提供指数退避重试机制确保抗网络抖动能力。
+发生中断或页面刷新后，客户端以文件哈希查询服务端已上传的分片列表定位断点，仅重传缺失分片。单分片失败时仅对网络错误与 5xx 做指数退避重试，4xx 业务错误直接向上抛出。文件哈希由前端预先计算，大文件建议使用 SparkMD5 等增量算法，避免整文件读入内存。
 
 ```mermaid
 sequenceDiagram
@@ -238,7 +302,7 @@ sequenceDiagram
     rect rgb(255, 240, 240)
         Note over C,S: 4. 传输重试机制
         C->>S: 上传分片 2 (因突发网络抖动失败)
-        C->>C: 等待延迟延迟 (1s, 2s, 4s...)
+        C->>C: 等待退避延迟 (1s, 2s, 4s...)
         C->>S: 重新上传分片 2
         S-->>C: 成功，记录到数据库
     end
@@ -247,6 +311,8 @@ sequenceDiagram
 #### 核心代码实现
 
 ```ts
+import ChunkUploader, { type ChunkUploaderOptions, UploadError } from './ChunkUploader';
+
 export interface ResumableUploaderOptions extends ChunkUploaderOptions {
   retries?: number;
   baseDelay?: number;
@@ -257,9 +323,6 @@ export interface StatusResponse {
   uploadedIndices: number[];
 }
 
-/**
- * 支持断点续传与重试的上传器
- */
 class ResumableUploader extends ChunkUploader {
   private maxRetries: number;
 
@@ -267,54 +330,65 @@ class ResumableUploader extends ChunkUploader {
 
   constructor(file: File, options: ResumableUploaderOptions = {}) {
     super(file, options);
-    this.maxRetries = options.retries || 3; // 单分片最大重试次数
-    this.baseDelay = options.baseDelay || 1000; // 重试基础退避延迟 (1秒)
+    this.maxRetries = options.retries ?? 3; // 单分片最大重试次数
+    this.baseDelay = options.baseDelay ?? 1000; // 退避基础延迟 1s
   }
 
-  // 覆盖单分片上传方法，添加指数退避与随机抖动重试逻辑
-  protected async uploadSingleChunk(
+  // 重写单分片上传：仅对可重试错误做指数退避 + 随机抖动
+  protected override async uploadSingleChunk(
     uploadId: string,
     index: number,
     chunkBlob: Blob,
+    signal?: AbortSignal,
     retryCount = 0,
-  ): Promise<any> {
+  ): Promise<void> {
     try {
-      return await super.uploadSingleChunk(uploadId, index, chunkBlob);
+      await super.uploadSingleChunk(uploadId, index, chunkBlob, signal);
     } catch (error) {
-      if (retryCount < this.maxRetries) {
-        // 指数退避延迟 + 随机抖动避免惊群效应
-        const jitter = Math.floor(Math.random() * 500);
-        // eslint-disable-next-line no-restricted-properties
-        const delay = (2 ** retryCount) * this.baseDelay + jitter;
-
-        console.warn(`分片 ${index} 上传失败，将在 ${delay}ms 后进行第 ${retryCount + 1} 次重试...`);
-
-        await new Promise((resolve) => { setTimeout(resolve, delay); });
-        return this.uploadSingleChunk(uploadId, index, chunkBlob, retryCount + 1);
+      const isAbort = error instanceof DOMException && error.name === 'AbortError';
+      // 主动取消与 4xx 业务错误不重试
+      if (isAbort || !(error instanceof UploadError) || !error.retryable) {
+        throw error;
       }
-      throw new Error(`分片 ${index} 超过最大重试限额`);
+      if (retryCount >= this.maxRetries) {
+        throw new Error(`分片 ${index} 重试 ${this.maxRetries} 次后仍失败`, {
+          cause: error,
+        });
+      }
+
+      const jitter = Math.floor(Math.random() * 500);
+      const delay = 2 ** retryCount * this.baseDelay + jitter;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      return this.uploadSingleChunk(uploadId, index, chunkBlob, signal, retryCount + 1);
     }
   }
 
-  // 断点续传主流程
-  public async startUpload(): Promise<void> {
-    // 1. 获取已上传分片列表
-    const statusRes = await fetch(`/api/upload/status?fileName=${this.file.name}&size=${this.file.size}`);
-    const { uploadId, uploadedIndices } = await statusRes.json() as StatusResponse;
+  // 断点续传主流程：fileHash 由前端预先计算
+  public async startUpload(fileHash: string, signal?: AbortSignal): Promise<string> {
+    // 以文件哈希查询断点
+    const statusRes = await fetch(`/api/upload/status?hash=${fileHash}`, { signal });
+    if (!statusRes.ok) {
+      throw new UploadError(`状态接口返回 ${statusRes.status}`, statusRes.status);
+    }
+    const { uploadId, uploadedIndices } = (await statusRes.json()) as StatusResponse;
 
-    console.log(`断点定位成功，跳过已上传分片: ${uploadedIndices.join(',')}`);
+    // 跳过已上传分片，调度剩余分片并发上传
+    await this.uploadChunks(uploadId, new Set(uploadedIndices), signal);
 
-    // 2. 调度未上传分片并发请求
-    await this.uploadChunks(uploadId, uploadedIndices);
-
-    // 3. 所有分片完成后通知服务端合并
-    await fetch('/api/upload/merge', {
+    // 通知服务端合并，并附带文件哈希做最终完整性校验
+    const mergeRes = await fetch('/api/upload/merge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uploadId, fileName: this.file.name }),
+      body: JSON.stringify({ uploadId, fileName: this.file.name, checksum: fileHash }),
+      signal,
     });
+    if (!mergeRes.ok) {
+      throw new UploadError(`合并接口返回 ${mergeRes.status}`, mergeRes.status);
+    }
 
-    console.log('文件上传及合并成功！');
+    const { url } = (await mergeRes.json()) as { url: string };
+    return url;
   }
 }
 
@@ -323,35 +397,41 @@ export default ResumableUploader;
 
 ## 3. 安全防护体系
 
-文件上传属于 Web 安全的高风险业务，系统在服务端设计了三层纵深防护体系：
+文件上传是 Web 安全的高风险业务，服务端需要纵深防护：
 
 1. **三层校验：** 
-   - **前端预检：** 文件扩展名及 `accept` 属性校验，过滤普通错误选择。 
-   - **MIME 类型校验：** 检查 HTTP 报文中的 `Content-Type`。 
+   - **前端预检：** 文件扩展名及 `accept` 属性校验，拦截明显的误选。 
+   - **MIME 类型校验：** 检查 HTTP 报文中的 `Content-Type`（客户端可伪造，仅作初筛）。 
    - **文件魔数校验 (Magic Number)：** 服务端读取文件头前几位字节判定真实类型。
      ```ts
-     // Node.js 读取文件头示例
-     const buffer: ArrayBuffer = await file.slice(0, 4).arrayBuffer();
-     const hex: string = Buffer.from(buffer).toString('hex');
-     // 例如 JPG 是 'ffd8ff', PNG 是 '89504e47'
+     // Node.js 读取文件头前 4 字节判定真实类型
+     import { open } from 'node:fs/promises';
+
+     const handle = await open(filePath, 'r');
+     const buffer = Buffer.alloc(4);
+     await handle.read(buffer, 0, 4, 0);
+     await handle.close();
+
+     const hex = buffer.toString('hex');
+     // JPG 为 ffd8ff，PNG 为 89504e47
      ```
-2. **重命名混淆：** 使用哈希值或 UUID 重新命名落盘目录与文件名，杜绝路径遍历攻击 (`../../`)。
-3. **取消执行权限：** 确保物理存储目录具有只读和写权限，但坚决取消执行权限，防止 WebShell 注入被意外执行。
+2. **重命名混淆：** 使用哈希值或 UUID 重新命名落盘目录与文件名，避免路径遍历攻击 (`../../`)。
+3. **取消执行权限：** 物理存储目录仅授予读写权限，取消执行权限，防止 WebShell 被意外执行。
 
-## 4. 企业级存储引擎选型
+## 4. 存储引擎选型
 
-在大规模生产环境中，强烈建议将数据与应用服务器解耦，采用对象存储服务，配合**客户端直传模式**以降低后端 I/O 压力。
+生产环境建议将存储与应用服务器解耦，采用对象存储服务，并配合**客户端直传模式**降低后端 I/O 压力。
 
 ### 4.1 方案对比
 
 | 存储引擎 | 适用场景 | 优势 |
 |---|---|---|
-| **阿里云 OSS** / **腾讯云 COS** 等 | 公有云业务、高并发互联网产品 | 弹性无限扩容，免除运维烦恼；内置 CDN 加速及丰富的图像、视频处理服务 |
-| **MinIO** | 私有云部署、内网隔离、信创及合规业务 | 开源且完全兼容 AWS S3 标准 API；单节点吞吐率极高，适合完全内网和本地化环境 |
+| **阿里云 OSS** / **腾讯云 COS** 等 | 公有云业务、高并发互联网产品 | 弹性扩容、免运维；内置 CDN 加速与图像/视频处理能力 |
+| **MinIO** | 私有云部署、内网隔离、信创及合规业务 | 开源且兼容 AWS S3 API；适合内网与本地化部署环境 |
 
 ### 4.2 前端直传方案实现 (以阿里云 OSS 为例)
 
-通过服务端签发 STS (临时访问凭证)，由前端 SDK 直接将文件流分片推送到云端存储。
+由服务端签发 STS 临时凭证，前端使用 OSS SDK 将文件分片直传至云端存储。
 
 #### Node.js 服务端签发 STS Token
 
@@ -373,13 +453,13 @@ export async function generateUploadToken(userId: string): Promise<STSCredential
     apiVersion: '2015-04-01',
   });
 
-  // 严格限制该凭证只能上传到特定用户的目录下
+  // 限定凭证仅能写入该用户目录；PutObject 覆盖分片写操作，AbortMultipartUpload 用于中断残留分片
   const policy = {
     Version: '1',
     Statement: [
       {
         Effect: 'Allow',
-        Action: ['oss:PutObject', 'oss:MultipartUpload'],
+        Action: ['oss:PutObject', 'oss:AbortMultipartUpload'],
         Resource: [`acs:oss:*:*:your-bucket/uploads/${userId}/*`],
       },
     ],
@@ -392,7 +472,7 @@ export async function generateUploadToken(userId: string): Promise<STSCredential
     DurationSeconds: 3600, // 凭证1小时有效
   }, { method: 'POST' });
 
-  return (res as any).Credentials as STSCredentials;
+  return (res as { Credentials: STSCredentials }).Credentials;
 }
 ```
 
@@ -411,7 +491,7 @@ export async function uploadToOSS(
   file: File,
   stsConfig: STSConfig,
   userId: string,
-): Promise<string | undefined> {
+): Promise<string> {
   const client = new OSS({
     region: 'oss-cn-hangzhou',
     accessKeyId: stsConfig.AccessKeyId,
@@ -423,26 +503,20 @@ export async function uploadToOSS(
   const objectKey = `uploads/${userId}/${Date.now()}_${file.name}`;
   const checkpointKey = `oss_upload_${file.name}_${file.size}`;
   const checkpointStr = localStorage.getItem(checkpointKey);
+  const checkpoint = checkpointStr ? JSON.parse(checkpointStr) : undefined;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const checkpoint: any = checkpointStr ? JSON.parse(checkpointStr) : undefined;
+  // 失败时保留 checkpoint 供下次续传；错误向上抛出，由调用方决定提示方式
+  await client.multipartUpload(objectKey, file, {
+    parallel: 3, // 并发分片数
+    partSize: 5 * 1024 * 1024, // 分片 5MB
+    checkpoint, // 传入断点，跳过已上传分片
+    progress: (_p: number, cpt: any) => {
+      localStorage.setItem(checkpointKey, JSON.stringify(cpt)); // 记录断点
+    },
+  });
 
-  try {
-    const result = await client.multipartUpload(objectKey, file, {
-      parallel: 3, // 并发数
-      partSize: 5 * 1024 * 1024, // 5MB 块大小
-      checkpoint, // 传入断点位置
-      progress: (p: number, cpt: any) => {
-        localStorage.setItem(checkpointKey, JSON.stringify(cpt)); // 记录进度
-        console.log(`OSS 传输进度: ${Math.floor(p * 100)}%`);
-      },
-    });
-
-    localStorage.removeItem(checkpointKey);
-    return result.res.requestUrls[0];
-  } catch (err) {
-    console.error('OSS 上传中断或失败:', err);
-    return undefined;
-  }
+  localStorage.removeItem(checkpointKey);
+  // 返回 objectKey，访问地址由业务侧拼接 CDN 域名生成
+  return objectKey;
 }
 ```

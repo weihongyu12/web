@@ -1,12 +1,12 @@
 ---
-description: HTML5 视频元素使用指南，采用免专利优先的编解码策略，支持 AV1、VP9、H.264 等多格式兼容方案
+description: HTML5 视频元素使用指南，采用免专利优先的编解码策略，支持 AV1、VP9、H.264 等多格式兼容方案，并涵盖 Video.js 播放器的使用
 ---
 
 # 视频
 
 ## 视频元素
 
-视频资源采用了 **“免专利优先，效率其次，兼容性保底”** 的多层次编解码策略：
+视频资源采用了 **"免专利优先，效率其次，兼容性保底"** 的多层次编解码策略：
 
 - 首选 AV1 作为主要编解码器（最高压缩比，支持现代浏览器）
 - 其次是 VP9（良好压缩比，广泛支持）
@@ -20,15 +20,15 @@ description: HTML5 视频元素使用指南，采用免专利优先的编解码�
 - OGV 格式作为旧浏览器的兜底选项
 
 ```html
-<video controls width="800" height="450" poster="preview.jpg">
+<video controls width="800" height="450" poster="preview.jpg" preload="metadata" playsinline>
   <!-- 免专利格式（优先） -->
   <source src="video.av1.webm" type='video/webm; codecs="av01.0.05M.08,opus"'>
-  <source src="video.av1.mp4" type='video/mp4; codecs="av01.0.05M.08,opus"'>
+  <source src="video.av1.mp4" type='video/mp4; codecs="av01.0.05M.08,mp4a.40.2"'>
   <source src="video.vp9.webm" type='video/webm; codecs="vp9,opus"'>
 
   <!-- 专利格式（兜底） -->
-  <source src="video.h265.mp4" type='video/mp4; codecs="hev1.1.6.L93.B0"'>
-  <source src="video.h264.mp4" type='video/mp4; codecs="avc1.64001E"'>
+  <source src="video.h265.mp4" type='video/mp4; codecs="hev1.1.6.L93.B0,mp4a.40.2"'>
+  <source src="video.h264.mp4" type='video/mp4; codecs="avc1.64001E,mp4a.40.2"'>
 
   <!-- 老旧浏览器兜底 -->
   <source src="video.vp8.webm" type='video/webm; codecs="vp8,vorbis"'>
@@ -39,7 +39,7 @@ description: HTML5 视频元素使用指南，采用免专利优先的编解码�
 ```
 
 :::warning
-在实际项目中，可能无法使用所有的编解码器和视频格式。但还是建议按照 **“免专利优先，效率其次，兼容性保底”** 的原则来选择视频格式和编解码器。这样可以确保在大多数现代浏览器中获得最佳性能和兼容性。
+在实际项目中，可能无法使用所有的编解码器和视频格式。但还是建议按照 **"免专利优先，效率其次，兼容性保底"** 的原则来选择视频格式和编解码器。这样可以确保在大多数现代浏览器中获得最佳性能和兼容性。
 :::
 
 ## 视频格式与编解码器
@@ -76,7 +76,7 @@ description: HTML5 视频元素使用指南，采用免专利优先的编解码�
 1. **AV1**：
    - 由 Alliance for Open Media 开发的开源、免专利费的视频编码格式
    - 比 VP9 提供约 30% 的压缩效率提升
-   - 在 Chrome、Firefox、Edge 和 Safari 17+ 中得到支持
+   - Chrome、Firefox、Edge 支持软件解码；Safari 17+ 依赖硬件解码（iPhone 15 Pro 及后续自研芯片设备）
    - 适合高清和 4K 内容，文件体积小
 
 2. **H.265/HEVC**：
@@ -108,7 +108,7 @@ description: HTML5 视频元素使用指南，采用免专利优先的编解码�
 
 | 容器格式 | 支持的视频编解码器 | 支持的音频编解码器 | 浏览器兼容性 | 最适用场景 |
 |---------|-----------------|-----------------|------------|------------|
-| **WebM** | AV1, VP9, VP8 | Opus, Vorbis | Chrome, Firefox, Edge, Safari 17+ | 高效网络传输，开源项目 |
+| **WebM** | AV1, VP9, VP8 | Opus, Vorbis | Chrome, Firefox, Edge, Safari 14.1+ | 高效网络传输，开源项目 |
 | **MP4** | AV1, H.265/HEVC, H.264/AVC | AAC, MP3, Opus | 全部现代浏览器 | 通用视频，最佳兼容性 |
 | **OGV** | Theora | Vorbis | Firefox, Chrome, Opera | 开源项目，旧浏览器支持 |
 
@@ -116,7 +116,7 @@ description: HTML5 视频元素使用指南，采用免专利优先的编解码�
 
 | 编解码器 | 压缩效率 | 质量 | 编码速度 | 解码复杂度 | 浏览器支持 | 专利状态 |
 |---------|--------|------|--------|-----------|-----------|---------|
-| **AV1** | 极高 | 极高 | 慢 | 中等 | Chrome, Firefox, Edge, Safari 17+ | 免费开源 |
+| **AV1** | 极高 | 极高 | 慢 | 中等 | Chrome, Firefox, Edge, Safari 17+（需硬件解码） | 免费开源 |
 | **H.265/HEVC** | 很高 | 很高 | 中等 | 高 | Safari, 部分移动浏览器 | 需付费许可 |
 | **VP9** | 高 | 高 | 中等 | 中等 | Chrome, Firefox, Edge, Safari 14+ | 免费开源 |
 | **H.264/AVC** | 中等 | 中等 | 快 | 低 | 几乎所有浏览器 | 需付费许可 |
@@ -150,6 +150,142 @@ ffmpeg -i input.mp4 -c:v libvpx-vp9 -crf 30 -b:v 0 -row-mt 1 -c:a libopus output
 # 生成 VP8 WebM（兼容旧设备）
 ffmpeg -i input.mp4 -c:v libvpx -crf 30 -c:a libvorbis output.vp8.webm
 ```
+
+## Video.js 播放器
+
+原生 `<video>` 元素适用于基础播放场景。需要自定义控件、HLS/DASH 自适应流播放、YouTube/Vimeo 等第三方平台嵌入或跨浏览器一致的播放体验时，可以使用 [Video.js](https://videojs.org/) 播放器库。
+
+Video.js v10 将播放器职责拆分为四个可独立使用的部分：
+
+| 组成部分 | 说明 | 示例 |
+|---------|------|------|
+| 状态管理 | `VideoPlayer` 创建中央状态存储，内部组件自动连接状态 | `<VideoPlayer>` |
+| 皮肤 | 预置的完整播放器 UI，打包控件与样式 | `<VideoSkin>` |
+| 媒体组件 | 渲染媒体并暴露统一 API，按格式、服务或场景区分 | `<Video>`、`<HlsJsVideo>` |
+| 扩展 | 附加行为，不渲染 UI、不播放媒体 | `<GoogleCast>`、`<MuxData>` |
+
+### 安装
+
+React 项目安装 `@videojs/react`，HTML、Vue、Svelte 项目安装 `@videojs/html`（以自定义元素形式使用）：
+
+```bash
+npm install @videojs/react
+```
+
+### 基本用法
+
+```tsx
+import '@videojs/react/video/skin.css';
+import { VideoPlayer, VideoSkin, Video } from '@videojs/react/video';
+
+export default function Page() {
+  return (
+    <VideoPlayer>
+      <VideoSkin style={{ width: '100%', aspectRatio: '16 / 9' }}>
+        <Video src="/video.av1.webm" playsInline />
+      </VideoSkin>
+    </VideoPlayer>
+  );
+}
+```
+
+媒体组件接受原生 `<video>` 的标准属性（`autoPlay`、`muted`、`preload` 等），媒体事件通过 `onPlay`、`onTimeUpdate` 等 React 事件属性处理，`ref` 转发至原生 `HTMLVideoElement`，可直接调用原生 API。
+
+### 媒体源
+
+不同类型的媒体源对应不同的媒体组件，切换媒体源只需替换组件：
+
+| 媒体组件 | 播放引擎/服务 | 适用场景 |
+|---------|-------------|---------|
+| `Video` | 原生 HTML5 | MP4、WebM 等文件直链 |
+| `HlsJsVideo` | hls.js | HLS 自适应流，全浏览器一致支持 |
+| `DashVideo` | dash.js | DASH 自适应流 |
+| `MuxVideo` | Mux | Mux 托管视频 |
+| `YouTubeVideo`、`VimeoVideo`、`TikTokVideo`、`TwitchVideo` | 平台嵌入 | 第三方视频服务 |
+
+HLS 引擎需要单独安装：
+
+```bash
+npm install @videojs/hlsjs-video
+```
+
+```tsx
+import { HlsJsVideo } from '@videojs/react/media/hlsjs-video';
+
+<VideoPlayer>
+  <VideoSkin>
+    <HlsJsVideo src="https://example.com/stream.m3u8" />
+  </VideoSkin>
+</VideoPlayer>
+```
+
+播放引擎配置通过 `source.engine` 传递，按引擎命名空间隔离并原样转交给对应引擎：
+
+```tsx
+<HlsJsVideo
+  source={{
+    src: 'https://example.com/stream.m3u8',
+    engine: { hlsJs: { maxBufferLength: 60 } },
+  }}
+/>
+```
+
+跨引擎通用的选项归一化在 `source` 顶层：
+
+- `preferPlayback`：在 hls.js 与浏览器原生 HLS 之间偏好其一，无法播放时自动回退
+- `maxAutoResolution`：限制自适应码率自动选择的最高分辨率，手动选择更高分辨率不受限制
+- `capRenditionToPlayerSize`：默认开启，自动选择不小于播放器尺寸的最小分辨率
+
+`source` 按结构比较而非引用，每次渲染传入新的对象字面量不会触发重载或引擎重建，无需使用 `useMemo` 缓存。
+
+### 皮肤与自定义控件
+
+预置皮肤通过 CSS 自定义属性调整颜色、字体等常见视觉属性。需要增删、重排或深度定制控件时，通过 [Shadcn 安装方式](https://videojs.org/docs/guides/installation/shadcn?framework=react)将皮肤源码复制为本地文件后直接编辑。
+
+也可以不使用皮肤，从 UI 组件自行组装。控件通过 `render` prop 自定义渲染，`props` 携带事件处理器、ARIA 属性、data 属性与 ref，展开透传即可保留内置的交互与无障碍能力：
+
+```tsx
+import { PlayButton } from '@videojs/react';
+import { PauseIcon, PlayIcon } from '@videojs/react/icons';
+
+<PlayButton
+  render={(props, state) => (
+    <button {...props}>
+      {state.paused ? <PlayIcon /> : <PauseIcon />}
+    </button>
+  )}
+/>
+```
+
+组件将播放器状态反映为 `data-*` 属性（如 `data-paused`、`data-volume-level`），状态样式可直接通过 CSS 选择器实现：
+
+```css
+.play-icon,
+.pause-icon {
+  display: none;
+}
+
+button[data-paused] .play-icon {
+  display: inline;
+}
+
+button:not([data-paused]) .pause-icon {
+  display: inline;
+}
+```
+
+自定义控件建议放置在 `<Container>` 内，全屏切换、用户活跃状态检测等行为随播放器自动生效。滑块等复杂控件采用复合组件形式，通过 `VolumeSlider.Root`、`VolumeSlider.Track`、`VolumeSlider.Thumb` 等命名空间子组件组装。
+
+### 预设
+
+除默认的视频预设外，Video.js 提供面向特定场景的预设：
+
+- `@videojs/react/audio`：音频播放预设，控件集对应 `<audio>` 标签的基础能力，适用于播客、音乐等音频内容
+- `@videojs/react/background`：背景视频预设，内置自动播放、静音、循环，搭配无控件皮肤，适用于页面装饰性视频
+
+:::tip
+Video.js 官方文档另提供[浏览器支持](https://videojs.org/docs/framework/react/guides/browser-support)、[TypeScript 配置](https://videojs.org/docs/framework/react/guides/typescript)、[CSP 配置](https://videojs.org/docs/framework/react/guides/content-security-policy)等部署参考。
+:::
 
 ## 最佳实践
 
@@ -209,7 +345,7 @@ video {
 
 - 为自定义视频播放器添加适当的 ARIA 角色和属性:
   ```html
-  <div role="application" aria-label="视频播放器">
+  <div role="region" aria-label="视频播放器">
     <video aria-describedby="video-description"></video>
     <div id="video-description" class="sr-only">
       本视频展示了产品的主要功能和使用方法
