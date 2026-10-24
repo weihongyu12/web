@@ -153,7 +153,7 @@ ffmpeg -i input.mp4 -c:v libvpx -crf 30 -c:a libvorbis output.vp8.webm
 
 ## Video.js 播放器
 
-原生 `<video>` 元素适用于基础播放场景。需要自定义控件、HLS/DASH 自适应流播放、YouTube/Vimeo 等第三方平台嵌入或跨浏览器一致的播放体验时，可以使用 [Video.js](https://videojs.org/) 播放器库。
+原生 `<video>` 元素适用于基础播放场景。需要自定义控件、HLS/DASH 自适应流播放、YouTube/TikTok 等第三方平台嵌入或跨浏览器一致的播放体验时，可以使用 [Video.js](https://videojs.org/) 播放器库。
 
 Video.js v10 将播放器职责拆分为四个可独立使用的部分：
 
