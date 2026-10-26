@@ -18,13 +18,13 @@ import TOCInline from '@theme/TOCInline';
 ```json
 {
   "scripts": {
-    "dev": "rsbuild dev --open",
+    "dev": "rsbuild dev",
+    "dev:open": "rsbuild dev --open",
     "build": "run-p type-check build-only",
     "analyze": "cross-env RSDOCTOR=true rsbuild build",
     "preview": "rsbuild preview",
     "build-only": "rsbuild build",
     "type-check": "tsc --build --noEmit",
-    "format": "biome format --write",
     "lint": "run-p lint:js lint:css",
     "lint:js": "eslint --cache",
     "lint:css": "stylelint \"./src/**/*.{css,scss,sass,less}\" --cache",
@@ -1389,9 +1389,7 @@ import { defineConfig } from 'eslint/config';
 import { configs, plugins, rules } from 'eslint-config-airbnb-extended';
 import unicorn from 'eslint-plugin-unicorn';
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs';
-// @ts-ignore
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
-// @ts-ignore
 import promise from 'eslint-plugin-promise';
 import regexp from 'eslint-plugin-regexp';
 import jsdoc from 'eslint-plugin-jsdoc';
@@ -1430,11 +1428,17 @@ const jsConfig = defineConfig([
       // 常见的缩写是众所周知且易于阅读的
       'unicorn/prevent-abbreviations': 'off',
       // Airbnb 更喜欢使用 forEach
-      'unicorn/no-array-for-each': 'off',
+      'unicorn/no-for-each': 'off',
+      // Airbnb 更喜欢使用 reduce
+      'unicorn/no-array-reduce': 'off',
       // null 在项目中是常见场景
       'unicorn/no-null': 'off',
-      // airbnb风格指南要求"基本文件名应该完全匹配其默认导出的名称"
+      // Airbnb 风格指南要求“基本文件名应该完全匹配其默认导出的名称”
       'unicorn/filename-case': 'off',
+      // react/require-default-props 需要 = undefined 作为可选 prop 的默认值，二者冲突
+      'unicorn/no-useless-undefined': 'off',
+      // airbnb no-restricted-globals 要求使用 window，与 unicorn/prefer-global-this 冲突
+      'unicorn/prefer-global-this': 'off',
     },
   },
 
@@ -2380,7 +2384,7 @@ RUN apk del gcc libc-dev make pcre-dev zlib-dev linux-headers curl gnupg libxml2
     && rm -rf /var/cache/apk/*
 
 # Copy nginx configuration
-COPY nginx-nextjs.conf /etc/nginx/nginx.conf
+COPY nginx/nginx-nextjs.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 443
 
@@ -2418,8 +2422,6 @@ stages:
 # 全局变量
 variables:
   PNPM_CACHE_FOLDER: .pnpm-store
-  LOCAL_REGISTRY: docker-registry.example.com
-  IMAGE_NAME: ${CI_PROJECT_NAME}
 
 # 全局缓存策略
 cache:
@@ -2449,6 +2451,18 @@ cache:
     DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_TLS_VERIFY: 1
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  before_script:
+    # 登录 GitLab Container Registry
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+
+.ssh_template: &ssh_template
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    # 首次连接时自动信任服务器主机指纹
+    - mkdir -p ~/.ssh && printf "Host *\n  StrictHostKeyChecking accept-new\n" > ~/.ssh/config
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
 
 # 安装依赖
 setup:
@@ -2504,9 +2518,9 @@ build_docker:
   stage: build
   needs: ["build_app"]
   script:
-    - docker build -t $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA -t $LOCAL_REGISTRY/$IMAGE_NAME:latest .
-    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
-    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:latest
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 # 单元测试
 unit_tests:
@@ -2528,7 +2542,7 @@ coverage_tests:
 # E2E 测试
 e2e_tests:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.58.2-noble
+  image: mcr.microsoft.com/playwright:v1.64.0-noble
   needs: ["build_app"]
   before_script:
     - corepack enable
@@ -2555,14 +2569,14 @@ e2e_tests:
 qodana:
   stage: quality
   image:
-    name: jetbrains/qodana-js:2025.3
+    name: jetbrains/qodana-js:latest
     entrypoint: [""]
   needs: ["setup"]
   cache:
-    - key: qodana-2025.3-$CI_DEFAULT_BRANCH-$CI_COMMIT_REF_SLUG
+    - key: qodana-latest-$CI_DEFAULT_BRANCH-$CI_COMMIT_REF_SLUG
       fallback_keys:
-        - qodana-2025.3-$CI_DEFAULT_BRANCH-
-        - qodana-2025.3-
+        - qodana-latest-$CI_DEFAULT_BRANCH-
+        - qodana-latest-
       paths:
         - .qodana/cache
   variables:
@@ -2623,28 +2637,114 @@ container_scanning:
   stage: security
   needs: ['build_docker']
   variables:
-    CS_IMAGE: $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
+    CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     CS_DOCKERFILE_PATH: Dockerfile
     GIT_STRATEGY: fetch
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# 部署到开发环境
+# 部署分支预览环境（泛解析域名：https://<分支slug>.example.dev，nginx 正则块免维护，仅上传文件）
 deploy_dev:
+  <<: *ssh_template
+  stage: deploy
+  needs: ["build_app"]
+  script:
+    - ssh $REVIEW_SSH "mkdir -p /srv/preview/$CI_COMMIT_REF_SLUG"
+    - scp -r ./dist/* $REVIEW_SSH:/srv/preview/$CI_COMMIT_REF_SLUG/
+  environment:
+    name: dev/$CI_COMMIT_REF_SLUG
+    url: https://$CI_COMMIT_REF_SLUG.example.dev
+    on_stop: stop_dev
+    auto_stop_in: 15 days
+  # 预览环境仅覆盖保留分支（main/pre-production/production）之外的分支
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_BRANCH == "pre-production"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "production"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+# 下线分支预览环境（环境停止时由 GitLab 触发执行，when: manual 仅避免其在普通流水线中自动执行）
+stop_dev:
+  <<: *ssh_template
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - ssh $REVIEW_SSH "rm -rf /srv/preview/$CI_COMMIT_REF_SLUG"
+  environment:
+    name: dev/$CI_COMMIT_REF_SLUG
+    action: stop
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_BRANCH == "pre-production"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "production"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+
+# 同步 nginx 配置（staging/pre/review 配置与公共片段 scp 到各机器宿主机，容器只读挂载；nginx 为容器名，重复 scp 幂等）
+sync_nginx_config:
+  <<: *ssh_template
+  stage: deploy
+  script:
+    - scp nginx/conf.d/10-staging.conf $STAGING_SSH:/etc/nginx/conf.d/
+    - scp nginx/conf.d/20-pre-production.conf $PRE_SSH:/etc/nginx/conf.d/
+    - scp nginx/conf.d/90-review.conf $REVIEW_SSH:/etc/nginx/conf.d/
+    - scp nginx/snippets/common.conf $STAGING_SSH:/etc/nginx/snippets/
+    - scp nginx/snippets/common.conf $PRE_SSH:/etc/nginx/snippets/
+    - scp nginx/snippets/common.conf $REVIEW_SSH:/etc/nginx/snippets/
+    - ssh $STAGING_SSH "docker exec nginx nginx -t && docker exec nginx nginx -s reload"
+    - ssh $PRE_SSH "docker exec nginx nginx -t && docker exec nginx nginx -s reload"
+    - ssh $REVIEW_SSH "docker exec nginx nginx -t && docker exec nginx nginx -s reload"
+  # 配置变更仅随保留分支晋升流水同步
+  rules:
+    - changes: ["nginx/**/*"]
+      if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: ["nginx/**/*"]
+      if: $CI_COMMIT_BRANCH == "pre-production"
+    - changes: ["nginx/**/*"]
+      if: $CI_COMMIT_BRANCH == "production"
+
+# 部署内网测试环境（main 分支，固定测试域名，静态文件由 CI 上传）
+deploy_staging:
+  <<: *ssh_template
+  stage: deploy
+  needs: ["build_app"]
+  script:
+    - ssh $STAGING_SSH "mkdir -p /srv/apps/$CI_PROJECT_NAME"
+    - scp -r ./dist/* $STAGING_SSH:/srv/apps/$CI_PROJECT_NAME/
+  environment:
+    name: staging
+    url: https://dev.example.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# 部署灰度环境（pre-production 分支，正式服务器，暂无外网访问）
+deploy_pre_production:
   <<: *docker_template
   stage: deploy
   needs: ["build_docker"]
   environment:
-    name: development
-    url: https://dev.example.com
+    name: pre-production
+    url: https://pre.example.com
   script:
-    - docker pull $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
-    - docker tag $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $LOCAL_REGISTRY/$IMAGE_NAME:dev
-    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:dev
+    # 上传静态资源到阿里云 OSS（目录按 $CI_ENVIRONMENT_SLUG 与生产隔离）
+    - apk add --no-cache curl
+    - curl -fsSL https://gosspublic.alicdn.com/ossutil/install.sh | bash
+    - ossutil config -i $ALI_ACCESS_KEY_ID -k $ALI_ACCESS_KEY_SECRET -e $OSS_ENDPOINT
+    - ossutil cp -rf ./dist oss://$OSS_BUCKET/$CI_ENVIRONMENT_SLUG/ --exclude "index.html,service-worker.js" --meta
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:pre
+    - docker push $CI_REGISTRY_IMAGE:pre
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "pre-production"
 
-# 部署到生产环境
+# 部署到生产环境（production 分支，手动触发）
 deploy_production:
   <<: *docker_template
   stage: deploy
@@ -2653,9 +2753,9 @@ deploy_production:
     name: production
     url: https://example.com
   script:
-    # 上传静态资源到阿里云 OSS
+    # 上传静态资源到阿里云 OSS（目录按 $CI_ENVIRONMENT_SLUG 与灰度隔离）
     - apk add --no-cache curl
-    - sudo -v ; curl https://gosspublic.alicdn.com/ossutil/install.sh | sudo bash
+    - curl -fsSL https://gosspublic.alicdn.com/ossutil/install.sh | bash
     - ossutil config -i $ALI_ACCESS_KEY_ID -k $ALI_ACCESS_KEY_SECRET -e $OSS_ENDPOINT
     - ossutil cp -rf ./dist oss://$OSS_BUCKET/$CI_ENVIRONMENT_SLUG/ --exclude "index.html,service-worker.js" --meta
     # 上传静态资源到腾讯云 COS
@@ -2663,13 +2763,154 @@ deploy_production:
     # - pip install coscmd
     # - coscmd config -a $TENCENT_SECRET_ID -s $TENCENT_SECRET_KEY -b $COS_BUCKET -r $COS_REGION
     # - coscmd upload -r ./dist /$CI_ENVIRONMENT_SLUG/ --ignore "index.html,service-worker.js"
-    - docker pull $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA
-    - docker tag $LOCAL_REGISTRY/$IMAGE_NAME:$CI_COMMIT_SHA $LOCAL_REGISTRY/$IMAGE_NAME:prod
-    - docker push $LOCAL_REGISTRY/$IMAGE_NAME:prod
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:prod
+    - docker push $CI_REGISTRY_IMAGE:prod
   when: manual
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "production"
 ```
+
+<details>
+<summary>四层环境说明与 nginx 配置</summary>
+
+四层环境与分支的对应关系：
+
+| 分支 | Job | 环境域名 | 说明 |
+| --- | --- | --- | --- |
+| 其他分支 | `deploy_dev` | `https://<分支slug>.example.dev` | 分支预览环境，15 天自动下线 |
+| `main` | `deploy_staging` | `https://dev.example.com` | 内网测试环境，仅内网 DNS 解析 |
+| `pre-production` | `deploy_pre_production` | `https://pre.example.com` | 正式服务器灰度环境，暂无外网访问 |
+| `production` | `deploy_production` | `https://example.com` | 正式环境，手动触发 |
+
+nginx 配置与环境分离：正式环境 server 块位于主 `nginx.conf`，随镜像分发；其余三个环境各一个文件，存放于 `nginx/conf.d/`，由 `sync_nginx_config` 上传到对应机器宿主机，容器只读挂载，每台机器只加载自己的环境配置。
+
+环境配置：
+
+- `conf.d/10-staging.conf`：`server_name dev.example.com`，`allow <内网网段>; deny all;`
+- `conf.d/20-pre-production.conf`：`server_name pre.example.com`，`allow <内网网段>; deny all;`
+- `conf.d/90-review.conf`：`server_name ~^(?<branch>[a-z0-9-]+)\.example\.dev$`，一个正则块覆盖所有分支预览域名，`root /srv/preview/$branch`
+
+前置条件：
+
+- DNS：`*.example.dev` 泛解析指向预览服务器；泛域名证书须通过 DNS-01 挑战签发
+- 证书：`example.com`、`*.example.com`（staging/pre 共用）、`*.example.dev`（review）
+- GitLab CI/CD Variables：`SSH_PRIVATE_KEY`（部署私钥，按机器拆分受限 deploy 用户）、`STAGING_SSH`、`PRE_SSH`、`REVIEW_SSH`（各机器登录目标，如 `deploy@example.dev`）
+
+<Tabs>
+  <TabItem value="layout" label="目录布局" default>
+  ```text
+  nginx/
+  ├── nginx.conf              # 主配置，含正式环境 server 块
+  ├── conf.d/
+  │   ├── 10-staging.conf
+  │   ├── 20-pre-production.conf
+  │   └── 90-review.conf
+  └── snippets/
+      └── common.conf
+  ```
+  </TabItem>
+  <TabItem value="staging" label="10-staging.conf">
+  `20-pre-production.conf` 仅 `server_name`、`root` 不同：
+
+  ```nginx
+  server {
+      listen 443 ssl;
+      http2 on;
+      server_name dev.example.com;
+
+      # 仅内网访问
+      allow 10.0.0.0/8;
+      deny all;
+
+      ssl_certificate     /etc/nginx/certs/example.com.crt;
+      ssl_certificate_key /etc/nginx/certs/example.com.key;
+
+      root /srv/staging/smart-factory-web;
+      index index.html;
+
+      include /etc/nginx/snippets/common.conf;
+
+      location / {
+          try_files $uri $uri/ /index.html;
+      }
+  }
+  ```
+  </TabItem>
+  <TabItem value="review" label="90-review.conf">
+  ```nginx
+  server {
+      listen 443 ssl;
+      http2 on;
+      # 捕获子域名作为目录名：feat-a.example.dev → /srv/preview/feat-a
+      server_name ~^(?<branch>[a-z0-9-]+)\.example\.dev$;
+
+      ssl_certificate     /etc/nginx/certs/example.dev.crt;
+      ssl_certificate_key /etc/nginx/certs/example.dev.key;
+
+      root /srv/preview/$branch;
+      index index.html;
+
+      include /etc/nginx/snippets/common.conf;
+
+      location / {
+          try_files $uri $uri/ /index.html;
+      }
+  }
+  ```
+  </TabItem>
+  <TabItem value="common" label="snippets/common.conf">
+  add_header 与 location 不跨 server 块继承，公共部分抽到此文件，各环境块 include 复用：
+
+  ```nginx
+  add_header Strict-Transport-Security "max-age=63072000" always;
+  add_header Cache-Control $cache_control;
+  add_header Content-Security-Policy $content_security_policy always;
+  add_header Referrer-Policy $referrer_policy always;
+  add_header Permissions-Policy $permissions_policy always;
+  add_header Cross-Origin-Embedder-Policy $coep_policy always;
+  add_header Cross-Origin-Opener-Policy $coop_policy always;
+  add_header Cross-Origin-Resource-Policy $corp_policy always;
+  add_header X-Content-Type-Options nosniff always;
+  add_header X-Frame-Options $x_frame_options always;
+  add_header X-XSS-Protection $x_xss_protection always;
+  add_header X-Download-Options noopen;
+  add_header Access-Control-Allow-Origin $cors;
+  add_header Timing-Allow-Origin "*";
+
+  location ~* /\.(?!well-known\/) {
+      deny all;
+  }
+
+  location ~* (?:#.*#|\.(?:bak|conf|dist|fla|in[ci]|log|orig|psd|sh|sql|sw[op])|~)$ {
+      deny all;
+  }
+  ```
+  </TabItem>
+  <TabItem value="volumes" label="容器挂载">
+  ```yaml
+  volumes:
+    - /etc/nginx/conf.d:/etc/nginx/conf.d:ro     # 环境配置，sync_nginx_config 上传
+    - /etc/nginx/snippets:/etc/nginx/snippets:ro # 公共片段，sync_nginx_config 上传
+    - /etc/nginx/certs:/etc/nginx/certs:ro       # 证书，不进镜像
+    - /srv/preview:/srv/preview:ro              # 静态文件，CI scp；staging 机器为 /srv/staging
+  ```
+  </TabItem>
+</Tabs>
+
+- 文件名数字前缀控制 `include conf.d/*.conf` 的字典序加载顺序，便于排错；请求命中哪个块由 `server_name` 匹配规则（精确 > 通配符 > 正则）决定
+- `CI_COMMIT_REF_SLUG` 将分支名转换为小写 DNS 标签（`feat/a` → `feat-a`），最长 63 字符，与 review 块字符类 `[a-z0-9-]` 一致；清洗结果相同的分支共享同一环境
+- review 正则块配置后不再改动，`deploy_dev`/`stop_dev` 只做静态文件上传与删除，不触碰 nginx
+- 灰度环境暂无外网访问，由 server 块内 `allow/deny`、仅内部 DNS 解析、防火墙限制来源三种方式任选
+- `pre-production` 与 `production` 的 OSS 目录通过 `$CI_ENVIRONMENT_SLUG` 隔离，镜像标签分别为 `:pre`、`:prod`；灰度验收通过后将 `pre-production` 合并至 `production` 手动发布，两个环境部署同一 commit
+- `auto_stop_in: 15 days` 到期后 GitLab 自动调度 `stop_dev` 清理并下线环境；下线 job 失败遗留的目录由服务器 cron 清理：
+
+```bash
+# 每天 3 点清理 16 天未更新的预览目录
+0 3 * * * find /srv/preview -maxdepth 1 -mindepth 1 -type d -mtime +16 -exec rm -rf {} +
+```
+
+</details>
 
 ## Orval
 
@@ -2729,6 +2970,7 @@ TypeScript 类型仅保证编译期静态安全，运行时数据可能不符合
   ```ts
   import Axios from 'axios';
   import type { AxiosRequestConfig, AxiosError } from 'axios';
+  import { useAuthStore } from '@/stores/auth';
 
   export const AXIOS_INSTANCE = Axios.create({
     baseURL: import.meta.env.BASE_API_URL,
@@ -2738,7 +2980,8 @@ TypeScript 类型仅保证编译期静态安全，运行时数据可能不符合
   // Request interceptor for auth
   AXIOS_INSTANCE.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('token');
+      const authStore = useAuthStore.getState();
+      const token = authStore?.token;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
