@@ -1,6 +1,6 @@
 ---
-sidebar_position: 8
-description: 前端文档规范，涵盖 JSDoc、TSDoc 注释标准与 Storybook 组件文档生成
+sidebar_position: 9
+description: 前端文档规范，涵盖 JSDoc 注释标准与 Styleguidist 组件文档生成
 ---
 
 # 文档
